@@ -405,7 +405,7 @@ export default function AgentRegistrationForm() {
       });
 
       setTimeout(() => {
-        router.back;
+        router.back();
       }, 2000);
 
     } catch (error) {

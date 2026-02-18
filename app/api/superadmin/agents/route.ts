@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
     const result = await query(`
       SELECT 
         id,
-        user_id,
         full_name,
         email,
         mobile_number,

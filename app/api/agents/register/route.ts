@@ -29,14 +29,13 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getSession();
     
-    if (!session || !session.userId) {
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized. Please sign in first.' },
         { status: 401 }
       );
     }
 
-    const userId = session.userId;
     const formData = await request.formData();
     
     // Personal Details
@@ -115,19 +114,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check if agent already exists for this user
-    const existingAgent = await query(
-      'SELECT id FROM agents WHERE user_id = $1',
-      [userId]
-    );
-
-    if (existingAgent.rows.length > 0) {
-      return NextResponse.json(
-        { error: 'Agent profile already exists for this user' },
-        { status: 400 }
-      );
-    }
-
     // Check if email is already registered
     const existingEmail = await query(
       'SELECT id FROM agents WHERE email = $1',
@@ -166,7 +152,7 @@ export async function POST(request: NextRequest) {
       const randomString = randomBytes(16).toString('hex');
       const uniqueFileName = `profile-${Date.now()}-${randomString}.${fileExtension}`;
       
-      profilePhotoS3Key = `${userId}/agents/profile/${uniqueFileName}`;
+      profilePhotoS3Key = `agents/profile/${uniqueFileName}`;
 
       const arrayBuffer = await profileImage.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
@@ -204,7 +190,7 @@ export async function POST(request: NextRequest) {
       const randomString = randomBytes(16).toString('hex');
       const uniqueFileName = `kyc-${Date.now()}-${randomString}.${fileExtension}`;
       
-      kycDocumentS3Key = `${userId}/agents/kyc/${uniqueFileName}`;
+      kycDocumentS3Key = `agents/kyc/${uniqueFileName}`;
 
       const arrayBuffer = await kycDocument.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
@@ -233,16 +219,15 @@ export async function POST(request: NextRequest) {
     // Insert agent record
     const agentResult = await query(
       `INSERT INTO agents 
-       (user_id, full_name, email, mobile_number, city, address,
+       (full_name, email, mobile_number, city, address,
         date_of_birth, gender,
         agency_name, license_number, experience_years, properties_managed, specialization,
         profile_photo_s3_key, profile_photo_s3_url,
         kyc_document_s3_key, kyc_document_s3_url,
         terms_accepted, is_verified, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
        RETURNING id, full_name, email, mobile_number, city, agency_name, status, created_at`,
       [
-        userId,
         fullName,
         email,
         primaryPhone,
@@ -302,7 +287,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getSession();
     
-    if (!session || !session.userId) {
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -310,15 +295,13 @@ export async function GET(request: NextRequest) {
     }
 
     const agentResult = await query(
-      `SELECT id, user_id, full_name, email, mobile_number, city, address,
+      `SELECT id, full_name, email, mobile_number, city, address,
               date_of_birth, gender,
               agency_name, license_number, experience_years, properties_managed, specialization,
               profile_photo_s3_url, kyc_document_s3_url,
               terms_accepted, is_verified, status,
               created_at, updated_at
-       FROM agents
-       WHERE user_id = $1`,
-      [session.userId]
+       FROM agents`,
     );
 
     if (agentResult.rows.length === 0) {
@@ -347,7 +330,7 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getSession();
     
-    if (!session || !session.userId) {
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -383,12 +366,10 @@ export async function PUT(request: NextRequest) {
     }
 
     updates.push(`updated_at = CURRENT_TIMESTAMP`);
-    values.push(session.userId);
 
     const updateQuery = `
       UPDATE agents 
       SET ${updates.join(', ')}
-      WHERE user_id = $${paramCount}
       RETURNING id, full_name, email, city, agency_name, updated_at
     `;
 
