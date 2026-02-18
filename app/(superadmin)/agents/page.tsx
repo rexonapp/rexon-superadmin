@@ -82,7 +82,7 @@ export default function AgentsPage() {
       }
     } catch (error) {
       console.error('Failed to update status:', error);
-    }
+    } 
   };
 
   const filteredAgents = agents.filter(agent => {
@@ -112,7 +112,7 @@ export default function AgentsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header Card */}
+      {/* Header Card */} 
       <GlassCard className="p-6" gradient="cyan">
         <div className="flex items-center justify-between">
           <div>
@@ -121,6 +121,12 @@ export default function AgentsPage() {
             </h2>
             <p className="text-sm text-gray-600 mt-1 font-medium">Verify and manage agent registrations</p>
           </div>
+          <Button
+            className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 shadow-lg shadow-blue-500/30 transition-all"
+            onClick={() => window.location.href = '/agents/addAgent'}
+          >
+            Add Agent
+          </Button>
           <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300 shadow-lg px-3 py-1.5">
             <UserCheck className="w-4 h-4 mr-2" />
             <span className="font-bold">{agents.filter(a => a.status === 'pending').length} Pending</span>
