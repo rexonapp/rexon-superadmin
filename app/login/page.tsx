@@ -101,10 +101,10 @@ export default function SuperAdminLogin() {
                 )}
               </Button>
             </form>
-            <div className="mt-5 text-center">
+            {/* <div className="mt-5 text-center">
               <span className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>Don't have an account? </span>
               <a href="/register" className="text-sm font-medium underline-offset-4 hover:underline">Register</a>
-            </div>
+            </div> */}
           </CardContent>
 
           <CardFooter className="px-6 pt-4 pb-6">
