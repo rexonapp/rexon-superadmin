@@ -1,6 +1,7 @@
-// app/unauthorized/page.tsx
+'use client'
 import { ShieldX } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default function UnauthorizedPage() {
   return (
@@ -16,7 +17,9 @@ export default function UnauthorizedPage() {
         </p>
         <div className="flex items-center justify-center gap-3">
           <Button variant="outline" size="sm" onClick={() => history.back()}>Go Back</Button>
-          <Button size="sm" onClick={() => window.location.href = '/'}>Home</Button>
+          <Link href={'/'}>
+          <Button size="sm">Home</Button>
+          </Link>
         </div>
       </div>
     </div>

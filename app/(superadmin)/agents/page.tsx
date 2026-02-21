@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Search, Filter, Eye, CheckCircle, XCircle, UserCheck, MoreVertical, FileText } from 'lucide-react';
 import GlassCard from '@/components/superadmin/GlassCard';
 import Loading from '../loading';
+import Link from 'next/link';
 
 interface Agent {
   id: string;
@@ -121,16 +122,15 @@ export default function AgentsPage() {
             </h2>
             <p className="text-sm text-gray-600 mt-1 font-medium">Verify and manage agent registrations</p>
           </div>
+          
+          <Link href={'/agents/addAgent'}>
+          
           <Button
             className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 shadow-lg shadow-blue-500/30 transition-all"
-            onClick={() => window.location.href = '/agents/addAgent'}
           >
             Add Agent
           </Button>
-          <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-300 shadow-lg px-3 py-1.5">
-            <UserCheck className="w-4 h-4 mr-2" />
-            <span className="font-bold">{agents.filter(a => a.status === 'pending').length} Pending</span>
-          </Badge>
+          </Link>
         </div>
 
         <Separator className="bg-gradient-to-r from-transparent via-cyan-200 to-transparent my-6" />

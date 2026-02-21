@@ -227,18 +227,17 @@ export default function SettingsPage() {
                 <TableHead className="text-left font-bold text-gray-700">Permission</TableHead>
                 <TableHead className="text-center font-bold text-gray-700">Super Admin</TableHead>
                 <TableHead className="text-center font-bold text-gray-700">Admin</TableHead>
-                <TableHead className="text-center font-bold text-gray-700">Manager</TableHead>
                 <TableHead className="text-center font-bold text-gray-700">User</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {[
-                { name: 'Approve Warehouses', superadmin: true, admin: true, manager: false, user: false },
-                { name: 'Verify Agents', superadmin: true, admin: true, manager: false, user: false },
-                { name: 'Manage Users', superadmin: true, admin: true, manager: false, user: false },
-                { name: 'View Analytics', superadmin: true, admin: true, manager: true, user: false },
-                { name: 'Create Listings', superadmin: true, admin: true, manager: true, user: true },
-                { name: 'System Settings', superadmin: true, admin: false, manager: false, user: false },
+                { name: 'Approve Warehouses', superadmin: true, admin: true,  user: false },
+                { name: 'Verify Agents', superadmin: true, admin: true,  user: false },
+                { name: 'Manage Users', superadmin: true, admin: true,  user: false },
+                { name: 'View Analytics', superadmin: true, admin: true,  user: false },
+                { name: 'Create Listings', superadmin: true, admin: true,  user: true },
+                { name: 'System Settings', superadmin: true, admin: false,  user: false },
               ].map((perm, idx) => (
                 <TableRow key={idx} className="border-b border-white/30 hover:bg-blue-100/80 transition-colors duration-150 group">
                   <TableCell className="font-bold text-gray-900">{perm.name}</TableCell>
@@ -249,11 +248,6 @@ export default function SettingsPage() {
                   </TableCell>
                   <TableCell className="text-center">
                     {perm.admin && (
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 mx-auto shadow-lg shadow-blue-500/50"></div>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {perm.manager && (
                       <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 mx-auto shadow-lg shadow-blue-500/50"></div>
                     )}
                   </TableCell>
