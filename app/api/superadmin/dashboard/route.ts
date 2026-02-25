@@ -26,8 +26,8 @@ export async function GET(request: NextRequest) {
     );
     const todayListings = parseInt(todayResult.rows[0].count);
 
-    // Get total users
-    const usersResult = await query('SELECT COUNT(*) as count FROM users');
+    // Get total leads
+    const usersResult = await query('SELECT COUNT(*) as count FROM leads');
     const totalUsers = parseInt(usersResult.rows[0].count);
 
     // Get total agents
@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
         w.status,
         w.id
       FROM warehouses w
-      LEFT JOIN users u ON w.user_id = u.id
+      LEFT JOIN leads u ON w.user_id = u.id
       ORDER BY w.created_at DESC
       LIMIT 10
     `);

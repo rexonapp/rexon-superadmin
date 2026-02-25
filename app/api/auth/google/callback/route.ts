@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     let user;
 
     const googleUserResult = await query(
-      'SELECT id, first_name, last_name, email, auth_provider, google_id, role FROM users WHERE google_id = $1',
+      'SELECT id, first_name, last_name, email, auth_provider, google_id, role FROM leads WHERE google_id = $1',
       [googleUser.id]
     );
 
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
       console.log('Existing Google user logging in:', user.email);
     } else {
       const emailResult = await query(
-        'SELECT id, first_name, last_name, email, auth_provider, google_id, role FROM users WHERE email = $1',
+        'SELECT id, first_name, last_name, email, auth_provider, google_id, role FROM leads WHERE email = $1',
         [googleUser.email.toLowerCase()]
       );
 
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         
         if (existingUser.auth_provider === 'email') {
           const updateResult = await query(
-            `UPDATE users 
+            `UPDATE leads 
              SET google_id = $1, 
                  auth_provider = 'google',
                  is_verified = true,
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
           );
         } else if (existingUser.auth_provider === 'google' && !existingUser.google_id) {
           const updateResult = await query(
-            `UPDATE users 
+            `UPDATE leads 
              SET google_id = $1
              WHERE id = $2
              RETURNING id, first_name, last_name, email, auth_provider, role`,
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
         }
       } else {
         const insertResult = await query(
-          `INSERT INTO users (first_name, last_name, email, google_id, auth_provider, is_verified, created_at)
+          `INSERT INTO leads (first_name, last_name, email, google_id, auth_provider, is_verified, created_at)
            VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP)
            RETURNING id, first_name, last_name, email, auth_provider, role`,
           [
@@ -141,7 +141,7 @@ export async function GET(request: NextRequest) {
     });
 
     await query(
-      'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
+      'UPDATE leads SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
       [user.id]
     );
 

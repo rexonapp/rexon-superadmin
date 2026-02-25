@@ -27,8 +27,6 @@ export async function PATCH(
       [status, isVerified, warehouseId]
     );
 
-    // TODO: Send notification to warehouse owner about status change
-
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Update warehouse status error:', error);

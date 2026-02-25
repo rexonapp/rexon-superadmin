@@ -1,10 +1,4 @@
-// app/api/superadmin/users/[userId]/route.ts
-//
-//  PATCH  /api/superadmin/users/:userId  — update role
-//  DELETE /api/superadmin/users/:userId  — delete user
-//
-// Note: the page calls BOTH at the same URL /api/superadmin/users/${userId}
-// NOT /api/superadmin/users/${userId}/role — they are differentiated by HTTP method.
+
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';

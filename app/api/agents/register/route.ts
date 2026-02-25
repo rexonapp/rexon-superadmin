@@ -38,29 +38,18 @@ export async function POST(request: NextRequest) {
 
     // Address Information
     const addressLine1 = formData.get('addressLine1') as string || '';
-    const addressLine2 = formData.get('addressLine2') as string || '';
     const city = formData.get('city') as string || '';
     const state = formData.get('state') as string || '';
     const pincode = formData.get('pincode') as string || null;
-    const fullAddress = [addressLine1, addressLine2].filter(Boolean).join(', ');
+    const fullAddress = addressLine1 || '';
 
     // Professional Information
     const agencyName = formData.get('agencyName') as string || '';
     const domainName = (formData.get('domainName') as string || '').trim().toLowerCase();
-    const licenseNumber = formData.get('licenseNumber') as string || '';
-    const experienceYears = formData.get('experienceYears') as string || '0';
-    const specialization = formData.get('specialization') as string || '';
-    const reraRegistration = formData.get('reraRegistration') as string || null;
-
-    // Identity & Verification
-    const aadharNumber = formData.get('aadharNumber') as string || null;
-    const panNumber = formData.get('panNumber') as string || null;
 
     // Additional Information
     const languagesSpokenStr = formData.get('languagesSpoken') as string;
     const languagesSpoken = languagesSpokenStr ? JSON.parse(languagesSpokenStr) : [];
-    const serviceAreasStr = formData.get('serviceAreas') as string;
-    const serviceAreas = serviceAreasStr ? JSON.parse(serviceAreasStr) : [];
     const bio = formData.get('bio') as string || '';
 
     // Files
@@ -198,50 +187,40 @@ export async function POST(request: NextRequest) {
       kycDocumentS3Url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'ap-south-2'}.amazonaws.com/${kycDocumentS3Key}`;
     }
 
-    // ── Specialization mapping ────────────────────────────────────────────────
-    let dbSpecialization = 'All';
-    if (specialization.toLowerCase().includes('residential')) {
-      dbSpecialization = 'Residential';
-    } else if (specialization.toLowerCase().includes('commercial')) {
-      dbSpecialization = 'Commercial';
-    } else if (
-      specialization.toLowerCase().includes('industrial') ||
-      specialization.toLowerCase().includes('warehouse')
-    ) {
-      dbSpecialization = 'Industrial';
-    }
-
     // ── Insert agent ──────────────────────────────────────────────────────────
+    // Fixed: Corrected the number of parameters and parameter mapping
     const agentResult = await query(
       `INSERT INTO agents
-       (full_name, email, mobile_number, city, address,
+       (full_name, email, mobile_number, whatsapp_number, city, state, address, pincode,
         date_of_birth, gender,
-        agency_name, license_number, experience_years, properties_managed, specialization,
+        agency_name, bio,
         profile_photo_s3_key, profile_photo_s3_url,
         kyc_document_s3_key, kyc_document_s3_url,
+        languages_spoken,
         terms_accepted, is_verified, status)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
        RETURNING id, full_name, email, mobile_number, city, agency_name, status, created_at`,
       [
-        fullName,
-        email,
-        primaryPhone,
-        city,
-        fullAddress,
-        dateOfBirth,
-        gender,
-        agencyName,
-        licenseNumber,
-        parseInt(experienceYears) || 0,
-        0,
-        dbSpecialization,
-        profilePhotoS3Key,
-        profilePhotoS3Url,
-        kycDocumentS3Key,
-        kycDocumentS3Url,
-        true,
-        false,
-        'Pending',
+        fullName,           // $1
+        email,              // $2
+        primaryPhone,       // $3
+        whatsappNumber,     // $4
+        city,               // $5
+        state,              // $6
+        fullAddress,        // $7
+        pincode,            // $8
+        dateOfBirth,        // $9
+        gender,             // $10
+        agencyName,         // $11
+        bio,                // $12
+        profilePhotoS3Key,  // $13
+        profilePhotoS3Url,  // $14
+        kycDocumentS3Key,   // $15
+        kycDocumentS3Url,   // $16
+        languagesSpoken.length > 0 ? languagesSpoken : null, // $17 - Pass array directly for text[]
+        true,               // $18 - terms_accepted
+        false,              // $19 - is_verified
+        'pending',          // $20 - status
       ]
     );
 
@@ -252,9 +231,9 @@ export async function POST(request: NextRequest) {
       const fullDomain = `${domainName}.${PLATFORM_DOMAIN}`;
       await query(
         `INSERT INTO agent_domains
-         (agent_id, domain_name, full_domain, status, is_active, activated_at)
-         VALUES ($1, $2, $3, 'pending', true, NOW())`,
-        [agentId, domainName, fullDomain]
+         (agent_id, domain_name, full_domain, status, is_active, created_at)
+         VALUES ($1, $2, $3, $4, $5, NOW())`,
+        [agentId, domainName, fullDomain, 'pending', true]
       );
     }
 
@@ -270,9 +249,6 @@ export async function POST(request: NextRequest) {
     if (error instanceof Error && error.message.includes('unique constraint')) {
       if (error.message.includes('email')) {
         return NextResponse.json({ error: 'This email is already registered' }, { status: 400 });
-      }
-      if (error.message.includes('license_number')) {
-        return NextResponse.json({ error: 'This license number is already registered' }, { status: 400 });
       }
       if (error.message.includes('domain_name')) {
         return NextResponse.json({ error: 'This domain was just taken. Please choose another.' }, { status: 409 });
@@ -297,10 +273,11 @@ export async function GET(request: NextRequest) {
     }
 
     const agentResult = await query(
-      `SELECT a.id, a.full_name, a.email, a.mobile_number, a.city, a.address,
+      `SELECT a.id, a.full_name, a.email, a.mobile_number, a.whatsapp_number, a.city, a.state, a.address, a.pincode,
               a.date_of_birth, a.gender,
-              a.agency_name, a.license_number, a.experience_years, a.properties_managed, a.specialization,
+              a.agency_name, a.bio,
               a.profile_photo_s3_url, a.kyc_document_s3_url,
+              a.languages_spoken,
               a.terms_accepted, a.is_verified, a.status,
               a.created_at, a.updated_at,
               d.domain_name, d.full_domain
@@ -337,15 +314,20 @@ export async function PUT(request: NextRequest) {
     let paramCount = 1;
 
     const allowedFields = [
-      'full_name', 'mobile_number', 'city', 'address',
-      'date_of_birth', 'gender', 'agency_name', 'experience_years',
-      'properties_managed', 'bio'
+      'full_name', 'mobile_number', 'whatsapp_number', 'city', 'state', 'address', 'pincode',
+      'date_of_birth', 'gender', 'agency_name', 'bio', 'languages_spoken'
     ];
 
     allowedFields.forEach(field => {
       if (body[field] !== undefined) {
-        updates.push(`${field} = $${paramCount}`);
-        values.push(body[field]);
+        // Handle languages_spoken as text[] array
+        if (field === 'languages_spoken' && Array.isArray(body[field])) {
+          updates.push(`${field} = $${paramCount}`);
+          values.push(body[field].length > 0 ? body[field] : null);  // Pass array directly
+        } else {
+          updates.push(`${field} = $${paramCount}`);
+          values.push(body[field]);
+        }
         paramCount++;
       }
     });
@@ -359,7 +341,7 @@ export async function PUT(request: NextRequest) {
 
     const result = await query(
       `UPDATE agents SET ${updates.join(', ')} WHERE email = $${paramCount}
-       RETURNING id, full_name, email, city, agency_name, updated_at`,
+       RETURNING id, full_name, email, mobile_number, city, state, agency_name, bio, updated_at`,
       values
     );
 

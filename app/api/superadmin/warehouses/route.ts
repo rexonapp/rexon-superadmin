@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         CONCAT(u.first_name, ' ', u.last_name) as user_name,
         (SELECT COUNT(*) FROM uploads WHERE warehouse_id = w.id) as images_count
       FROM warehouses w
-      LEFT JOIN users u ON w.user_id = u.id
+      LEFT JOIN leads u ON w.user_id = u.id
       ORDER BY w.created_at DESC
     `);
 
