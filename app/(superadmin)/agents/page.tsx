@@ -10,10 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Filter, Eye, CheckCircle, XCircle, MoreVertical, FileText, Pencil, Globe } from 'lucide-react';
-import GlassCard from '@/components/superadmin/GlassCard';
+import { Search, Filter, Eye, CheckCircle, XCircle, MoreVertical, FileText, Pencil, Globe, X, Calendar, ChevronDown } from 'lucide-react';
 import Loading from '../loading';
 import Link from 'next/link';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 interface AgentDomain {
   id: string;
@@ -34,10 +34,17 @@ interface Agent {
   agency_name: string;
   is_verified: boolean;
   status: 'pending' | 'approved' | 'rejected' | 'invite';
-  created_at: string;
+  created_at: string | null;
   kyc_document_s3_url: string | null;
   profile_photo_s3_url: string | null;
   domains: AgentDomain[];
+}
+
+type DateFilterType = 'all' | 'today' | 'week' | 'month' | 'last7' | 'last30' | 'custom';
+
+interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
 }
 
 const statusColors = {
@@ -57,11 +64,13 @@ export default function AgentsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
+  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [showDomainModal, setShowDomainModal] = useState(false);
-  const [selectedDomain, setSelectedDomain] = useState<AgentDomain | null>(null);
   const [domainLoading, setDomainLoading] = useState(false);
+  const [showCustomDateModal, setShowCustomDateModal] = useState(false);
 
   useEffect(() => {
     fetchAgents();
@@ -77,6 +86,96 @@ export default function AgentsPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getDateRangeForFilter = (filterType: DateFilterType): DateRange => {
+    const today = new Date();
+    
+    switch (filterType) {
+      case 'today':
+        return {
+          from: startOfDay(today),
+          to: endOfDay(today),
+        };
+      case 'week':
+        return {
+          from: startOfWeek(today),
+          to: endOfWeek(today),
+        };
+      case 'month':
+        return {
+          from: startOfMonth(today),
+          to: endOfMonth(today),
+        };
+      case 'last7': {
+        const from = new Date(today);
+        from.setDate(from.getDate() - 7);
+        return {
+          from: startOfDay(from),
+          to: endOfDay(today),
+        };
+      }
+      case 'last30': {
+        const from = new Date(today);
+        from.setDate(from.getDate() - 30);
+        return {
+          from: startOfDay(from),
+          to: endOfDay(today),
+        };
+      }
+      case 'custom':
+        return dateRange;
+      default:
+        return { from: undefined, to: undefined };
+    }
+  };
+
+  const isDateInRange = (dateString: string | null, range: DateRange): boolean => {
+    if (!dateString || !range.from || !range.to) return true;
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return false;
+    
+    const startOfRangeDay = new Date(range.from);
+    startOfRangeDay.setHours(0, 0, 0, 0);
+    
+    const endOfRangeDay = new Date(range.to);
+    endOfRangeDay.setHours(23, 59, 59, 999);
+    
+    return date >= startOfRangeDay && date <= endOfRangeDay;
+  };
+
+  const handleDateFilterChange = (value: string) => {
+    const filterValue = value as DateFilterType;
+    setDateFilter(filterValue);
+    if (filterValue === 'custom') {
+      setShowCustomDateModal(true);
+    } else {
+      setDateRange({ from: undefined, to: undefined });
+    }
+  };
+
+  const handleCustomDateSelect = (fromDate: Date | undefined, toDate: Date | undefined) => {
+    setDateRange({ from: fromDate, to: toDate });
+  };
+
+  const handleApplyCustomDate = () => {
+    if (dateRange.from && dateRange.to) {
+      setShowCustomDateModal(false);
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setFilterStatus('all');
+    setDateFilter('all');
+    setDateRange({ from: undefined, to: undefined });
+    setShowCustomDateModal(false);
+  };
+
+  const clearDateFilter = () => {
+    setDateFilter('all');
+    setDateRange({ from: undefined, to: undefined });
   };
 
   const updateAgentStatus = async (agentId: string, status: 'approved' | 'rejected' | 'invite') => {
@@ -109,7 +208,6 @@ export default function AgentsPage() {
       });
       const data = await response.json();
       if (data.success && selectedAgent) {
-        // Update the local agent data
         const updatedDomains = selectedAgent.domains.map(d =>
           d.id === domainId ? { ...d, status: newStatus, is_active: newStatus === 'active' } : d
         );
@@ -130,73 +228,222 @@ export default function AgentsPage() {
       agent.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       agent.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       agent.agency_name.toLowerCase().includes(searchTerm.toLowerCase());
+    
     const matchesStatus = filterStatus === 'all' || agent.status === filterStatus;
-    return matchesSearch && matchesStatus;
+    
+    const currentDateRange = getDateRangeForFilter(dateFilter);
+    const matchesDate = dateFilter === 'all' ? true : isDateInRange(agent.created_at, currentDateRange);
+
+    return matchesSearch && matchesStatus && matchesDate;
   });
 
-  const formatDate = (dateString: string) =>
-    new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  const formatDateSafe = (dateString: string | null): string | null => {
+    if (!dateString) return null;
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+      
+      return date.toLocaleDateString('en-IN', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        timeZone: 'Asia/Kolkata'
+      });
+    } catch {
+      return null;
+    }
+  };
+
+  const formatTimeSafe = (dateString: string | null): string | null => {
+    if (!dateString) return null;
+    
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return null;
+      
+      return date.toLocaleTimeString('en-IN', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit', 
+        hour12: true,
+        timeZone: 'Asia/Kolkata'
+      });
+    } catch {
+      return null;
+    }
+  };
+
+  const formatDateForDomain = (dateString: string | null) => {
+    const formatted = formatDateSafe(dateString);
+    return formatted || 'N/A';
+  };
+
+  const isAnyFilterActive = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
+
+  // Get display text for date filter button
+  const getDateFilterDisplay = () => {
+    if (dateFilter === 'custom' && dateRange.from && dateRange.to) {
+      return `${format(dateRange.from, 'MMM d')} - ${format(dateRange.to, 'MMM d')}`;
+    }
+    
+    switch (dateFilter) {
+      case 'today':
+        return 'Today';
+      case 'week':
+        return 'This Week';
+      case 'month':
+        return 'This Month';
+      case 'last7':
+        return 'Last 7 Days';
+      case 'last30':
+        return 'Last 30 Days';
+      case 'custom':
+        return 'Custom Range';
+      default:
+        return 'Date Range';
+    }
+  };
 
   if (loading) return <Loading />;
 
   return (
     <div className="space-y-6">
-      {/* Header Card */}
-      <GlassCard className="p-6" gradient="cyan">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent">
-              Agent Management
-            </h2>
-            <p className="text-sm text-gray-600 mt-1 font-medium">Verify and manage agent registrations</p>
-          </div>
-          <Link href="/agents/addAgent">
-            <Button className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 shadow-lg shadow-blue-500/30 transition-all">
-              Add Agent
-            </Button>
-          </Link>
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Agents</h1>
+          <p className="text-sm text-gray-600 mt-1">Manage and verify agent registrations</p>
         </div>
+        <Link href="/agents/addAgent">
+          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all">
+            + Add Agent
+          </Button>
+        </Link>
+      </div>
 
-        <Separator className="bg-gradient-to-r from-transparent via-cyan-200 to-transparent my-6" />
+      {/* Filter & Search Bar - Compact Responsive */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
+        <div className="flex flex-col gap-4">
+          {/* Top Row: Search and Filters */}
+          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
+            
+            {/* Search Input - More Responsive Width */}
+            <div className="relative w-full lg:flex-1 lg:max-w-2xl">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <Input
+                type="text"
+                placeholder="Search agents by name, email, or agency..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 h-10 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:bg-white focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition-all"
+              />
+            </div>
 
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-cyan-400 pointer-events-none" />
-            <Input
-              type="text"
-              placeholder="Search agents by name, email, or agency..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 bg-white/50 border-white/60 focus:bg-white focus:border-cyan-400 transition-all"
-            />
+            {/* Filter Controls - Responsive Layout */}
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center sm:flex-wrap lg:flex-nowrap lg:gap-2">
+              
+              {/* Status Filter */}
+              <div className="w-full sm:w-48 lg:w-40 flex-shrink-0">
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="h-10 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:border-gray-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition-all">
+                    <Filter className="w-4 h-4 mr-2 text-gray-500" />
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-lg">
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="invite">Invite</SelectItem>
+                    <SelectItem value="approved">Approved</SelectItem>
+                    <SelectItem value="rejected">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Date Filter with Smart Display */}
+              <div className="w-full sm:w-48 lg:w-auto lg:flex-shrink-0 group relative">
+                <Select value={dateFilter} onValueChange={handleDateFilterChange}>
+                  <SelectTrigger className={`h-10 w-full lg:w-auto rounded-lg text-sm transition-all ${
+                    dateFilter !== 'all' 
+                      ? 'bg-blue-50 border border-blue-300 hover:border-blue-400 focus:border-blue-400' 
+                      : 'bg-gray-50 border border-gray-200 hover:border-gray-300 focus:border-blue-400'
+                  }`}>
+                    <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                    <SelectValue placeholder="Date Range" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-lg">
+                    <SelectItem value="all">All Time</SelectItem>
+                    <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="week">This Week</SelectItem>
+                    <SelectItem value="month">This Month</SelectItem>
+                    <SelectItem value="last7">Last 7 Days</SelectItem>
+                    <SelectItem value="last30">Last 30 Days</SelectItem>
+                    <SelectItem value="custom">Custom Range</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* Hover Tooltip for Active Filter */}
+                {dateFilter !== 'all' && (
+                  <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50">
+                    <div className="bg-gray-900 text-white px-3 py-2 rounded-lg text-xs whitespace-nowrap shadow-lg">
+                      <p className="font-medium">{getDateFilterDisplay()}</p>
+                      <p className="text-gray-300 text-xs mt-1">Click to change</p>
+                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Edit/Clear Date Button - Shows When Custom Date Selected */}
+              {dateFilter === 'custom' && dateRange.from && dateRange.to && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowCustomDateModal(true)}
+                  className="h-10 px-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 hover:border-blue-300 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto lg:w-auto"
+                >
+                  <Calendar className="w-4 h-4 mr-1.5" />
+                  Edit Range
+                </Button>
+              )}
+
+              {/* Clear Button */}
+              {isAnyFilterActive && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="h-10 px-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto lg:w-auto"
+                >
+                  <X className="w-4 h-4 mr-1.5" />
+                  Clear All
+                </Button>
+              )}
+            </div>
           </div>
-          <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-full md:w-[180px] bg-white/50 border-white/60 focus:bg-white focus:border-cyan-400">
-              <Filter className="w-4 h-4 mr-2 text-cyan-400" />
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="invite">Invite</SelectItem>
-              <SelectItem value="approved">Approved</SelectItem>
-              <SelectItem value="rejected">Rejected</SelectItem>
-            </SelectContent>
-          </Select>
+
+          {/* Results Counter - Bottom Right on Desktop, Full Width on Mobile */}
+          <div className="flex items-center justify-between lg:justify-end">
+            <span className="text-sm text-gray-600 lg:hidden">Results:</span>
+            <span className="text-sm text-gray-600 font-medium">
+              <span className="text-blue-600 font-bold">{filteredAgents.length}</span> agents
+            </span>
+          </div>
         </div>
-      </GlassCard>
+      </div>
 
       {/* Agents Table */}
-      <GlassCard className="p-0" gradient="emerald">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-b border-white/40 bg-gradient-to-r from-cyan-50/50 via-emerald-50/50 to-teal-50/50">
-                <TableHead className="font-bold text-gray-700">Agent</TableHead>
-                <TableHead className="font-bold text-gray-700">Contact</TableHead>
-                <TableHead className="font-bold text-gray-700">Domain</TableHead>
-                <TableHead className="font-bold text-gray-700">Status</TableHead>
-                <TableHead className="font-bold text-gray-700 text-right">Actions</TableHead>
+              <TableRow className="border-b border-gray-200 bg-gray-50">
+                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Agent</TableHead>
+                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Contact</TableHead>
+                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Registered (IST)</TableHead>
+                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Domain</TableHead>
+                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Status</TableHead>
+                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -204,51 +451,64 @@ export default function AgentsPage() {
                 filteredAgents.map((agent) => (
                   <TableRow
                     key={agent.id}
-                    className="border-b border-white/30 hover:bg-blue-100/80 transition-colors duration-150 group"
+                    className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors duration-100"
                   >
-                    <TableCell>
+                    <TableCell className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <Avatar className="w-10 h-10 ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all">
+                        <Avatar className="w-9 h-9 ring-1 ring-gray-200">
                           {agent.profile_photo_s3_url ? (
                             <AvatarImage 
                               src={agent.profile_photo_s3_url} 
                               alt={agent.full_name}
                             />
                           ) : null}
-                          <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-sm font-bold">
+                          <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-xs font-bold">
                             {agent.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </AvatarFallback>
                         </Avatar>
-                        <div>
-                          <p className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">{agent.full_name}</p>
-                          <p className="text-xs text-gray-500 font-medium">{agent.city}</p>
+                        <div className="min-w-0">
+                          <p className="font-medium text-gray-900 text-sm truncate">{agent.full_name}</p>
+                          <p className="text-xs text-gray-500 truncate">{agent.city}</p>
                         </div>
                       </div>
                     </TableCell>
                    
-                    <TableCell>
-                      <div>
-                        <p className="text-sm text-gray-900">{agent.email}</p>
-                        <p className="text-xs text-gray-500">{agent.mobile_number}</p>
+                    <TableCell className="px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-sm text-gray-900 truncate">{agent.email}</p>
+                        <p className="text-xs text-gray-500 truncate">{agent.mobile_number}</p>
                       </div>
                     </TableCell>
 
-                    <TableCell>
+                    <TableCell className="px-4 py-3">
+                      {formatDateSafe(agent.created_at) ? (
+                        <div className="space-y-0.5">
+                          <p className="text-sm text-gray-900 font-medium">{formatDateSafe(agent.created_at)}</p>
+                          {formatTimeSafe(agent.created_at) && (
+                            <p className="text-xs text-gray-500">{formatTimeSafe(agent.created_at)}</p>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-400">—</p>
+                      )}
+                    </TableCell>
+
+                    <TableCell className="px-4 py-3">
                       {agent.domains && agent.domains.length > 0 ? (
-                        <div className="flex flex-col gap-2">
-                          {agent.domains.slice(0, 2).map((domain) => (
+                        <div className="flex flex-col gap-1.5">
+                          {agent.domains.slice(0, 1).map((domain) => (
                             <div key={domain.id} className="flex items-center gap-2">
-                              <span className="text-sm text-gray-700">{domain.full_domain}</span>
+                              <span className="text-sm text-gray-700 truncate">{domain.full_domain}</span>
                               <Badge 
                                 variant="outline" 
-                                className={`text-xs ${domainStatusColors[domain.status as keyof typeof domainStatusColors]}`}
+                                className={`text-xs font-medium whitespace-nowrap ${domainStatusColors[domain.status as keyof typeof domainStatusColors]}`}
                               >
                                 {domain.status}
                               </Badge>
                             </div>
                           ))}
-                          {agent.domains.length > 2 && (
-                            <span className="text-xs text-gray-500">+{agent.domains.length - 2} more</span>
+                          {agent.domains.length > 1 && (
+                            <span className="text-xs text-gray-500">+{agent.domains.length - 1} more</span>
                           )}
                         </div>
                       ) : (
@@ -256,71 +516,67 @@ export default function AgentsPage() {
                       )}
                     </TableCell>
                    
-                    <TableCell>
-                      <Badge variant="outline" className={statusColors[agent.status]}>
+                    <TableCell className="px-4 py-3">
+                      <Badge variant="outline" className={`${statusColors[agent.status]} font-medium`}>
                         {agent.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="px-4 py-3 text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreVertical className="w-4 h-4" />
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                            <MoreVertical className="w-4 h-4 text-gray-500" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {/* View Details */}
+                        <DropdownMenuContent align="end" className="rounded-lg">
                           <DropdownMenuItem
                             onClick={() => { setSelectedAgent(agent); setShowDetailsModal(true); }}
-                            className="cursor-pointer"
+                            className="cursor-pointer text-sm"
                           >
                             <Eye className="w-4 h-4 mr-2" />
                             View Details
                           </DropdownMenuItem>
 
-                          {/* Manage Domains */}
                           {agent.domains && agent.domains.length > 0 && (
                             <DropdownMenuItem
                               onClick={() => { setSelectedAgent(agent); setShowDomainModal(true); }}
-                              className="cursor-pointer"
+                              className="cursor-pointer text-sm"
                             >
                               <Globe className="w-4 h-4 mr-2" />
                               Manage Domains
                             </DropdownMenuItem>
                           )}
 
-                          {/* Edit Agent */}
                           <DropdownMenuItem asChild>
                             <Link
                               href={`/agents/${agent.id}/edit`}
-                              className="flex items-center cursor-pointer"
+                              className="flex items-center cursor-pointer text-sm"
                             >
                               <Pencil className="w-4 h-4 mr-2" />
                               Edit Agent
                             </Link>
                           </DropdownMenuItem>
 
-                          {/* Status Actions */}
                           {agent.status === 'pending' && (
                             <>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => updateAgentStatus(agent.id, 'invite')}
-                                className="cursor-pointer text-purple-600 focus:text-purple-600"
+                                className="cursor-pointer text-purple-600 text-sm"
                               >
                                 <CheckCircle className="w-4 h-4 mr-2" />
                                 Send Invite
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => updateAgentStatus(agent.id, 'approved')}
-                                className="cursor-pointer text-green-600 focus:text-green-600"
+                                className="cursor-pointer text-green-600 text-sm"
                               >
                                 <CheckCircle className="w-4 h-4 mr-2" />
                                 Approve
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => updateAgentStatus(agent.id, 'rejected')}
-                                className="cursor-pointer text-red-600 focus:text-red-600"
+                                className="cursor-pointer text-red-600 text-sm"
                               >
                                 <XCircle className="w-4 h-4 mr-2" />
                                 Reject
@@ -333,14 +589,14 @@ export default function AgentsPage() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 onClick={() => updateAgentStatus(agent.id, 'approved')}
-                                className="cursor-pointer text-green-600 focus:text-green-600"
+                                className="cursor-pointer text-green-600 text-sm"
                               >
                                 <CheckCircle className="w-4 h-4 mr-2" />
                                 Approve
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => updateAgentStatus(agent.id, 'rejected')}
-                                className="cursor-pointer text-red-600 focus:text-red-600"
+                                className="cursor-pointer text-red-600 text-sm"
                               >
                                 <XCircle className="w-4 h-4 mr-2" />
                                 Reject
@@ -354,27 +610,125 @@ export default function AgentsPage() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-12 text-gray-500">
-                    No agents found matching your criteria
+                  <TableCell colSpan={6} className="px-4 py-12 text-center">
+                    <div className="space-y-2">
+                      <p className="text-base font-medium text-gray-900">No agents found</p>
+                      <p className="text-sm text-gray-500">Try adjusting your filters or search term</p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
         </div>
-      </GlassCard>
+      </div>
+
+      {/* Custom Date Range Modal - Professional Design */}
+      <Dialog open={showCustomDateModal} onOpenChange={setShowCustomDateModal}>
+        <DialogContent className="bg-white border border-gray-200 sm:max-w-md rounded-lg">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900">
+              <Calendar className="w-5 h-5 inline mr-2 text-blue-600" />
+              Select Date Range
+            </DialogTitle>
+          </DialogHeader>
+
+          <Separator className="bg-gray-200" />
+
+          <div className="space-y-5 py-4">
+            {/* From Date */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-2 block">From Date</label>
+              <Input
+                type="date"
+                value={dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : ''}
+                onChange={(e) => {
+                  const date = e.target.value ? new Date(e.target.value) : undefined;
+                  handleCustomDateSelect(date, dateRange.to);
+                }}
+                className="w-full border border-gray-300 rounded-lg h-10 px-3 focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition-all"
+              />
+            </div>
+
+            {/* To Date */}
+            <div>
+              <label className="text-sm font-semibold text-gray-700 mb-2 block">To Date</label>
+              <Input
+                type="date"
+                value={dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : ''}
+                onChange={(e) => {
+                  const date = e.target.value ? new Date(e.target.value) : undefined;
+                  handleCustomDateSelect(dateRange.from, date);
+                }}
+                className="w-full border border-gray-300 rounded-lg h-10 px-3 focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition-all"
+              />
+            </div>
+
+            {/* Preview when both dates selected */}
+            {dateRange.from && dateRange.to && (
+              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-blue-900 uppercase tracking-wide">Selected Range</span>
+                  <span className="text-xs font-semibold text-blue-600 bg-white px-2 py-1 rounded">
+                    {Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1} days
+                  </span>
+                </div>
+                <p className="text-sm font-semibold text-gray-900">
+                  {format(dateRange.from, 'EEEE, MMMM d, yyyy')}
+                </p>
+                <p className="text-xs text-gray-600">to</p>
+                <p className="text-sm font-semibold text-gray-900">
+                  {format(dateRange.to, 'EEEE, MMMM d, yyyy')}
+                </p>
+              </div>
+            )}
+
+            {/* Info text */}
+            {!dateRange.from || !dateRange.to ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-xs text-amber-800">
+                  <span className="font-semibold">Tip:</span> Select both from and to dates to filter agents
+                </p>
+              </div>
+            ) : null}
+          </div>
+
+          <Separator className="bg-gray-200" />
+
+          <DialogFooter className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setDateRange({ from: undefined, to: undefined });
+                setDateFilter('all');
+                setShowCustomDateModal(false);
+              }}
+              className="flex-1 rounded-lg h-10"
+            >
+              Reset
+            </Button>
+            <Button
+              onClick={handleApplyCustomDate}
+              disabled={!dateRange.from || !dateRange.to}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              Apply Filter
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Details Modal */}
       <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
-        <DialogContent className="bg-white border-gray-200 sm:max-w-3xl">
+        <DialogContent className="bg-white border border-gray-200 sm:max-w-3xl rounded-lg">
           <DialogHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <DialogTitle className="text-xl">{selectedAgent?.full_name}</DialogTitle>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-xl font-semibold text-gray-900">{selectedAgent?.full_name}</DialogTitle>
                 <p className="text-gray-600 text-sm mt-1">{selectedAgent?.agency_name}</p>
               </div>
               {selectedAgent && (
-                <Badge variant="outline" className={statusColors[selectedAgent.status]}>
+                <Badge variant="outline" className={`${statusColors[selectedAgent.status]} font-medium flex-shrink-0`}>
                   {selectedAgent.status}
                 </Badge>
               )}
@@ -412,7 +766,7 @@ export default function AgentsPage() {
                   <p className="text-xs font-medium text-gray-500 mb-2">KYC Document</p>
                   <Button
                     variant="outline"
-                    className="w-full justify-between"
+                    className="w-full justify-between rounded-lg h-10"
                     onClick={() => selectedAgent.kyc_document_s3_url && window.open(selectedAgent.kyc_document_s3_url, '_blank')}
                   >
                     <span className="flex items-center gap-2">
@@ -429,28 +783,28 @@ export default function AgentsPage() {
           {selectedAgent?.status === 'pending' && (
             <>
               <Separator className="bg-gray-200" />
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <Button
                   onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'invite')}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg h-10"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
                   Send Invite
                 </Button>
                 <Button
                   onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'approved')}
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-lg h-10"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Approve Agent
+                  Approve
                 </Button>
                 <Button
                   onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'rejected')}
                   variant="outline"
-                  className="flex-1 text-red-600 hover:bg-red-50"
+                  className="flex-1 text-red-600 hover:bg-red-50 rounded-lg h-10"
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  Reject Agent
+                  Reject
                 </Button>
               </div>
             </>
@@ -459,21 +813,21 @@ export default function AgentsPage() {
           {selectedAgent?.status === 'invite' && (
             <>
               <Separator className="bg-gray-200" />
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <Button
                   onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'approved')}
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-lg h-10"
                 >
                   <CheckCircle className="w-4 h-4 mr-2" />
-                  Approve Agent
+                  Approve
                 </Button>
                 <Button
                   onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'rejected')}
                   variant="outline"
-                  className="flex-1 text-red-600 hover:bg-red-50"
+                  className="flex-1 text-red-600 hover:bg-red-50 rounded-lg h-10"
                 >
                   <XCircle className="w-4 h-4 mr-2" />
-                  Reject Agent
+                  Reject
                 </Button>
               </div>
             </>
@@ -481,7 +835,7 @@ export default function AgentsPage() {
 
           <DialogFooter>
             <Link href={selectedAgent ? `/agents/${selectedAgent.id}/edit` : '#'} className="flex-1">
-              <Button variant="outline" className="w-full gap-2">
+              <Button variant="outline" className="w-full rounded-lg h-10 gap-2">
                 <Pencil className="w-4 h-4" />
                 Edit Agent
               </Button>
@@ -489,7 +843,7 @@ export default function AgentsPage() {
             <Button
               variant="outline"
               onClick={() => { setShowDetailsModal(false); setSelectedAgent(null); }}
-              className="flex-1"
+              className="flex-1 rounded-lg h-10"
             >
               Close
             </Button>
@@ -499,13 +853,13 @@ export default function AgentsPage() {
 
       {/* Domain Management Modal */}
       <Dialog open={showDomainModal} onOpenChange={setShowDomainModal}>
-        <DialogContent className="bg-white border-gray-200 sm:max-w-2xl">
+        <DialogContent className="bg-white border border-gray-200 sm:max-w-2xl rounded-lg">
           <DialogHeader>
-            <div className="flex items-start justify-between">
-              <div>
-                <DialogTitle className="text-xl flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-blue-600" />
-                  Domain Management
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <span>Domain Management</span>
                 </DialogTitle>
                 <p className="text-gray-600 text-sm mt-1">{selectedAgent?.full_name}</p>
               </div>
@@ -514,40 +868,40 @@ export default function AgentsPage() {
 
           <Separator className="bg-gray-200" />
 
-          <div className="space-y-3 max-h-[400px] overflow-y-auto">
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
             {selectedAgent?.domains && selectedAgent.domains.length > 0 ? (
               selectedAgent.domains.map((domain) => (
                 <div
                   key={domain.id}
-                  className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50/50 transition-colors"
                 >
-                  <div className="flex items-center gap-3 flex-1">
-                    <Globe className="w-5 h-5 text-blue-500" />
-                    <div>
-                      <p className="font-medium text-gray-900">{domain.full_domain}</p>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <Globe className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-gray-900 text-sm truncate">{domain.full_domain}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge 
                           variant="outline"
-                          className={domainStatusColors[domain.status as keyof typeof domainStatusColors]}
+                          className={`text-xs font-medium ${domainStatusColors[domain.status as keyof typeof domainStatusColors]}`}
                         >
                           {domain.status}
                         </Badge>
                         <p className="text-xs text-gray-500">
                           {domain.status === 'active' 
-                            ? `Activated on ${formatDate(domain.activated_at || '')}` 
-                            : `Released on ${formatDate(domain.released_at || '')}`}
+                            ? `Activated on ${formatDateForDomain(domain.activated_at)}` 
+                            : `Released on ${formatDateForDomain(domain.released_at)}`}
                         </p>
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-shrink-0 ml-2">
                     {domain.status === 'active' ? (
                       <Button
                         onClick={() => updateDomainStatus(domain.id, 'deactivate')}
                         variant="outline"
                         size="sm"
                         disabled={domainLoading}
-                        className="text-orange-600 hover:bg-orange-50"
+                        className="text-orange-600 hover:bg-orange-50 rounded-lg h-9 text-xs whitespace-nowrap"
                       >
                         Deactivate
                       </Button>
@@ -557,7 +911,7 @@ export default function AgentsPage() {
                         variant="outline"
                         size="sm"
                         disabled={domainLoading}
-                        className="text-green-600 hover:bg-green-50"
+                        className="text-green-600 hover:bg-green-50 rounded-lg h-9 text-xs whitespace-nowrap"
                       >
                         Activate
                       </Button>
@@ -567,7 +921,7 @@ export default function AgentsPage() {
               ))
             ) : (
               <div className="text-center py-8 text-gray-500">
-                No domains assigned to this agent
+                <p className="text-sm font-medium">No domains assigned</p>
               </div>
             )}
           </div>
@@ -576,7 +930,7 @@ export default function AgentsPage() {
             <Button
               variant="outline"
               onClick={() => setShowDomainModal(false)}
-              className="w-full"
+              className="w-full rounded-lg h-10"
             >
               Close
             </Button>

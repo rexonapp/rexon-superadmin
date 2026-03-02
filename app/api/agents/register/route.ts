@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { query } from '@/lib/db';
 import { randomBytes } from 'crypto';
+import bcrypt from 'bcrypt';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'ap-south-2',
@@ -18,6 +19,10 @@ const PLATFORM_DOMAIN = 'rexon.com';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const ALLOWED_DOCUMENT_TYPES = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+
+// Temporary hardcoded password — TODO: Replace with random password generation
+const TEMPORARY_PASSWORD = 'rexon@123';
+const BCRYPT_ROUNDS = 10;
 
 export async function POST(request: NextRequest) {
   try {
@@ -187,8 +192,29 @@ export async function POST(request: NextRequest) {
       kycDocumentS3Url = `https://${BUCKET_NAME}.s3.${process.env.AWS_REGION || 'ap-south-2'}.amazonaws.com/${kycDocumentS3Key}`;
     }
 
+    // ── Password hashing ──────────────────────────────────────────────────────
+    // TODO: Replace TEMPORARY_PASSWORD with dynamically generated password
+    // Example for future use:
+    // const generateRandomPassword = (length: number): string => {
+    //   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    //   let password = '';
+    //   for (let i = 0; i < length; i++) {
+    //     password += chars.charAt(Math.floor(Math.random() * chars.length));
+    //   }
+    //   return password;
+    // };
+    // const TEMPORARY_PASSWORD = generateRandomPassword(12);
+    // Then send this password via email or SMS to the agent
+    
+    const passwordSalt = await bcrypt.genSalt(BCRYPT_ROUNDS);
+    const passwordHash = await bcrypt.hash(TEMPORARY_PASSWORD, passwordSalt);
+
     // ── Insert agent ──────────────────────────────────────────────────────────
-    // Fixed: Corrected the number of parameters and parameter mapping
+    // FIXED: Proper created_at handling with timezone awareness
+    // Get current timestamp in IST (UTC+5:30)
+    const now = new Date();
+    const istTime = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)); // Convert to IST
+    
     const agentResult = await query(
       `INSERT INTO agents
        (full_name, email, mobile_number, whatsapp_number, city, state, address, pincode,
@@ -197,8 +223,9 @@ export async function POST(request: NextRequest) {
         profile_photo_s3_key, profile_photo_s3_url,
         kyc_document_s3_key, kyc_document_s3_url,
         languages_spoken,
-        terms_accepted, is_verified, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+        password_hash, password_salt,
+        terms_accepted, is_verified, status, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
        RETURNING id, full_name, email, mobile_number, city, agency_name, status, created_at`,
       [
         fullName,           // $1
@@ -217,10 +244,13 @@ export async function POST(request: NextRequest) {
         profilePhotoS3Url,  // $14
         kycDocumentS3Key,   // $15
         kycDocumentS3Url,   // $16
-        languagesSpoken.length > 0 ? languagesSpoken : null, // $17 - Pass array directly for text[]
-        true,               // $18 - terms_accepted
-        false,              // $19 - is_verified
-        'pending',          // $20 - status
+        languagesSpoken.length > 0 ? languagesSpoken : null, // $17
+        passwordHash,       // $18 - password_hash
+        passwordSalt,       // $19 - password_salt
+        true,               // $20 - terms_accepted
+        false,              // $21 - is_verified
+        'approved',          // $22 - status
+        istTime.toISOString(), // $23 - created_at with IST timezone
       ]
     );
 
