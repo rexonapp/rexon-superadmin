@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@/lib/session';
 import { query } from '@/lib/db';
+import { sendAgentStatusEmail } from '@/lib/sendemail';
 
 export async function PATCH(
   request: NextRequest,
@@ -29,6 +30,23 @@ export async function PATCH(
 
     // TODO: Send notification to agent about verification status
 
+    // Get agent info for email
+    const result = await query(
+      'SELECT full_name, email FROM agents WHERE id = $1',
+      [agentId]
+    );
+
+    const agent = result.rows[0];
+
+    // Send email when approved or rejected
+    if (status === 'approved' || status === 'rejected') {
+      await sendAgentStatusEmail({
+        fullName: agent.full_name,
+        email: agent.email,
+        status: status,
+        reason: "",
+      });
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Update agent status error:', error);
