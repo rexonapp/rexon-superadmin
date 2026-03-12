@@ -1,13 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, EyeOff, ShieldCheck, AlertCircle, LogIn } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
+import { Eye, EyeOff, AlertCircle, LogIn, ShieldAlert, Lock, User } from 'lucide-react'
 
 export default function SuperAdminLogin() {
   const [username, setUsername] = useState('')
@@ -20,7 +14,6 @@ export default function SuperAdminLogin() {
     e.preventDefault()
     setError('')
     if (!username || !password) { setError('Please enter both username and password.'); return }
-
     setLoading(true)
     try {
       const res = await fetch('/api/auth/signin', {
@@ -39,85 +32,169 @@ export default function SuperAdminLogin() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        {/* Brand */}
+    <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-6 bg-slate-50 overflow-hidden">
+
+      {/* Background decorative blobs — pure Tailwind */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-blue-100 opacity-60 blur-3xl" />
+        <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-orange-100 opacity-50 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-50 opacity-40 blur-3xl" />
+      </div>
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md">
+
+        {/* ── Brand ── */}
         <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center justify-center w-11 h-11 rounded-lg border mb-4"
-            style={{ borderColor: 'hsl(var(--border))', backgroundColor: 'hsl(var(--muted))' }}>
-            <ShieldCheck className="w-5 h-5" strokeWidth={1.5} />
+          {/* Logo */}
+          <div className="relative mb-5">
+            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-blue-400 to-orange-300 opacity-20 blur-lg" />
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white border border-slate-100 shadow-2xl shadow-blue-200/50 flex items-center justify-center">
+              <img
+                src="/rexon-logo.png"
+                alt="Rexon"
+                width={102}
+                height={102}
+                className="w-30 h-30 sm:w-[102px] sm:h-[102px] object-contain"
+              />
+            </div>
           </div>
-          <h1 className="text-lg font-semibold tracking-tight">Rexon</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'hsl(var(--muted-foreground))' }}>Administration Portal</p>
+
+          <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Rexon</h1>
+
+          {/* Decorated subtitle */}
+          <div className="flex items-center gap-2 mt-1.5">
+            <div className="w-8 h-px bg-gradient-to-r from-transparent to-blue-300" />
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Administration Portal</p>
+            <div className="w-8 h-px bg-gradient-to-l from-transparent to-blue-300" />
+          </div>
         </div>
 
-        <Card>
-          <CardHeader className="px-6 pt-6 pb-0">
-            <div className="flex items-start justify-between">
-              <div>
-                <CardTitle className="text-base font-semibold">Sign in</CardTitle>
-                <CardDescription className="text-sm mt-0.5">Restricted to authorized personnel</CardDescription>
-              </div>
-              <Badge variant="outline" className="text-xs font-normal mt-0.5">Super Admin</Badge>
-            </div>
-            <div className="mt-5" style={{ height: '1px', backgroundColor: 'hsl(var(--border))' }} />
-          </CardHeader>
+        {/* ── Card ── */}
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl border border-slate-200/80 shadow-2xl shadow-blue-100/30 overflow-hidden">
 
-          <CardContent className="px-6 pt-5 pb-2">
+          {/* Accent bar */}
+          <div className="h-1 bg-gradient-to-r from-blue-700 via-blue-400 to-orange-400" />
+
+          {/* Header */}
+          <div className="flex items-start justify-between px-6 sm:px-8 pt-6">
+            <div>
+              <p className="text-base font-extrabold text-slate-800 tracking-tight">Welcome back</p>
+              <p className="text-xs text-slate-400 mt-0.5">Sign in to access the admin dashboard</p>
+            </div>
+            <div className="flex items-center gap-1 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg px-2.5 py-1.5 shadow-md shadow-blue-300/40 whitespace-nowrap ml-3 mt-0.5">
+              <ShieldAlert size={10} strokeWidth={3} />
+              Admin Portal
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="mx-6 sm:mx-8 mt-5 h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+
+          {/* Form */}
+          <div className="px-6 sm:px-8 pt-5 pb-6">
             <form onSubmit={handleLogin} className="space-y-4">
+
+              {/* Error */}
               {error && (
-                <Alert variant="destructive">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription className="text-sm">{error}</AlertDescription>
-                </Alert>
+                <div className="flex items-start gap-2.5 bg-red-50 border border-red-200 rounded-2xl px-4 py-3 text-red-600 text-xs leading-snug">
+                  <AlertCircle size={14} className="mt-0.5 shrink-0" />
+                  <span>{error}</span>
+                </div>
               )}
+
+              {/* Username */}
               <div className="space-y-1.5">
-                <Label htmlFor="username" className="text-sm font-medium">Username</Label>
-                <Input id="username" type="text" placeholder="Enter your username" value={username}
-                  onChange={(e) => setUsername(e.target.value)} autoComplete="username" autoFocus className="h-9 text-sm" required />
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+                <label htmlFor="username" className="block text-[10.5px] font-bold text-slate-500 uppercase tracking-widest">
+                  Username
+                </label>
                 <div className="relative">
-                  <Input id="password" type={showPassword ? 'text' : 'password'} placeholder="Enter your password"
-                    value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" className="h-9 text-sm pr-9" required />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} tabIndex={-1}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2" style={{ color: 'hsl(var(--muted-foreground))' }}>
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  <User size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input
+                    id="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    autoComplete="username"
+                    autoFocus
+                    required
+                    className="w-full h-11 pl-10 pr-4 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl outline-none transition-all duration-150 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 hover:border-slate-300 placeholder:text-slate-300"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="block text-[10.5px] font-bold text-slate-500 uppercase tracking-widest">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    required
+                    className="w-full h-11 pl-10 pr-11 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl outline-none transition-all duration-150 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 hover:border-slate-300 placeholder:text-slate-300"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    tabIndex={-1}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-blue-500 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
               </div>
-              <Button type="submit" className="w-full h-9 text-sm font-medium" disabled={loading}>
-                {loading ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                    </svg>
-                    Authenticating...
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-2"><LogIn className="w-4 h-4" />Sign in</span>
-                )}
-              </Button>
+
+              {/* Submit */}
+              <div className="pt-1">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full h-12 flex items-center justify-center gap-2.5 text-sm font-bold text-white bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 rounded-2xl shadow-lg shadow-blue-300/30 hover:shadow-xl hover:shadow-blue-300/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg"
+                >
+                  {loading ? (
+                    <>
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                      </svg>
+                      Authenticating...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn size={15} />
+                      Sign in to Dashboard
+                    </>
+                  )}
+                </button>
+              </div>
             </form>
-            {/* <div className="mt-5 text-center">
-              <span className="text-sm" style={{ color: 'hsl(var(--muted-foreground))' }}>Don't have an account? </span>
-              <a href="/register" className="text-sm font-medium underline-offset-4 hover:underline">Register</a>
-            </div> */}
-          </CardContent>
 
-          <CardFooter className="px-6 pt-4 pb-6">
-            <p className="text-xs text-center w-full leading-relaxed" style={{ color: 'hsl(var(--muted-foreground))' }}>
-              This system is monitored. Unauthorized access attempts are logged and reported.
-            </p>
-          </CardFooter>
-        </Card>
-
-        <div className="flex items-center justify-between mt-5 px-1">
-          <span className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>© {new Date().getFullYear()} Rexon</span>
-          <span className="text-xs" style={{ color: 'hsl(var(--muted-foreground))' }}>v2.4.1</span>
+            {/* Security notice */}
+            <div className="mt-5 flex items-start gap-2.5 bg-orange-50 border border-orange-100 rounded-2xl px-4 py-3">
+              <ShieldAlert size={13} className="text-orange-400 mt-0.5 shrink-0" />
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                This system is monitored.{' '}
+                <span className="font-semibold text-orange-500">Unauthorized access</span>{' '}
+                attempts are logged and reported.
+              </p>
+            </div>
+          </div>
         </div>
+
+        {/* Meta footer */}
+        <div className="flex items-center justify-between mt-5 px-2">
+          <span className="text-[11px] text-slate-400">© {new Date().getFullYear()} Rexon. All rights reserved.</span>
+          <span className="text-[11px] text-slate-400 bg-white border border-slate-200 rounded-md px-2 py-0.5">v2.4.1</span>
+        </div>
+
       </div>
     </div>
   )

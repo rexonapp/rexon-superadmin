@@ -7,6 +7,8 @@ import { Building2, UserCheck, Users, Clock, TrendingUp, ArrowUpRight, ArrowRigh
 import StatCard from '@/components/superadmin/StatCard';
 import GlassCard from '@/components/superadmin/GlassCard';
 import Loading from './loading';
+import { routerServerGlobal } from 'next/dist/server/lib/router-utils/router-server-context';
+import { useRouter } from 'next/navigation';
 
 interface Stats {
   totalWarehouses: number;
@@ -37,6 +39,7 @@ export default function SuperAdminHome() {
   });
   const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     fetchDashboardData();
@@ -76,7 +79,7 @@ export default function SuperAdminHome() {
       trend: 'neutral' as const,
     },
     {
-      label: 'Total Users',
+      label: 'Total Admin Users',
       value: stats.totalUsers.toString(),
       change: 'Active',
       icon: Users,
@@ -191,7 +194,7 @@ export default function SuperAdminHome() {
 
           <div className="space-y-3">
             <Button
-              onClick={() => window.location.href = '/superadmin/warehouses'}
+              onClick={()=>router.push('/warehouses')}
               className="w-full justify-between h-12 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 hover:from-blue-700 hover:via-cyan-700 hover:to-sky-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-cyan-500/40 transition-all group"
             >
               <span className="flex items-center gap-2 font-semibold">
@@ -202,7 +205,7 @@ export default function SuperAdminHome() {
             </Button>
 
             <Button
-              onClick={() => window.location.href = '/superadmin/agents'}
+              onClick={()=>router.push('/agents')}
               className="w-full justify-between h-12 rounded-xl bg-white/50 hover:bg-white/80 text-gray-900 border border-white/60 hover:border-white/80 shadow-sm hover:shadow-md transition-all group"
               variant="outline"
             >
@@ -214,13 +217,13 @@ export default function SuperAdminHome() {
             </Button>
 
             <Button
-              onClick={() => window.location.href = '/superadmin/users'}
+              onClick={()=>router.push('/users')}
               className="w-full justify-between h-12 rounded-xl bg-white/50 hover:bg-white/80 text-gray-900 border border-white/60 hover:border-white/80 shadow-sm hover:shadow-md transition-all group"
               variant="outline"
             >
               <span className="flex items-center gap-2 font-semibold">
                 <Users className="w-4 h-4 text-blue-600" />
-                Manage Users
+                Manage Admin Users
               </span>
               <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
             </Button>
