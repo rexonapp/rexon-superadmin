@@ -494,27 +494,31 @@ export default function AgentsPage() {
                     </TableCell>
 
                     <TableCell className="px-4 py-3">
-                      {agent.domains && agent.domains.length > 0 ? (
-                        <div className="flex flex-col gap-1.5">
-                          {agent.domains.slice(0, 1).map((domain) => (
-                            <div key={domain.id} className="flex items-center gap-2">
-                              <span className="text-sm text-gray-700 truncate">{domain.full_domain}</span>
-                              <Badge 
-                                variant="outline" 
-                                className={`text-xs font-medium whitespace-nowrap ${domainStatusColors[domain.status as keyof typeof domainStatusColors]}`}
-                              >
-                                {domain.status}
-                              </Badge>
-                            </div>
-                          ))}
-                          {agent.domains.length > 1 && (
-                            <span className="text-xs text-gray-500">+{agent.domains.length - 1} more</span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-sm text-gray-400">No domains</span>
-                      )}
-                    </TableCell>
+                    {agent.domains && agent.domains.length > 0 ? (
+                      <div className="flex flex-col gap-2">
+                        {agent.domains.slice(0, 1).map((domain) => (
+                          <div key={domain.id} className="grid gap-1">
+                            <span className="text-sm text-gray-800 font-medium truncate leading-tight">
+                              {domain.full_domain}
+                            </span>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs font-medium w-fit px-2 py-0.5 ${domainStatusColors[domain.status as keyof typeof domainStatusColors]}`}
+                            >
+                              {domain.status === 'active' ? '● Active' : '● Deactivated'}
+                            </Badge>
+                          </div>
+                        ))}
+                        {agent.domains.length > 1 && (
+                          <span className="text-xs text-blue-500 font-medium">
+                            +{agent.domains.length - 1} more domain{agent.domains.length - 1 > 1 ? 's' : ''}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-sm text-gray-400 italic">No domains</span>
+                    )}
+                  </TableCell>
                    
                     <TableCell className="px-4 py-3">
                       <Badge variant="outline" className={`${statusColors[agent.status]} font-medium`}>
