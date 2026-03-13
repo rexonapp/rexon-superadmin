@@ -40,6 +40,7 @@ export default function SuperAdminHome() {
   const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [agentActivities, setAgentActivities] = useState<any[]>([]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -54,12 +55,21 @@ export default function SuperAdminHome() {
         setStats(data.stats);
         setRecentActivity(data.recentActivity);
       }
+
+      const res = await fetch("/api/agents/recent-activity");
+      const agentdata = await res.json();
+      if (agentdata.success) {
+        setAgentActivities(agentdata.data.activities);
+      }
+
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+      console.error('Failed to fetch dashboard data:', error);  
     } finally {
       setLoading(false);
     }
   };
+
+  
 
   const statCards = [
     {
@@ -130,7 +140,12 @@ export default function SuperAdminHome() {
               </div>
               <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
             </div>
-            <Button variant="ghost" size="sm" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+            <Button
+              onClick={() => router.push("agents/agentActivity")}
+              variant="ghost"
+              size="sm"
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            >
               View All
               <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
@@ -139,35 +154,84 @@ export default function SuperAdminHome() {
           <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent mb-6" />
 
           {recentActivity.length > 0 ? (
-            <div className="space-y-3">
-              {recentActivity.map((activity) => (
-                <div
-                  key={activity.id}
-                  className="flex items-start gap-4 p-4 rounded-xl bg-white/40 hover:bg-white/60 border border-white/40 hover:border-white/60 transition-all duration-300 group"
-                >
-                  <div className="relative flex-shrink-0">
+            // <div className="space-y-3">
+            //   {recentActivity.map((activity) => (
+            //     <div
+            //       key={activity.id}
+            //       className="flex items-start gap-4 p-4 rounded-xl bg-white/40 hover:bg-white/60 border border-white/40 hover:border-white/60 transition-all duration-300 group"
+            //     >
+            //       <div className="relative flex-shrink-0">
+            //         <div
+            //           className={`w-2.5 h-2.5 rounded-full mt-1.5 ${
+            //             activity.status === 'success' ? 'bg-cyan-500 shadow-lg shadow-cyan-500/50' :
+            //             activity.status === 'warning' ? 'bg-sky-500 shadow-lg shadow-sky-500/50' :
+            //             activity.status === 'pending' ? 'bg-indigo-500 shadow-lg shadow-indigo-500/50' :
+            //             'bg-blue-500 shadow-lg shadow-blue-500/50'
+            //           } animate-pulse`}
+            //         />
+            //       </div>
+            //       <div className="flex-1 min-w-0">
+            //         <p className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
+            //           {activity.action}
+            //         </p>
+            //         <p className="text-sm text-gray-600 mt-0.5 font-medium">
+            //           {activity.warehouse || activity.user || 'System'}
+            //         </p>
+            //       </div>
+            //       <span className="text-xs text-gray-500 whitespace-nowrap font-medium bg-gray-100/80 px-2 py-1 rounded-full">
+            //         {activity.time}
+            //       </span>
+            //     </div>
+            //   ))}
+            // </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              {/* Warehouse Activity */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Warehouse Activity</h3>
+
+                <div className="space-y-3">
+                  {recentActivity.map((activity: any) => (
                     <div
-                      className={`w-2.5 h-2.5 rounded-full mt-1.5 ${
-                        activity.status === 'success' ? 'bg-cyan-500 shadow-lg shadow-cyan-500/50' :
-                        activity.status === 'warning' ? 'bg-sky-500 shadow-lg shadow-sky-500/50' :
-                        activity.status === 'pending' ? 'bg-indigo-500 shadow-lg shadow-indigo-500/50' :
-                        'bg-blue-500 shadow-lg shadow-blue-500/50'
-                      } animate-pulse`}
-                    />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 group-hover:text-blue-700 transition-colors">
-                      {activity.action}
-                    </p>
-                    <p className="text-sm text-gray-600 mt-0.5 font-medium">
-                      {activity.warehouse || activity.user || 'System'}
-                    </p>
-                  </div>
-                  <span className="text-xs text-gray-500 whitespace-nowrap font-medium bg-gray-100/80 px-2 py-1 rounded-full">
-                    {activity.time}
-                  </span>
+                      key={activity.id}
+                      className="flex justify-between items-center p-3 border rounded-lg"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{activity.action}</p>
+                        <p className="text-xs text-gray-500">{activity.warehouse}</p>
+                      </div>
+
+                      <span className="text-xs text-gray-400">
+                        {activity.time}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+
+              {/* Agent Activity */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Agent Activity</h3>
+
+                <div className="space-y-3">
+                  {agentActivities.map((activity: any) => (
+                    <div
+                      key={activity.id}
+                      className="flex justify-between items-center p-3 border rounded-lg"
+                    >
+                      <div>
+                        <p className="text-sm font-medium">{activity.action}</p>
+                        <p className="text-xs text-gray-500">{activity.user}  ({activity.email})</p>
+                      </div>
+
+                      <span className="text-xs text-gray-400">
+                        {new Date(activity.time).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
             </div>
           ) : (
             <div className="text-center py-16 text-gray-500">
