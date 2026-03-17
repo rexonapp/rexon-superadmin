@@ -75,34 +75,34 @@ export default function SuperAdminHome() {
     {
       label: 'Total Warehouses',
       value: stats.totalWarehouses.toString(),
-      change: `+${stats.todayListings}`,
+      // change: `+${stats.todayListings}`,
       icon: Building2,
       color: 'blue' as const,
-      trend: 'up' as const,
+      // trend: 'up' as const,
     },
     {
       label: 'Pending Approvals',
       value: stats.pendingApprovals.toString(),
-      change: 'Action needed',
+      // change: 'Action needed',
       icon: Clock,
       color: 'cyan' as const,
-      trend: 'neutral' as const,
+      // trend: 'neutral' as const,
     },
     {
-      label: 'Total Admin Users',
+      label: 'Leads',
       value: stats.totalUsers.toString(),
-      change: 'Active',
+      // change: 'Active',
       icon: Users,
       color: 'blue' as const,
-      trend: 'up' as const,
+      // trend: 'up' as const,
     },
     {
       label: 'Agent Network',
       value: stats.totalAgents.toString(),
-      change: `${stats.verifiedAgents} verified`,
+      // change: `${stats.verifiedAgents} verified`,
       icon: UserCheck,
       color: 'cyan' as const,
-      trend: 'up' as const,
+      // trend: 'up' as const,
     },
   ];
 
@@ -121,8 +121,8 @@ export default function SuperAdminHome() {
             label={stat.label}
             value={stat.value}
             icon={stat.icon}
-            trend={stat.trend}
-            change={stat.change}
+            // trend={stat.trend}
+            // change={stat.change}
             color={stat.color}
             index={idx}
           />
@@ -294,7 +294,7 @@ export default function SuperAdminHome() {
 
             <Separator className="my-4 bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
 
-            <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200/50 shadow-sm">
+            {/* <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200/50 shadow-sm">
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded-lg bg-cyan-500/10">
                   <TrendingUp className="w-5 h-5 text-cyan-600" />
@@ -307,7 +307,7 @@ export default function SuperAdminHome() {
                   </p>
                 </div>
               </div>
-            </div>
+            </div> */}
           </div>
         </GlassCard>
       </div>

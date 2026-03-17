@@ -440,6 +440,7 @@ export default function AgentsPage() {
               <TableRow className="border-b border-gray-200 bg-gray-50">
                 <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Agent</TableHead>
                 <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Contact</TableHead>
+                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Agency Name</TableHead>
                 <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Registered (IST)</TableHead>
                 <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Domain</TableHead>
                 <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Status</TableHead>
@@ -479,6 +480,12 @@ export default function AgentsPage() {
                         <p className="text-xs text-gray-500 truncate">{agent.mobile_number}</p>
                       </div>
                     </TableCell>
+                    <TableCell className="px-4 py-3">
+                      <div className="min-w-0">
+                        <p className="text-sm text-gray-900 truncate">{agent.agency_name}</p>
+                      </div>
+                    </TableCell>
+
 
                     <TableCell className="px-4 py-3">
                       {formatDateSafe(agent.created_at) ? (
@@ -541,7 +548,7 @@ export default function AgentsPage() {
                             View Details
                           </DropdownMenuItem>
 
-                          {agent.domains && agent.domains.length > 0 && (
+                          {/* {agent.domains && agent.domains.length > 0 && (
                             <DropdownMenuItem
                               onClick={() => { setSelectedAgent(agent); setShowDomainModal(true); }}
                               className="cursor-pointer text-sm"
@@ -549,7 +556,7 @@ export default function AgentsPage() {
                               <Globe className="w-4 h-4 mr-2" />
                               Manage Domains
                             </DropdownMenuItem>
-                          )}
+                          )} */}
 
                           <DropdownMenuItem asChild>
                             <Link

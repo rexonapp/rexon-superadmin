@@ -7,8 +7,8 @@ interface StatCardProps {
   label: string;
   value: string;
   icon: LucideIcon;
-  trend: 'up' | 'down' | 'neutral';
-  change: string;
+  trend?: 'up' | 'down' | 'neutral';
+  change?: string;
   color: 'blue' | 'purple' | 'orange' | 'emerald' | 'violet' | 'rose' | 'cyan' | 'amber';
   index: number;
 }
@@ -110,10 +110,10 @@ export default function StatCard({
           <div className={`p-3.5 rounded-xl ${colors.bg} ring-4 ${colors.ring} transition-colors duration-300`}>
             <Icon className={`w-6 h-6 ${colors.text}`} />
           </div>
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${colors.badge} font-semibold text-xs`}>
+          {/* <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${colors.badge} font-semibold text-xs`}>
             <TrendIcon className="w-3.5 h-3.5" />
             <span>{change}</span>
-          </div>
+          </div> */}
         </div>
 
         <h3 className="text-3xl font-bold text-gray-900 mb-2">
