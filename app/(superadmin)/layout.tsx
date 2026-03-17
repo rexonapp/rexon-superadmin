@@ -134,7 +134,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                   <Menu className="w-5 h-5 text-gray-700" />
                 </Button>
 
-                {pathname !== '/agents' && (
+                {pathname === '/' && (
                 <div className="min-w-0">
                   <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent truncate">
                     {getActiveLabel(pathname)}
@@ -149,7 +149,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               {/* Right — actions */}
               <div className="flex items-center gap-2 shrink-0">
                 {/* Inline search — hidden on small screens, shown on sm+ */}
-                {!isAgentsPage && (
+                {/* {!isAgentsPage && (
                 <div className="relative hidden sm:block">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-400 pointer-events-none" />
                   <Input
@@ -158,7 +158,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                     className="pl-9 w-40 lg:w-56 bg-white/50 border-blue-200 focus:border-blue-400 focus:bg-white transition-all text-sm"
                   />
                 </div>
-                )}
+                )} */}
                 {/* Mobile search toggle */}
                 <Button
                   variant="ghost"
