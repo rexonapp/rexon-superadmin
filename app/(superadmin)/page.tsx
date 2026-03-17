@@ -141,7 +141,7 @@ export default function SuperAdminHome() {
               <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
             </div>
             <Button
-              onClick={() => router.push("agents/agentActivity")}
+              onClick={() => router.push("/agents")}
               variant="ghost"
               size="sm"
               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
