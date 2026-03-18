@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Settings, LogOut, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Bell, Menu, Settings, LogOut, Clock, CheckCircle, XCircle } from 'lucide-react';
 import Sidebar, { AdminUser } from '@/components/superadmin/sidebar';
 import Loading from './loading';
 
@@ -127,7 +127,23 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
             {/* Left */}
             <div className="flex items-center gap-3 min-w-0">
-            
+              <Button
+                variant="ghost"
+                size="icon"
+                className="-ml-1 hover:bg-gray-100 shrink-0"
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+              >
+                <Menu className="w-5 h-5 text-gray-600" />
+              </Button>
+
+              <div className="min-w-0">
+                <h1 className="text-[17px] font-semibold text-gray-900 truncate leading-tight">
+                  {pageLabel}
+                </h1>
+                <p className="text-[12px] text-gray-400 hidden sm:block leading-tight mt-0.5">
+                  Super Admin Panel
+                </p>
+              </div>
 
               {/* Warehouse stats pills — only shown on /warehouses */}
               {isWarehousesPage && (
