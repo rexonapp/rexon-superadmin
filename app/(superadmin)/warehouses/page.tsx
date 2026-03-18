@@ -100,6 +100,149 @@ function parseAmenities(raw: string | string[] | Record<string, string>): string
   return raw.split(',').map(a => a.trim()).filter(Boolean);
 }
 
+/* ══════════════════════════════════════════ CUSTOM DATE MODAL ══════════════════════════════════════════ */
+function CustomDateModal({
+  open,
+  onClose,
+  dateRange,
+  onApply,
+}: {
+  open: boolean;
+  onClose: () => void;
+  dateRange: DateRange;
+  onApply: (from: Date | undefined, to: Date | undefined) => void;
+}) {
+  const [fromVal, setFromVal] = useState(
+    dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : ''
+  );
+  const [toVal, setToVal] = useState(
+    dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : ''
+  );
+  const [error, setError] = useState('');
+
+  // Sync when modal reopens with existing range
+  useEffect(() => {
+    if (open) {
+      setFromVal(dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : '');
+      setToVal(dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : '');
+      setError('');
+    }
+  }, [open]);
+
+  const handleApply = () => {
+    if (!fromVal || !toVal) {
+      setError('Please select both start and end dates.');
+      return;
+    }
+    const from = new Date(fromVal);
+    const to = new Date(toVal);
+    if (from > to) {
+      setError('Start date must be before or equal to end date.');
+      return;
+    }
+    setError('');
+    onApply(startOfDay(from), endOfDay(to));
+    onClose();
+  };
+
+  const handleClear = () => {
+    setFromVal('');
+    setToVal('');
+    setError('');
+    onApply(undefined, undefined);
+    onClose();
+  };
+
+  if (!open) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
+      <DialogContent className="bg-white border border-gray-200 shadow-2xl sm:max-w-sm p-0 gap-0 overflow-hidden">
+        <VisuallyHidden><DialogTitle>Select Custom Date Range</DialogTitle></VisuallyHidden>
+
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 px-5 py-4">
+          <div className="flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-blue-100" />
+            <h3 className="text-white font-bold text-sm">Custom Date Range</h3>
+          </div>
+          <p className="text-blue-200 text-xs mt-0.5">Filter listings by created date</p>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-5 space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+              Start Date
+            </label>
+            <input
+              type="date"
+              value={fromVal}
+              max={toVal || undefined}
+              onChange={e => { setFromVal(e.target.value); setError(''); }}
+              className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                         bg-gray-50 hover:border-gray-300 transition-colors"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+              End Date
+            </label>
+            <input
+              type="date"
+              value={toVal}
+              min={fromVal || undefined}
+              onChange={e => { setToVal(e.target.value); setError(''); }}
+              className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                         bg-gray-50 hover:border-gray-300 transition-colors"
+            />
+          </div>
+
+          {/* Preview */}
+          {fromVal && toVal && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-blue-500 flex-shrink-0" />
+              <p className="text-xs font-semibold text-blue-700">
+                {format(new Date(fromVal), 'MMM d, yyyy')}
+                <span className="mx-1.5 text-blue-400">→</span>
+                {format(new Date(toVal), 'MMM d, yyyy')}
+              </p>
+            </div>
+          )}
+
+          {error && (
+            <p className="text-xs font-semibold text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-100 bg-gray-50 px-5 py-4 flex gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleClear}
+            className="flex-1 h-9 text-gray-600 hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 transition-colors"
+          >
+            Clear
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleApply}
+            className="flex-1 h-9 bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 hover:opacity-90 text-white font-bold border-0"
+          >
+            Apply Filter
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 /* ══════════════════════════════════════════ IMAGE GALLERY ══════════════════════════════════════════ */
 function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: boolean }) {
   const [current, setCurrent] = useState(0);
@@ -138,7 +281,6 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
 
   return (
     <div className="space-y-2">
-      {/* Main image */}
       <div className="relative w-full h-56 rounded-xl overflow-hidden bg-gray-100 group border border-gray-200">
         {imgError[current] ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gray-50">
@@ -153,44 +295,32 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
             onError={() => setImgError(prev => ({ ...prev, [current]: true }))}
           />
         )}
-
-        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none" />
-
-        {/* Counter */}
         <div className="absolute bottom-2.5 right-2.5 bg-black/50 backdrop-blur-sm
                         text-white text-xs font-semibold px-2.5 py-1 rounded-full">
           {current + 1} / {images.length}
         </div>
-
-        {/* Primary badge */}
         {img.is_primary && (
           <div className="absolute top-2.5 left-2.5 bg-orange-500 text-white
                           text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
             <Star className="w-3 h-3 fill-current" /> Primary
           </div>
         )}
-
-        {/* Prev / Next */}
         {images.length > 1 && (
           <>
             <button onClick={prev}
               className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white
-                         text-gray-700 rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100
-                         transition-all">
+                         text-gray-700 rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-all">
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button onClick={next}
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white
-                         text-gray-700 rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100
-                         transition-all">
+                         text-gray-700 rounded-full p-1.5 shadow-md opacity-0 group-hover:opacity-100 transition-all">
               <ChevronRight className="w-4 h-4" />
             </button>
           </>
         )}
       </div>
-
-      {/* Thumbnails */}
       {images.length > 1 && (
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
           {images.map((thumb, i) => (
@@ -275,6 +405,7 @@ export default function WarehousesPage() {
   const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
   const [showCustomDateModal, setShowCustomDateModal] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+
   const isAnyFilterActive = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
 
   useEffect(() => { fetchWarehouses(); }, []);
@@ -298,7 +429,7 @@ export default function WarehousesPage() {
   }
 
   async function openDetails(warehouse: Warehouse) {
-    setSelected({ ...warehouse }); // fresh copy
+    setSelected({ ...warehouse });
     setShowModal(true);
     setActiveTab('overview');
 
@@ -330,28 +461,14 @@ export default function WarehousesPage() {
     } catch (e) { console.error(e); }
   }
 
-  const filtered = warehouses.filter(w => {
-    const q = searchTerm.toLowerCase();
-    return (
-      (w.title?.toLowerCase().includes(q) ||
-        w.city?.toLowerCase().includes(q) ||
-        w.property_name?.toLowerCase().includes(q)) &&
-      (filterStatus === 'all' || w.status === filterStatus)
-    );
-  });
-
   const isDateInRange = (dateString: string | null, range: DateRange): boolean => {
     if (!dateString || !range.from || !range.to) return true;
-    
     const date = new Date(dateString);
     if (isNaN(date.getTime())) return false;
-    
     const startOfRangeDay = new Date(range.from);
     startOfRangeDay.setHours(0, 0, 0, 0);
-    
     const endOfRangeDay = new Date(range.to);
     endOfRangeDay.setHours(23, 59, 59, 999);
-    
     return date >= startOfRangeDay && date <= endOfRangeDay;
   };
 
@@ -365,44 +482,32 @@ export default function WarehousesPage() {
     }
   };
 
-  const handleCustomDateSelect = (fromDate: Date | undefined, toDate: Date | undefined) => {
-    setDateRange({ from: fromDate, to: toDate });
+  const handleCustomDateApply = (from: Date | undefined, to: Date | undefined) => {
+    setDateRange({ from, to });
+    // If both cleared, reset filter to 'all'
+    if (!from && !to) {
+      setDateFilter('all');
+    }
   };
 
   const getDateRangeForFilter = (filterType: DateFilterType): DateRange => {
     const today = new Date();
-
     switch (filterType) {
       case 'today':
-        return {
-          from: startOfDay(today),
-          to: endOfDay(today),
-        };
+        return { from: startOfDay(today), to: endOfDay(today) };
       case 'week':
-        return {
-          from: startOfWeek(today),
-          to: endOfWeek(today),
-        };
+        return { from: startOfWeek(today), to: endOfWeek(today) };
       case 'month':
-        return {
-          from: startOfMonth(today),
-          to: endOfMonth(today),
-        };
+        return { from: startOfMonth(today), to: endOfMonth(today) };
       case 'last7': {
         const from = new Date(today);
         from.setDate(from.getDate() - 7);
-        return {
-          from: startOfDay(from),
-          to: endOfDay(today),
-        };
+        return { from: startOfDay(from), to: endOfDay(today) };
       }
       case 'last30': {
         const from = new Date(today);
         from.setDate(from.getDate() - 30);
-        return {
-          from: startOfDay(from),
-          to: endOfDay(today),
-        };
+        return { from: startOfDay(from), to: endOfDay(today) };
       }
       case 'custom':
         return dateRange;
@@ -419,52 +524,44 @@ export default function WarehousesPage() {
     setShowCustomDateModal(false);
   };
 
-  // Get display text for date filter button
   const getDateFilterDisplay = () => {
     if (dateFilter === 'custom' && dateRange.from && dateRange.to) {
-      return `${format(dateRange.from, 'MMM d')} - ${format(dateRange.to, 'MMM d')}`;
+      return `${format(dateRange.from, 'MMM d')} – ${format(dateRange.to, 'MMM d')}`;
     }
-
     switch (dateFilter) {
-      case 'today':
-        return 'Today';
-      case 'week':
-        return 'This Week';
-      case 'month':
-        return 'This Month';
-      case 'last7':
-        return 'Last 7 Days';
-      case 'last30':
-        return 'Last 30 Days';
-      case 'custom':
-        return 'Custom Range';
-      default:
-        return 'Date Range';
+      case 'today': return 'Today';
+      case 'week': return 'This Week';
+      case 'month': return 'This Month';
+      case 'last7': return 'Last 7 Days';
+      case 'last30': return 'Last 30 Days';
+      case 'custom': return 'Custom Range';
+      default: return 'Date Range';
     }
   };
+
   const stats = {
     pending: warehouses.filter(w => w.status === 'Pending').length,
     active: warehouses.filter(w => w.status === 'Active').length,
     rejected: warehouses.filter(w => w.status === 'rejected').length,
   };
-  
-  const filteredAgents = warehouses.filter(warehouses => {
+
+  const filteredAgents = warehouses.filter(w => {
     const matchesSearch =
-    warehouses.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    warehouses.contact_person_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    warehouses.created_at.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = filterStatus === 'all' || warehouses.status === filterStatus;
-    
+      w.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      w.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      w.property_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      w.contact_person_email?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus = filterStatus === 'all' || w.status === filterStatus;
+
     const currentDateRange = getDateRangeForFilter(dateFilter);
-    const matchesDate = dateFilter === 'all' ? true : isDateInRange(warehouses.created_at, currentDateRange);
+    const matchesDate = dateFilter === 'all' ? true : isDateInRange(w.created_at, currentDateRange);
 
     return matchesSearch && matchesStatus && matchesDate;
   });
 
   if (loading) return <Loading />;
 
-  /* ───────────────────────── JSX ───────────────────────── */
   return (
     <div className="space-y-6">
 
@@ -494,6 +591,7 @@ export default function WarehousesPage() {
         <Separator className="bg-gradient-to-r from-transparent via-amber-200 to-transparent my-5" />
 
         <div className="flex flex-col md:flex-row gap-4">
+          {/* Search */}
           <div className="relative flex-1 max-w-xl">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-amber-400 pointer-events-none" />
             <Input
@@ -503,6 +601,8 @@ export default function WarehousesPage() {
               className="pl-9 bg-white/60 border-white/70 focus:bg-white focus:border-amber-400 transition-all"
             />
           </div>
+
+          {/* Status filter */}
           <Select value={filterStatus} onValueChange={setFilterStatus}>
             <SelectTrigger className="w-full md:w-[180px] bg-white/60 border-white/70 focus:bg-white focus:border-amber-400">
               <Filter className="w-4 h-4 mr-2 text-amber-400" />
@@ -515,13 +615,15 @@ export default function WarehousesPage() {
               <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
-          {/* Date Filter with Smart Display */}
+
+          {/* Date filter */}
           <div className="w-full sm:w-48 lg:w-auto lg:flex-shrink-0 group relative">
             <Select value={dateFilter} onValueChange={handleDateFilterChange}>
-              <SelectTrigger className={`h-10 w-full lg:w-auto rounded-lg text-sm transition-all ${dateFilter !== 'all'
-                ? 'bg-blue-50 border border-blue-300 hover:border-blue-400 focus:border-blue-400'
-                : 'bg-gray-50 border border-gray-200 hover:border-gray-300 focus:border-blue-400'
-                }`}>
+              <SelectTrigger className={`h-10 w-full lg:w-auto rounded-lg text-sm transition-all ${
+                dateFilter !== 'all'
+                  ? 'bg-blue-50 border border-blue-300 hover:border-blue-400 focus:border-blue-400'
+                  : 'bg-gray-50 border border-gray-200 hover:border-gray-300 focus:border-blue-400'
+              }`}>
                 <Calendar className="w-4 h-4 mr-2 text-gray-500" />
                 <SelectValue placeholder="Date Range" />
               </SelectTrigger>
@@ -532,54 +634,56 @@ export default function WarehousesPage() {
                 <SelectItem value="month">This Month</SelectItem>
                 <SelectItem value="last7">Last 7 Days</SelectItem>
                 <SelectItem value="last30">Last 30 Days</SelectItem>
-                <SelectItem value="custom">Custom Range</SelectItem>
+                <SelectItem value="custom">Custom Range…</SelectItem>
               </SelectContent>
             </Select>
 
-            {/* Hover Tooltip for Active Filter */}
+            {/* Hover tooltip */}
             {dateFilter !== 'all' && (
               <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50">
                 <div className="bg-gray-900 text-white px-3 py-2 rounded-lg text-xs whitespace-nowrap shadow-lg">
                   <p className="font-medium">{getDateFilterDisplay()}</p>
                   <p className="text-gray-300 text-xs mt-1">Click to change</p>
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45" />
                 </div>
               </div>
             )}
           </div>
-          {/* Edit/Clear Date Button - Shows When Custom Date Selected */}
+
+          {/* Edit range button (only when custom is active and applied) */}
           {dateFilter === 'custom' && dateRange.from && dateRange.to && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowCustomDateModal(true)}
-              className="h-10 px-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 hover:border-blue-300 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto lg:w-auto"
+              className="h-10 px-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 hover:border-blue-300 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto"
             >
               <Calendar className="w-4 h-4 mr-1.5" />
-              Edit Range
+              {format(dateRange.from, 'MMM d')} – {format(dateRange.to, 'MMM d')}
             </Button>
           )}
 
-          {/* Clear Button */}
+          {/* Clear all */}
           {isAnyFilterActive && (
             <Button
               variant="ghost"
               size="sm"
               onClick={clearAllFilters}
-              className="h-10 px-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto lg:w-auto"
+              className="h-10 px-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto"
             >
               <X className="w-4 h-4 mr-1.5" />
               Clear All
             </Button>
           )}
         </div>
-  {/* Results Counter - Bottom Right on Desktop, Full Width on Mobile */}
-          <div className="flex items-center justify-between lg:justify-end">
-            <span className="text-sm text-gray-600 lg:hidden">Results:</span>
-            <span className="text-sm text-gray-600 font-medium">
-              <span className="text-blue-600 font-bold">{filteredAgents.length}</span> agents
-            </span>
-          </div>
+
+        {/* Results counter */}
+        <div className="flex items-center justify-between lg:justify-end mt-3">
+          <span className="text-sm text-gray-600 lg:hidden">Results:</span>
+          <span className="text-sm text-gray-600 font-medium">
+            <span className="text-blue-600 font-bold">{filteredAgents.length}</span> warehouses
+          </span>
+        </div>
       </GlassCard>
 
       {/* ── Table ── */}
@@ -608,8 +712,7 @@ export default function WarehousesPage() {
                     <div className="flex items-center gap-3">
                       <RowThumb warehouse={w} />
                       <div>
-                        <p className="font-semibold text-gray-900 group-hover:text-blue-600
-                                      transition-colors text-sm leading-tight">{w.title}</p>
+                        <p className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors text-sm leading-tight">{w.title}</p>
                         <p className="text-xs text-gray-400 mt-0.5">{w.property_name}</p>
                       </div>
                     </div>
@@ -692,21 +795,33 @@ export default function WarehousesPage() {
       </GlassCard>
 
       {/* ══════════════════════════════════════════════════════════════
-          DETAILS MODAL  —  white background, blue-600 + orange theme
+          CUSTOM DATE RANGE MODAL
+      ══════════════════════════════════════════════════════════════ */}
+      <CustomDateModal
+        open={showCustomDateModal}
+        onClose={() => {
+          setShowCustomDateModal(false);
+          // If user closes without applying and no range is set, reset to 'all'
+          if (!dateRange.from || !dateRange.to) {
+            setDateFilter('all');
+          }
+        }}
+        dateRange={dateRange}
+        onApply={handleCustomDateApply}
+      />
+
+      {/* ══════════════════════════════════════════════════════════════
+          DETAILS MODAL
       ══════════════════════════════════════════════════════════════ */}
       <Dialog open={showModal} onOpenChange={open => { setShowModal(open); if (!open) setSelected(null); }}>
         <DialogContent className="bg-white border border-gray-200 shadow-2xl sm:max-w-4xl
                                    max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
-
-          {/* Accessible title for screen readers */}
           <VisuallyHidden>
             <DialogTitle>{selected?.title ?? 'Warehouse Details'}</DialogTitle>
           </VisuallyHidden>
 
-          {/* ── Coloured header banner ── */}
+          {/* Coloured header banner */}
           <div className="bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 px-6 pt-5 pb-0 flex-shrink-0">
-
-            {/* Title row */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -738,7 +853,6 @@ export default function WarehousesPage() {
               </div>
             </div>
 
-            {/* Stats strip */}
             <div className="grid grid-cols-3 gap-2 mt-4">
               {[
                 { label: 'Price / sqft', value: `₹${selected?.price_per_sqft}`, border: 'border-blue-500/50 bg-white/10' },
@@ -752,7 +866,6 @@ export default function WarehousesPage() {
               ))}
             </div>
 
-            {/* Tab bar */}
             <div className="flex gap-0 mt-4 border-b border-blue-500/50">
               {(['overview', 'contact', 'location'] as const).map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
@@ -767,17 +880,13 @@ export default function WarehousesPage() {
             </div>
           </div>
 
-          {/* ── Scrollable body (WHITE background) ── */}
+          {/* Scrollable body */}
           <div className="overflow-y-auto flex-1 bg-white px-6 py-5">
 
-            {/* ─── OVERVIEW TAB ─── */}
             {activeTab === 'overview' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-                {/* Left: Photos */}
                 <div>
-                  <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3
-                                flex items-center gap-1.5">
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                     <ImageIcon className="w-3.5 h-3.5" /> Photos
                     <span className="ml-auto text-gray-400 font-normal normal-case tracking-normal">
                       {selected?.images ? `${selected.images.length} image${selected.images.length !== 1 ? 's' : ''}` : ''}
@@ -785,14 +894,10 @@ export default function WarehousesPage() {
                   </p>
                   <ImageGallery images={selected?.images ?? []} loading={loadingImages} />
                 </div>
-
-                {/* Right: Property details */}
                 <div>
-                  <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3
-                                flex items-center gap-1.5">
+                  <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                     <Building2 className="w-3.5 h-3.5" /> Property Details
                   </p>
-
                   <DetailRow icon={Building2} label="Property Type" value={selected?.property_type} />
                   <DetailRow icon={Ruler} label="Warehouse Size" value={selected?.warehouse_size} />
                   <DetailRow icon={Package} label="Space Available" value={selected ? `${selected.space_available} ${selected.space_unit}` : null} />
@@ -817,9 +922,7 @@ export default function WarehousesPage() {
                         <p className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-2">Amenities</p>
                         <div className="flex flex-wrap gap-1.5">
                           {list.map((a, i) => (
-                            <span key={i}
-                              className="bg-orange-50 border border-orange-200 text-orange-600
-                                         text-xs font-semibold px-2.5 py-1 rounded-full">
+                            <span key={i} className="bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold px-2.5 py-1 rounded-full">
                               {a}
                             </span>
                           ))}
@@ -831,12 +934,9 @@ export default function WarehousesPage() {
               </div>
             )}
 
-            {/* ─── CONTACT TAB ─── */}
             {activeTab === 'contact' && (
               <div className="max-w-md">
-                {/* Avatar card */}
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200
-                                rounded-2xl p-4 mb-5">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-4 mb-5">
                   <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600
                                     flex items-center justify-center text-white font-bold text-2xl
@@ -849,20 +949,17 @@ export default function WarehousesPage() {
                         <p className="text-sm text-gray-500">{selected.contact_person_designation}</p>
                       )}
                       {selected?.contact_person_relation && (
-                        <span className="text-[11px] bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 text-white
-                                         px-2.5 py-0.5 rounded-full font-semibold mt-1.5 inline-block">
+                        <span className="text-[11px] bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 text-white px-2.5 py-0.5 rounded-full font-semibold mt-1.5 inline-block">
                           {selected.contact_person_relation}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-
                 <DetailRow icon={Phone} label="Primary Phone" value={selected?.contact_person_phone} />
                 <DetailRow icon={Phone} label="Alternate" value={selected?.contact_person_alternate} />
                 <DetailRow icon={Mail} label="Email" value={selected?.contact_person_email} />
                 <DetailRow icon={UserCheck} label="Listed By" value={selected?.user_name} />
-
                 <div className="mt-5">
                   <p className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-2">Listing Timeline</p>
                   <DetailRow icon={Calendar} label="Listed On" value={selected ? fmt(selected.created_at) : null} accent="orange" />
@@ -871,23 +968,18 @@ export default function WarehousesPage() {
               </div>
             )}
 
-            {/* ─── LOCATION TAB ─── */}
             {activeTab === 'location' && (
               <div className="max-w-lg">
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3
-                              flex items-center gap-1.5">
+                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <MapPin className="w-3.5 h-3.5" /> Location Details
                 </p>
-
                 <DetailRow icon={MapPin} label="Full Address" value={selected?.address} />
                 <DetailRow icon={MapPin} label="City" value={selected?.city} />
                 <DetailRow icon={MapPin} label="State" value={selected?.state} />
                 <DetailRow icon={Hash} label="Pincode" value={selected?.pincode} />
                 <DetailRow icon={Truck} label="Road Connectivity" value={selected?.road_connectivity} />
-
                 {selected?.latitude && selected?.longitude && (
-                  <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4
-                                  flex items-center justify-between gap-4">
+                  <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between gap-4">
                     <div>
                       <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">Coordinates</p>
                       <p className="text-sm font-mono font-bold text-gray-800">
@@ -908,7 +1000,7 @@ export default function WarehousesPage() {
             )}
           </div>
 
-          {/* ── Footer ── */}
+          {/* Footer */}
           <div className="border-t border-gray-100 bg-gray-50 px-6 py-4 flex-shrink-0
                           flex items-center justify-between gap-3 flex-wrap">
             {selected?.status === 'Pending' ? (
@@ -921,8 +1013,7 @@ export default function WarehousesPage() {
                 <Button
                   onClick={() => selected && updateStatus(selected.id, 'rejected')}
                   variant="outline"
-                  className="flex-1 min-w-[140px] border-rose-300 text-rose-600
-                             hover:bg-rose-50 font-bold">
+                  className="flex-1 min-w-[140px] border-rose-300 text-rose-600 hover:bg-rose-50 font-bold">
                   <XCircle className="w-4 h-4 mr-2" /> Reject Listing
                 </Button>
               </div>
