@@ -14,10 +14,11 @@ import {
   Search, Filter, Eye, CheckCircle, XCircle, Clock, MapPin,
   MoreVertical, Building2, Phone, Mail, Calendar,
   Ruler, DollarSign, ImageIcon, ChevronLeft, ChevronRight,
-  Star, Truck, ArrowUpRight, Package, Hash, UserCheck,
+  Star, Truck, ArrowUpRight, Package, Hash, UserCheck, X
 } from 'lucide-react';
 import GlassCard from '@/components/superadmin/GlassCard';
 import Loading from '../loading';
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 
 /* ══════════════════════════════════════════ TYPES ══════════════════════════════════════════ */
 interface WarehouseImage {
@@ -65,15 +66,22 @@ interface Warehouse {
   images?: WarehouseImage[];
 }
 
+type DateFilterType = 'all' | 'today' | 'week' | 'month' | 'last7' | 'last30' | 'custom';
+
+interface DateRange {
+  from: Date | undefined;
+  to: Date | undefined;
+}
+
 /* ── Status styles ── */
 const statusColors: Record<string, string> = {
-  Pending:  'bg-amber-50 text-amber-700 border-amber-300',
-  Active:   'bg-emerald-50 text-emerald-700 border-emerald-300',
+  Pending: 'bg-amber-50 text-amber-700 border-amber-300',
+  Active: 'bg-emerald-50 text-emerald-700 border-emerald-300',
   rejected: 'bg-rose-50 text-rose-700 border-rose-300',
 };
 const statusDot: Record<string, string> = {
-  Pending:  'bg-amber-400 animate-pulse',
-  Active:   'bg-emerald-500',
+  Pending: 'bg-amber-400 animate-pulse',
+  Active: 'bg-emerald-500',
   rejected: 'bg-rose-500',
 };
 
@@ -126,7 +134,7 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
 
   const prev = () => setCurrent(c => (c - 1 + images.length) % images.length);
   const next = () => setCurrent(c => (c + 1) % images.length);
-  const img  = images[current];
+  const img = images[current];
 
   return (
     <div className="space-y-2">
@@ -256,29 +264,33 @@ function DetailRow({ icon: Icon, label, value, accent = 'blue' }: {
 
 /* ══════════════════════════════════════════ PAGE ══════════════════════════════════════════ */
 export default function WarehousesPage() {
-  const [warehouses,    setWarehouses]    = useState<Warehouse[]>([]);
-  const [loading,       setLoading]       = useState(true);
-  const [searchTerm,    setSearchTerm]    = useState('');
-  const [filterStatus,  setFilterStatus]  = useState('all');
-  const [selected,      setSelected]      = useState<Warehouse | null>(null);
-  const [showModal,     setShowModal]     = useState(false);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [selected, setSelected] = useState<Warehouse | null>(null);
+  const [showModal, setShowModal] = useState(false);
   const [loadingImages, setLoadingImages] = useState(false);
-  const [activeTab,     setActiveTab]     = useState<'overview' | 'contact' | 'location'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'contact' | 'location'>('overview');
+  const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
+  const [showCustomDateModal, setShowCustomDateModal] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+  const isAnyFilterActive = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
 
   useEffect(() => { fetchWarehouses(); }, []);
 
   async function fetchWarehouses() {
     try {
-      const res  = await fetch('/api/superadmin/warehouses');
+      const res = await fetch('/api/superadmin/warehouses');
       const data = await res.json();
       if (data.success) setWarehouses(data.warehouses);
     } catch (e) { console.error(e); }
-    finally     { setLoading(false); }
+    finally { setLoading(false); }
   }
 
   async function fetchImages(warehouseId: string): Promise<WarehouseImage[]> {
     try {
-      const res  = await fetch(`/api/superadmin/warehouses/${warehouseId}/images`);
+      const res = await fetch(`/api/superadmin/warehouses/${warehouseId}/images`);
       const data = await res.json();
       if (data.success) return data.images ?? [];
     } catch (e) { console.error('Image fetch error:', e); }
@@ -302,7 +314,7 @@ export default function WarehousesPage() {
 
   async function updateStatus(id: string, status: 'Active' | 'rejected') {
     try {
-      const res  = await fetch(`/api/superadmin/warehouses/${id}/status`, {
+      const res = await fetch(`/api/superadmin/warehouses/${id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
@@ -322,17 +334,133 @@ export default function WarehousesPage() {
     const q = searchTerm.toLowerCase();
     return (
       (w.title?.toLowerCase().includes(q) ||
-       w.city?.toLowerCase().includes(q)  ||
-       w.property_name?.toLowerCase().includes(q)) &&
+        w.city?.toLowerCase().includes(q) ||
+        w.property_name?.toLowerCase().includes(q)) &&
       (filterStatus === 'all' || w.status === filterStatus)
     );
   });
 
+  const isDateInRange = (dateString: string | null, range: DateRange): boolean => {
+    if (!dateString || !range.from || !range.to) return true;
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return false;
+    
+    const startOfRangeDay = new Date(range.from);
+    startOfRangeDay.setHours(0, 0, 0, 0);
+    
+    const endOfRangeDay = new Date(range.to);
+    endOfRangeDay.setHours(23, 59, 59, 999);
+    
+    return date >= startOfRangeDay && date <= endOfRangeDay;
+  };
+
+  const handleDateFilterChange = (value: string) => {
+    const filterValue = value as DateFilterType;
+    setDateFilter(filterValue);
+    if (filterValue === 'custom') {
+      setShowCustomDateModal(true);
+    } else {
+      setDateRange({ from: undefined, to: undefined });
+    }
+  };
+
+  const handleCustomDateSelect = (fromDate: Date | undefined, toDate: Date | undefined) => {
+    setDateRange({ from: fromDate, to: toDate });
+  };
+
+  const getDateRangeForFilter = (filterType: DateFilterType): DateRange => {
+    const today = new Date();
+
+    switch (filterType) {
+      case 'today':
+        return {
+          from: startOfDay(today),
+          to: endOfDay(today),
+        };
+      case 'week':
+        return {
+          from: startOfWeek(today),
+          to: endOfWeek(today),
+        };
+      case 'month':
+        return {
+          from: startOfMonth(today),
+          to: endOfMonth(today),
+        };
+      case 'last7': {
+        const from = new Date(today);
+        from.setDate(from.getDate() - 7);
+        return {
+          from: startOfDay(from),
+          to: endOfDay(today),
+        };
+      }
+      case 'last30': {
+        const from = new Date(today);
+        from.setDate(from.getDate() - 30);
+        return {
+          from: startOfDay(from),
+          to: endOfDay(today),
+        };
+      }
+      case 'custom':
+        return dateRange;
+      default:
+        return { from: undefined, to: undefined };
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setFilterStatus('all');
+    setDateFilter('all');
+    setDateRange({ from: undefined, to: undefined });
+    setShowCustomDateModal(false);
+  };
+
+  // Get display text for date filter button
+  const getDateFilterDisplay = () => {
+    if (dateFilter === 'custom' && dateRange.from && dateRange.to) {
+      return `${format(dateRange.from, 'MMM d')} - ${format(dateRange.to, 'MMM d')}`;
+    }
+
+    switch (dateFilter) {
+      case 'today':
+        return 'Today';
+      case 'week':
+        return 'This Week';
+      case 'month':
+        return 'This Month';
+      case 'last7':
+        return 'Last 7 Days';
+      case 'last30':
+        return 'Last 30 Days';
+      case 'custom':
+        return 'Custom Range';
+      default:
+        return 'Date Range';
+    }
+  };
   const stats = {
-    pending:  warehouses.filter(w => w.status === 'Pending').length,
-    active:   warehouses.filter(w => w.status === 'Active').length,
+    pending: warehouses.filter(w => w.status === 'Pending').length,
+    active: warehouses.filter(w => w.status === 'Active').length,
     rejected: warehouses.filter(w => w.status === 'rejected').length,
   };
+  
+  const filteredAgents = warehouses.filter(warehouses => {
+    const matchesSearch =
+    warehouses.city.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    warehouses.contact_person_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    warehouses.created_at.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = filterStatus === 'all' || warehouses.status === filterStatus;
+    
+    const currentDateRange = getDateRangeForFilter(dateFilter);
+    const matchesDate = dateFilter === 'all' ? true : isDateInRange(warehouses.created_at, currentDateRange);
+
+    return matchesSearch && matchesStatus && matchesDate;
+  });
 
   if (loading) return <Loading />;
 
@@ -351,9 +479,9 @@ export default function WarehousesPage() {
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             {[
-              { label: `${stats.pending} Pending`,   dot: 'bg-amber-400 animate-pulse', text: 'text-amber-700',   bg: 'bg-amber-50 border-amber-200' },
-              { label: `${stats.active} Active`,     dot: 'bg-emerald-500',             text: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
-              { label: `${stats.rejected} Rejected`, dot: 'bg-rose-500',                text: 'text-rose-700',    bg: 'bg-rose-50 border-rose-200' },
+              { label: `${stats.pending} Pending`, dot: 'bg-amber-400 animate-pulse', text: 'text-amber-700', bg: 'bg-amber-50 border-amber-200' },
+              { label: `${stats.active} Active`, dot: 'bg-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-50 border-emerald-200' },
+              { label: `${stats.rejected} Rejected`, dot: 'bg-rose-500', text: 'text-rose-700', bg: 'bg-rose-50 border-rose-200' },
             ].map(s => (
               <div key={s.label} className={`flex items-center gap-2 ${s.bg} rounded-xl px-3 py-2 border shadow-sm`}>
                 <div className={`w-2 h-2 rounded-full ${s.dot}`} />
@@ -387,7 +515,71 @@ export default function WarehousesPage() {
               <SelectItem value="rejected">Rejected</SelectItem>
             </SelectContent>
           </Select>
+          {/* Date Filter with Smart Display */}
+          <div className="w-full sm:w-48 lg:w-auto lg:flex-shrink-0 group relative">
+            <Select value={dateFilter} onValueChange={handleDateFilterChange}>
+              <SelectTrigger className={`h-10 w-full lg:w-auto rounded-lg text-sm transition-all ${dateFilter !== 'all'
+                ? 'bg-blue-50 border border-blue-300 hover:border-blue-400 focus:border-blue-400'
+                : 'bg-gray-50 border border-gray-200 hover:border-gray-300 focus:border-blue-400'
+                }`}>
+                <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                <SelectValue placeholder="Date Range" />
+              </SelectTrigger>
+              <SelectContent className="rounded-lg">
+                <SelectItem value="all">All Time</SelectItem>
+                <SelectItem value="today">Today</SelectItem>
+                <SelectItem value="week">This Week</SelectItem>
+                <SelectItem value="month">This Month</SelectItem>
+                <SelectItem value="last7">Last 7 Days</SelectItem>
+                <SelectItem value="last30">Last 30 Days</SelectItem>
+                <SelectItem value="custom">Custom Range</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Hover Tooltip for Active Filter */}
+            {dateFilter !== 'all' && (
+              <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50">
+                <div className="bg-gray-900 text-white px-3 py-2 rounded-lg text-xs whitespace-nowrap shadow-lg">
+                  <p className="font-medium">{getDateFilterDisplay()}</p>
+                  <p className="text-gray-300 text-xs mt-1">Click to change</p>
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Edit/Clear Date Button - Shows When Custom Date Selected */}
+          {dateFilter === 'custom' && dateRange.from && dateRange.to && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowCustomDateModal(true)}
+              className="h-10 px-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 hover:border-blue-300 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto lg:w-auto"
+            >
+              <Calendar className="w-4 h-4 mr-1.5" />
+              Edit Range
+            </Button>
+          )}
+
+          {/* Clear Button */}
+          {isAnyFilterActive && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="h-10 px-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto lg:w-auto"
+            >
+              <X className="w-4 h-4 mr-1.5" />
+              Clear All
+            </Button>
+          )}
         </div>
+  {/* Results Counter - Bottom Right on Desktop, Full Width on Mobile */}
+          <div className="flex items-center justify-between lg:justify-end">
+            <span className="text-sm text-gray-600 lg:hidden">Results:</span>
+            <span className="text-sm text-gray-600 font-medium">
+              <span className="text-blue-600 font-bold">{filteredAgents.length}</span> agents
+            </span>
+          </div>
       </GlassCard>
 
       {/* ── Table ── */}
@@ -408,7 +600,7 @@ export default function WarehousesPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.length > 0 ? filtered.map((w, i) => (
+              {filteredAgents.length > 0 ? filteredAgents.map((w, i) => (
                 <TableRow key={w.id}
                   className="border-b border-gray-100 hover:bg-blue-50/40 transition-colors group">
                   <TableCell className="pl-4 text-gray-400 text-xs font-medium">{i + 1}</TableCell>
@@ -549,9 +741,9 @@ export default function WarehousesPage() {
             {/* Stats strip */}
             <div className="grid grid-cols-3 gap-2 mt-4">
               {[
-                { label: 'Price / sqft',    value: `₹${selected?.price_per_sqft}`,                        border: 'border-blue-500/50 bg-white/10' },
+                { label: 'Price / sqft', value: `₹${selected?.price_per_sqft}`, border: 'border-blue-500/50 bg-white/10' },
                 { label: 'Space Available', value: `${selected?.space_available} ${selected?.space_unit}`, border: 'border-blue-500/50 bg-white/10' },
-                { label: 'City',            value: selected?.city,                                          border: 'border-orange-400/60 bg-orange-500/15' },
+                { label: 'City', value: selected?.city, border: 'border-orange-400/60 bg-orange-500/15' },
               ].map(item => (
                 <div key={item.label} className={`${item.border} border rounded-xl px-3 py-2.5`}>
                   <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wide mb-0.5">{item.label}</p>
@@ -601,13 +793,13 @@ export default function WarehousesPage() {
                     <Building2 className="w-3.5 h-3.5" /> Property Details
                   </p>
 
-                  <DetailRow icon={Building2}  label="Property Type"   value={selected?.property_type} />
-                  <DetailRow icon={Ruler}      label="Warehouse Size"  value={selected?.warehouse_size} />
-                  <DetailRow icon={Package}    label="Space Available" value={selected ? `${selected.space_available} ${selected.space_unit}` : null} />
-                  <DetailRow icon={DollarSign} label="Price / sqft"    value={selected ? `₹${selected.price_per_sqft}` : null} />
-                  <DetailRow icon={Hash}       label="Price Type"      value={selected?.price_type} />
-                  <DetailRow icon={Calendar}   label="Available From"  value={selected?.available_from ? fmt(selected.available_from) : null} />
-                  <DetailRow icon={Calendar}   label="Expiry Date"     value={selected?.expiry_date ? fmt(selected.expiry_date) : null} />
+                  <DetailRow icon={Building2} label="Property Type" value={selected?.property_type} />
+                  <DetailRow icon={Ruler} label="Warehouse Size" value={selected?.warehouse_size} />
+                  <DetailRow icon={Package} label="Space Available" value={selected ? `${selected.space_available} ${selected.space_unit}` : null} />
+                  <DetailRow icon={DollarSign} label="Price / sqft" value={selected ? `₹${selected.price_per_sqft}` : null} />
+                  <DetailRow icon={Hash} label="Price Type" value={selected?.price_type} />
+                  <DetailRow icon={Calendar} label="Available From" value={selected?.available_from ? fmt(selected.available_from) : null} />
+                  <DetailRow icon={Calendar} label="Expiry Date" value={selected?.expiry_date ? fmt(selected.expiry_date) : null} />
 
                   {selected?.description && (
                     <div className="mt-4">
@@ -666,15 +858,15 @@ export default function WarehousesPage() {
                   </div>
                 </div>
 
-                <DetailRow icon={Phone}     label="Primary Phone" value={selected?.contact_person_phone} />
-                <DetailRow icon={Phone}     label="Alternate"     value={selected?.contact_person_alternate} />
-                <DetailRow icon={Mail}      label="Email"         value={selected?.contact_person_email} />
-                <DetailRow icon={UserCheck} label="Listed By"     value={selected?.user_name} />
+                <DetailRow icon={Phone} label="Primary Phone" value={selected?.contact_person_phone} />
+                <DetailRow icon={Phone} label="Alternate" value={selected?.contact_person_alternate} />
+                <DetailRow icon={Mail} label="Email" value={selected?.contact_person_email} />
+                <DetailRow icon={UserCheck} label="Listed By" value={selected?.user_name} />
 
                 <div className="mt-5">
                   <p className="text-xs font-bold text-orange-500 uppercase tracking-widest mb-2">Listing Timeline</p>
-                  <DetailRow icon={Calendar} label="Listed On"    value={selected ? fmt(selected.created_at) : null} accent="orange" />
-                  <DetailRow icon={Clock}    label="Last Updated" value={selected?.updated_at ? fmt(selected.updated_at) : null} accent="orange" />
+                  <DetailRow icon={Calendar} label="Listed On" value={selected ? fmt(selected.created_at) : null} accent="orange" />
+                  <DetailRow icon={Clock} label="Last Updated" value={selected?.updated_at ? fmt(selected.updated_at) : null} accent="orange" />
                 </div>
               </div>
             )}
@@ -687,11 +879,11 @@ export default function WarehousesPage() {
                   <MapPin className="w-3.5 h-3.5" /> Location Details
                 </p>
 
-                <DetailRow icon={MapPin} label="Full Address"      value={selected?.address} />
-                <DetailRow icon={MapPin} label="City"              value={selected?.city} />
-                <DetailRow icon={MapPin} label="State"             value={selected?.state} />
-                <DetailRow icon={Hash}   label="Pincode"           value={selected?.pincode} />
-                <DetailRow icon={Truck}  label="Road Connectivity" value={selected?.road_connectivity} />
+                <DetailRow icon={MapPin} label="Full Address" value={selected?.address} />
+                <DetailRow icon={MapPin} label="City" value={selected?.city} />
+                <DetailRow icon={MapPin} label="State" value={selected?.state} />
+                <DetailRow icon={Hash} label="Pincode" value={selected?.pincode} />
+                <DetailRow icon={Truck} label="Road Connectivity" value={selected?.road_connectivity} />
 
                 {selected?.latitude && selected?.longitude && (
                   <div className="mt-5 bg-blue-50 border border-blue-200 rounded-xl p-4
