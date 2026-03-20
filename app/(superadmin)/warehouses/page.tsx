@@ -457,7 +457,7 @@ export default function WarehousesPage() {
   ];
 
   return (
-    <div className="flex flex-col gap-3 p-3 sm:p-0">
+<div className="flex flex-col gap-3 p-3 sm:p-0 h-full">
 
       {/* ── Filters row ──
           Mobile: search full width on its own row, filters wrap below
@@ -526,8 +526,8 @@ export default function WarehousesPage() {
       </div>
 
       {/* ── Table card ── */}
-      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col"
-        style={{ maxHeight: 'calc(100vh - 8rem)' }}>
+      <div className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col min-h-0 flex-1">
+
 
         {/* Table scroll area — horizontal scroll on mobile */}
         <div className="overflow-auto w-full">

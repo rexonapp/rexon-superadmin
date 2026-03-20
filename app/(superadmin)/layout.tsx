@@ -119,7 +119,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         onLogout={handleLogout}
       />
 
-      <main className={`transition-all duration-300 ease-in-out ml-0 ${sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'}`}>
+<main className={`transition-all duration-300 ease-in-out ml-0 ${sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'} flex flex-col h-screen overflow-hidden`}>
 
         {/* ── Header ── */}
         <header className="sticky top-0 z-20 bg-white border-b border-gray-200">
@@ -133,32 +133,32 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                 className="-ml-1 hover:bg-gray-100 shrink-0"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
-                <Menu className="w-5 h-5 text-gray-600" />
+                <Menu className="w-7 h-7 text-gray-600" />
               </Button>
 
-              <div className="min-w-0">
+              {/* <div className="min-w-0">
                 <h1 className="text-[17px] font-semibold text-gray-900 truncate leading-tight">
                   {pageLabel}
                 </h1>
                 <p className="text-[12px] text-gray-400 hidden sm:block leading-tight mt-0.5">
                   Super Admin Panel
                 </p>
-              </div>
+              </div> */}
 
               {/* Warehouse stats pills — only shown on /warehouses */}
               {isWarehousesPage && (
                 <div className="hidden md:flex items-center gap-2 ml-4">
-                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 rounded-full px-3 py-1">
-                    <Clock className="w-3 h-3 text-amber-500" />
-                    <span className="text-[12px] font-semibold text-amber-700">{stats.pending} Pending</span>
+                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1">
+                    <Clock className="w-3 h-12 text-amber-500" />
+                    <span className="text-[14px] font-semibold text-amber-700">{stats.pending} Pending</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1">
-                    <CheckCircle className="w-3 h-3 text-emerald-500" />
-                    <span className="text-[12px] font-semibold text-emerald-700">{stats.active} Active</span>
+                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200  px-3 py-1">
+                    <CheckCircle className="w-3 h-12 text-emerald-500" />
+                    <span className="text-[14px] font-semibold text-emerald-700">{stats.active} Active</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 rounded-full px-3 py-1">
-                    <XCircle className="w-3 h-3 text-rose-500" />
-                    <span className="text-[12px] font-semibold text-rose-700">{stats.rejected} Rejected</span>
+                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200  px-3 py-1">
+                    <XCircle className="w-3 h-12 text-rose-500" />
+                    <span className="text-[14px] font-semibold text-rose-700">{stats.rejected} Rejected</span>
                   </div>
                 </div>
               )}
@@ -238,8 +238,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         </header>
 
         {/* Page content */}
-        <div className="p-4 sm:p-6">{children}</div>
-      </main>
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">{children}</div>
+        </main>
     </div>
   );
 }

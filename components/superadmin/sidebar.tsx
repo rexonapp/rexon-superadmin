@@ -11,7 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import {
   Home, Users, Settings, LogOut, Building2,
-  UserCheck, User2Icon, PanelLeftClose, PanelLeft, X,
+  UserCheck, User2Icon, PanelLeft, X,
 } from 'lucide-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -111,8 +111,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                 <X className="w-5 h-5" />
               </Button>
 
-              {/* Desktop: collapse toggle */}
-              <Button
+              {/* <Button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 variant="ghost"
                 size="icon"
@@ -123,7 +122,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                   ? <PanelLeftClose className="w-4 h-4 text-blue-600" />
                   : <PanelLeft      className="w-4 h-4 text-blue-600" />
                 }
-              </Button>
+              </Button> */}
             </div>
 
             <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent" />
