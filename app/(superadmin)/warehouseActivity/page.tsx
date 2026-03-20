@@ -536,9 +536,6 @@ export default function WarehousesPage() {
                     <Table className="min-w-[900px]">
                         <TableHeader className="sticky top-0 z-10">
                             <TableRow className="bg-gray-50 hover:bg-gray-50 border-b border-gray-200">
-                                <TableHead className="text-[11px] font-bold uppercase tracking-[0.07em] text-gray-400 h-11 px-4 w-10 bg-gray-50">
-                                    S.no.
-                                </TableHead>
                                 {cols.map(c => (
                                     <SortableHead
                                         key={c.key}
@@ -558,11 +555,6 @@ export default function WarehousesPage() {
                                 <TableRow key={w.id}
                                     className={cn('border-b border-gray-100 hover:bg-blue-50/40 transition-colors group',
                                         i % 2 === 1 ? 'bg-gray-50/40' : 'bg-white')}>
-
-                                    <TableCell className="px-4 py-4 text-[12.5px] text-gray-400 font-medium w-10">
-                                        {startIndex + i + 1}
-                                    </TableCell>
-
                                     <TableCell className="px-4 py-4">
                                         <div className="flex items-center gap-2.5">
                                             <RowThumb warehouse={w} />
