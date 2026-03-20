@@ -199,19 +199,13 @@ export default function UsersPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 bg-clip-text text-transparent">
-              User Management
+              Admin Management
             </h2>
             <p className="text-sm text-gray-600 mt-1 font-medium">
               Manage admin users and assign roles
             </p>
           </div>
-          <Button
-            className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 hover:from-blue-700 hover:via-indigo-700 hover:to-violet-700 shadow-lg shadow-blue-500/30 transition-all"
-            onClick={() => window.location.href = '/register'}
-          >
-            <UserPlus className="w-4 h-4 mr-2" />
-            Add User
-          </Button>
+         
         </div>
 
         <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent my-6" />

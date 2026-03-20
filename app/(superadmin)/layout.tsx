@@ -15,7 +15,7 @@ import Loading from './loading';
 
 const menuItems = [
   { label: 'Dashboard',  path: '/'           },
-  { label: 'Users',      path: '/users'      },
+  { label: 'Admin',      path: '/admin'      },
   { label: 'Agents',     path: '/agents'     },
   { label: 'Warehouses', path: '/warehouses' },
   { label: 'Settings',   path: '/settings'   },

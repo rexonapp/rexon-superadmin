@@ -557,7 +557,7 @@ export default function WarehousesPage() {
             <TableBody>
               {paginated.length > 0 ? paginated.map((w, i) => (
                 <TableRow key={w.id}
-                  className={cn('border-b border-gray-100 hover:bg-blue-50/40 transition-colors group',
+                  className={cn('border-b border-gray-100 hover:bg-blue-100 transition-colors group',
                     i % 2 === 1 ? 'bg-gray-50/40' : 'bg-white')}>
 
                   <TableCell className="px-4 py-4 text-[12.5px] text-gray-400 font-medium w-10">

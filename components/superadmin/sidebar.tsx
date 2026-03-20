@@ -35,7 +35,7 @@ interface SidebarProps {
 // ── Nav items ─────────────────────────────────────────────────────────────────
 const menuItems = [
   { id: 'home',       label: 'Dashboard',  icon: Home,      path: '/'           },
-  { id: 'users',      label: 'Users',      icon: Users,     path: '/users'      },
+  { id: 'admin',      label: 'Admin',      icon: Users,     path: '/admin'      },
   { id: 'agents',     label: 'Agents',     icon: UserCheck, path: '/agents'     },
   { id: 'warehouses', label: 'Warehouses', icon: Building2, path: '/warehouses' },
   { id: 'settings',   label: 'Settings',   icon: Settings,  path: '/settings'   },

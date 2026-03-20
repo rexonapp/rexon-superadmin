@@ -353,7 +353,7 @@ export default function AgentsPage() {
                   <SelectContent className="rounded-lg">
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="invite">Invite</SelectItem>
+                    {/* <SelectItem value="invite">Invite</SelectItem> */}
                     <SelectItem value="approved">Approved</SelectItem>
                     <SelectItem value="rejected">Rejected</SelectItem>
                   </SelectContent>
@@ -595,25 +595,7 @@ export default function AgentsPage() {
                             </>
                           )}
 
-                          {agent.status === 'invite' && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => updateAgentStatus(agent.id, 'approved')}
-                                className="cursor-pointer text-green-600 text-sm"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Approve
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => updateAgentStatus(agent.id, 'rejected')}
-                                className="cursor-pointer text-red-600 text-sm"
-                              >
-                                <XCircle className="w-4 h-4 mr-2" />
-                                Reject
-                              </DropdownMenuItem>
-                            </>
-                          )}
+                          
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
