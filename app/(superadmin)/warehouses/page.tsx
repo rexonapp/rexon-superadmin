@@ -495,7 +495,7 @@ export default function WarehousesPage() {
         <div className="relative w-full sm:w-xl lg:w-xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
           <Input
-            placeholder="Search title, city, name…"
+            placeholder="Search property title, city ..."
             value={searchTerm}
             onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             className="pl-9 h-9 text-sm bg-gray-50 border-gray-200 focus:bg-white"
@@ -564,9 +564,7 @@ export default function WarehousesPage() {
           <Table className="min-w-[960px] w-full">
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50 border-b border-gray-200">
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 w-12 bg-gray-50 sticky top-0 z-10">
-                  #
-                </TableHead>
+               
                 {cols.map(c => (
                   <SortableHead key={c.key} col={c.key} label={c.label}
                     sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
@@ -585,9 +583,6 @@ export default function WarehousesPage() {
                     i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white')}
                   onClick={() => openDetails(w)}>
 
-                  <TableCell className="px-4 py-3.5 text-sm text-gray-400 font-medium w-12">
-                    {startIndex + i + 1}
-                  </TableCell>
 
                   <TableCell className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
@@ -690,12 +685,12 @@ export default function WarehousesPage() {
         {/* Pagination — always at bottom of card, never scrolls */}
         {totalPages > 1 && (
           <div className="flex-shrink-0 border-t border-gray-100 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 bg-white">
-            <p className="text-sm text-gray-500 order-2 sm:order-1">
+            {/* <p className="text-sm text-gray-500 order-2 sm:order-1">
               Showing{' '}
               <span className="font-semibold text-gray-700">{startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, sorted.length)}</span>
               {' '}of{' '}
               <span className="font-semibold text-gray-700">{sorted.length}</span>
-            </p>
+            </p> */}
             <Pagination className="order-1 sm:order-2">
               <PaginationContent className="gap-0.5 flex-wrap justify-center">
                 <PaginationItem>

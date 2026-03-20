@@ -94,7 +94,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                 {/* Hide text when collapsed on desktop */}
                 <div className={`overflow-hidden transition-all duration-300 ${sidebarOpen ? 'opacity-100 max-w-xs' : 'lg:opacity-0 lg:max-w-0 opacity-100 max-w-xs'}`}>
                   <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent whitespace-nowrap">
-                    WarehouseOS
+                    Rexon
                   </h1>
                   <p className="text-xs font-medium text-blue-600/70 whitespace-nowrap">Super Admin Panel</p>
                 </div>

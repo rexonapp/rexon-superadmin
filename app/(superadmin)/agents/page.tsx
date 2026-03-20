@@ -1,19 +1,30 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, Filter, Eye, CheckCircle, XCircle, MoreVertical, FileText, Pencil, Globe, X, Calendar, ChevronDown } from 'lucide-react';
+import {
+  Pagination, PaginationContent, PaginationEllipsis, PaginationItem,
+  PaginationLink, PaginationNext, PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Search, Filter, Eye, CheckCircle, XCircle, MoreVertical,
+  FileText, Pencil, Globe, X, Calendar,
+  ChevronsUpDown, ChevronUp, ChevronDown, Users,
+  Phone, Mail, MapPin, Hash, Clock, Building2,
+} from 'lucide-react';
 import Loading from '../loading';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+
+// ── Types ─────────────────────────────────────────────────────────────────────
 
 interface AgentDomain {
   id: string;
@@ -41,572 +52,564 @@ interface Agent {
 }
 
 type DateFilterType = 'all' | 'today' | 'week' | 'month' | 'last7' | 'last30' | 'custom';
+interface DateRange { from: Date | undefined; to: Date | undefined; }
+type SortKey = 'full_name' | 'agency_name' | 'city' | 'status' | 'created_at' | 'domains';
+type SortDir = 'asc' | 'desc';
 
-interface DateRange {
-  from: Date | undefined;
-  to: Date | undefined;
+const ITEMS_PER_PAGE = 10;
+
+// ── Status config ─────────────────────────────────────────────────────────────
+
+const statusCfg: Record<string, { badge: string; dot: string; label: string }> = {
+  pending:  { badge: 'bg-amber-50 text-amber-700 border border-amber-200',       dot: 'bg-amber-400 animate-pulse', label: 'Pending'  },
+  approved: { badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500',             label: 'Approved' },
+  rejected: { badge: 'bg-rose-50 text-rose-700 border border-rose-200',          dot: 'bg-rose-500',                label: 'Rejected' },
+  invite:   { badge: 'bg-purple-50 text-purple-700 border border-purple-200',    dot: 'bg-purple-400',              label: 'Invited'  },
+};
+
+const domainStatusCfg: Record<string, string> = {
+  active:     'bg-emerald-50 text-emerald-700 border-emerald-200',
+  deactivate: 'bg-orange-50 text-orange-700 border-orange-200',
+};
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function fmtDate(ds: string | null): string {
+  if (!ds) return '—';
+  try {
+    const d = new Date(ds);
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'Asia/Kolkata' });
+  } catch { return '—'; }
 }
 
-const statusColors = {
-  pending: 'bg-sky-100 text-sky-700 border-sky-300 shadow-sm',
-  approved: 'bg-cyan-100 text-cyan-700 border-cyan-300 shadow-sm',
-  rejected: 'bg-rose-100 text-rose-700 border-rose-300 shadow-sm',
-  invite: 'bg-purple-100 text-purple-700 border-purple-300 shadow-sm',
-};
+function fmtTime(ds: string | null): string | null {
+  if (!ds) return null;
+  try {
+    const d = new Date(ds);
+    if (isNaN(d.getTime())) return null;
+    return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata' });
+  } catch { return null; }
+}
 
-const domainStatusColors = {
-  active: 'bg-emerald-100 text-emerald-700 border-emerald-300',
-  deactivate: 'bg-orange-100 text-orange-700 border-orange-300',
-};
+// ── Sub-components ────────────────────────────────────────────────────────────
 
-export default function AgentsPage() {
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
-  const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
-  const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
-  const [showDomainModal, setShowDomainModal] = useState(false);
-  const [domainLoading, setDomainLoading] = useState(false);
-  const [showCustomDateModal, setShowCustomDateModal] = useState(false);
+function StatusBadge({ status }: { status: string }) {
+  const cfg = statusCfg[status] ?? statusCfg['pending'];
+  return (
+    <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold leading-none whitespace-nowrap', cfg.badge)}>
+      <span className={cn('w-1.5 h-1.5 rounded-full shrink-0', cfg.dot)} />
+      {cfg.label}
+    </span>
+  );
+}
+
+function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (col !== sortKey) return <ChevronsUpDown className="w-3 h-3 text-gray-400 ml-1 shrink-0" />;
+  return sortDir === 'asc'
+    ? <ChevronUp   className="w-3 h-3 text-blue-500 ml-1 shrink-0" />
+    : <ChevronDown className="w-3 h-3 text-blue-500 ml-1 shrink-0" />;
+}
+
+function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
+  col: SortKey; label: string; sortKey: SortKey; sortDir: SortDir;
+  onSort: (k: SortKey) => void; className?: string;
+}) {
+  return (
+    <TableHead
+      onClick={() => onSort(col)}
+      className={cn(
+        'text-xs font-bold uppercase tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer transition-colors',
+        'hover:bg-gray-100',
+        col === sortKey ? 'text-blue-600 bg-blue-50/60' : 'text-gray-500 bg-gray-50',
+        className,
+      )}
+    >
+      <div className="flex items-center gap-1">
+        {label}
+        <SortIcon col={col} sortKey={sortKey} sortDir={sortDir} />
+      </div>
+    </TableHead>
+  );
+}
+
+function CustomDateModal({ open, onClose, dateRange, onApply }: {
+  open: boolean; onClose: () => void;
+  dateRange: DateRange; onApply: (from: Date | undefined, to: Date | undefined) => void;
+}) {
+  const [fromVal, setFromVal] = useState('');
+  const [toVal,   setToVal]   = useState('');
+  const [error,   setError]   = useState('');
 
   useEffect(() => {
-    fetchAgents();
+    if (open) {
+      setFromVal(dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : '');
+      setToVal(dateRange.to   ? format(dateRange.to,   'yyyy-MM-dd') : '');
+      setError('');
+    }
+  }, [open, dateRange]);
+
+  const handleApply = () => {
+    if (!fromVal || !toVal) { setError('Please select both dates.'); return; }
+    const from = new Date(fromVal), to = new Date(toVal);
+    if (from > to) { setError('Start date must be before end date.'); return; }
+    onApply(startOfDay(from), endOfDay(to)); onClose();
+  };
+  const handleClear = () => { setFromVal(''); setToVal(''); setError(''); onApply(undefined, undefined); onClose(); };
+
+  if (!open) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={v => { if (!v) onClose(); }}>
+      <DialogContent className="bg-white sm:max-w-sm p-0 gap-0 overflow-hidden border border-gray-200 shadow-xl">
+        <VisuallyHidden><DialogTitle>Custom Date Range</DialogTitle></VisuallyHidden>
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h3 className="text-sm font-semibold text-gray-900">Custom Date Range</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Filter agents by registration date</p>
+        </div>
+        <div className="px-5 py-5 space-y-4">
+          {['Start', 'End'].map((lbl) => {
+            const isFrom = lbl === 'Start';
+            return (
+              <div key={lbl} className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">{lbl} Date</label>
+                <input
+                  type="date"
+                  value={isFrom ? fromVal : toVal}
+                  max={isFrom ? toVal || undefined : undefined}
+                  min={isFrom ? undefined : fromVal || undefined}
+                  onChange={e => { isFrom ? setFromVal(e.target.value) : setToVal(e.target.value); setError(''); }}
+                  className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                />
+              </div>
+            );
+          })}
+          {fromVal && toVal && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <p className="text-xs font-medium text-blue-700">
+                {format(new Date(fromVal), 'MMM d, yyyy')} → {format(new Date(toVal), 'MMM d, yyyy')}
+              </p>
+            </div>
+          )}
+          {error && <p className="text-xs font-medium text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{error}</p>}
+        </div>
+        <div className="border-t border-gray-100 bg-gray-50 px-5 py-4 flex gap-2">
+          <Button variant="outline" size="sm" onClick={handleClear} className="flex-1 h-9 text-sm">Clear</Button>
+          <Button size="sm" onClick={handleApply} className="flex-1 h-9 text-sm">Apply Filter</Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DetailRow({ icon: Icon, label, value, accent = 'blue' }: {
+  icon: React.ElementType; label: string; value?: string | null; accent?: 'blue' | 'amber';
+}) {
+  if (!value) return null;
+  return (
+    <div className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
+      <div className={cn('w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0',
+        accent === 'amber' ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-blue-50 border-blue-100 text-blue-600')}>
+        <Icon className="w-4 h-4" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{label}</p>
+        <p className="text-sm font-semibold text-gray-800 mt-0.5 break-words">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+export default function AgentsPage() {
+  const [agents,           setAgents]           = useState<Agent[]>([]);
+  const [loading,          setLoading]          = useState(true);
+  const [searchTerm,       setSearchTerm]       = useState('');
+  const [filterStatus,     setFilterStatus]     = useState('all');
+  const [dateFilter,       setDateFilter]       = useState<DateFilterType>('all');
+  const [dateRange,        setDateRange]        = useState<DateRange>({ from: undefined, to: undefined });
+  const [showCustomDate,   setShowCustomDate]   = useState(false);
+  const [selectedAgent,    setSelectedAgent]    = useState<Agent | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showDomainModal,  setShowDomainModal]  = useState(false);
+  const [domainLoading,    setDomainLoading]    = useState(false);
+  const [currentPage,      setCurrentPage]      = useState(1);
+  const [sortKey,          setSortKey]          = useState<SortKey>('created_at');
+  const [sortDir,          setSortDir]          = useState<SortDir>('desc');
+  const [activeTab,        setActiveTab]        = useState<'overview' | 'contact' | 'domains'>('overview');
+
+  const anyFilter = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
+
+  // ── Data ──────────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/superadmin/agents');
+        const d   = await res.json();
+        if (d.success) setAgents(d.agents);
+      } catch (e) { console.error(e); }
+      finally { setLoading(false); }
+    })();
   }, []);
-
-  const fetchAgents = async () => {
-    try {
-      const response = await fetch('/api/superadmin/agents');
-      const data = await response.json();
-      if (data.success) setAgents(data.agents);
-    } catch (error) {
-      console.error('Failed to fetch agents:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getDateRangeForFilter = (filterType: DateFilterType): DateRange => {
-    const today = new Date();
-    
-    switch (filterType) {
-      case 'today':
-        return {
-          from: startOfDay(today),
-          to: endOfDay(today),
-        };
-      case 'week':
-        return {
-          from: startOfWeek(today),
-          to: endOfWeek(today),
-        };
-      case 'month':
-        return {
-          from: startOfMonth(today),
-          to: endOfMonth(today),
-        };
-      case 'last7': {
-        const from = new Date(today);
-        from.setDate(from.getDate() - 7);
-        return {
-          from: startOfDay(from),
-          to: endOfDay(today),
-        };
-      }
-      case 'last30': {
-        const from = new Date(today);
-        from.setDate(from.getDate() - 30);
-        return {
-          from: startOfDay(from),
-          to: endOfDay(today),
-        };
-      }
-      case 'custom':
-        return dateRange;
-      default:
-        return { from: undefined, to: undefined };
-    }
-  };
-
-  const isDateInRange = (dateString: string | null, range: DateRange): boolean => {
-    if (!dateString || !range.from || !range.to) return true;
-    
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return false;
-    
-    const startOfRangeDay = new Date(range.from);
-    startOfRangeDay.setHours(0, 0, 0, 0);
-    
-    const endOfRangeDay = new Date(range.to);
-    endOfRangeDay.setHours(23, 59, 59, 999);
-    
-    return date >= startOfRangeDay && date <= endOfRangeDay;
-  };
-
-  const handleDateFilterChange = (value: string) => {
-    const filterValue = value as DateFilterType;
-    setDateFilter(filterValue);
-    if (filterValue === 'custom') {
-      setShowCustomDateModal(true);
-    } else {
-      setDateRange({ from: undefined, to: undefined });
-    }
-  };
-
-  const handleCustomDateSelect = (fromDate: Date | undefined, toDate: Date | undefined) => {
-    setDateRange({ from: fromDate, to: toDate });
-  };
-
-  const handleApplyCustomDate = () => {
-    if (dateRange.from && dateRange.to) {
-      setShowCustomDateModal(false);
-    }
-  };
-
-  const clearAllFilters = () => {
-    setSearchTerm('');
-    setFilterStatus('all');
-    setDateFilter('all');
-    setDateRange({ from: undefined, to: undefined });
-    setShowCustomDateModal(false);
-  };
-
-  const clearDateFilter = () => {
-    setDateFilter('all');
-    setDateRange({ from: undefined, to: undefined });
-  };
 
   const updateAgentStatus = async (agentId: string, status: 'approved' | 'rejected' | 'invite') => {
     try {
-      const response = await fetch(`/api/superadmin/agents/${agentId}/status`, {
+      const res = await fetch(`/api/superadmin/agents/${agentId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
       });
-      const data = await response.json();
-      if (data.success) {
-        setAgents(agents.map(a =>
-          a.id === agentId ? { ...a, status, is_verified: status === 'approved' } : a
-        ));
-        setShowDetailsModal(false);
-        setSelectedAgent(null);
+      const d = await res.json();
+      if (d.success) {
+        setAgents(prev => prev.map(a => a.id === agentId ? { ...a, status, is_verified: status === 'approved' } : a));
+        setShowDetailsModal(false); setSelectedAgent(null);
       }
-    } catch (error) {
-      console.error('Failed to update status:', error);
-    }
+    } catch (e) { console.error(e); }
   };
 
   const updateDomainStatus = async (domainId: string, newStatus: 'active' | 'deactivate') => {
     setDomainLoading(true);
     try {
-      const response = await fetch(`/api/agent-domains/${domainId}`, {
+      const res = await fetch(`/api/agent-domains/${domainId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
-      const data = await response.json();
-      if (data.success && selectedAgent) {
-        const updatedDomains = selectedAgent.domains.map(d =>
-          d.id === domainId ? { ...d, status: newStatus, is_active: newStatus === 'active' } : d
+      const d = await res.json();
+      if (d.success && selectedAgent) {
+        const updatedDomains = selectedAgent.domains.map(dom =>
+          dom.id === domainId ? { ...dom, status: newStatus, is_active: newStatus === 'active' } : dom
         );
-        const updatedAgent = { ...selectedAgent, domains: updatedDomains };
-        setSelectedAgent(updatedAgent);
-        setAgents(agents.map(a => a.id === selectedAgent.id ? updatedAgent : a));
+        const updated = { ...selectedAgent, domains: updatedDomains };
+        setSelectedAgent(updated);
+        setAgents(prev => prev.map(a => a.id === selectedAgent.id ? updated : a));
         setShowDomainModal(false);
       }
-    } catch (error) {
-      console.error('Failed to update domain status:', error);
-    } finally {
-      setDomainLoading(false);
-    }
+    } catch (e) { console.error(e); }
+    finally { setDomainLoading(false); }
   };
 
-  const filteredAgents = agents.filter(agent => {
-    const matchesSearch =
-      agent.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      agent.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      agent.agency_name.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = filterStatus === 'all' || agent.status === filterStatus;
-    
-    const currentDateRange = getDateRangeForFilter(dateFilter);
-    const matchesDate = dateFilter === 'all' ? true : isDateInRange(agent.created_at, currentDateRange);
+  // ── Filtering & sorting ───────────────────────────────────────────────────
 
-    return matchesSearch && matchesStatus && matchesDate;
+  const isDateInRange = (ds: string | null, r: DateRange): boolean => {
+    if (!ds || !r.from || !r.to) return true;
+    const d = new Date(ds);
+    return !isNaN(d.getTime()) && d >= r.from && d <= r.to;
+  };
+
+  const getRange = useCallback((f: DateFilterType): DateRange => {
+    const today = new Date();
+    switch (f) {
+      case 'today':  return { from: startOfDay(today),   to: endOfDay(today)   };
+      case 'week':   return { from: startOfWeek(today),  to: endOfWeek(today)  };
+      case 'month':  return { from: startOfMonth(today), to: endOfMonth(today) };
+      case 'last7':  { const d = new Date(today); d.setDate(d.getDate() - 7);  return { from: startOfDay(d), to: endOfDay(today) }; }
+      case 'last30': { const d = new Date(today); d.setDate(d.getDate() - 30); return { from: startOfDay(d), to: endOfDay(today) }; }
+      case 'custom': return dateRange;
+      default: return { from: undefined, to: undefined };
+    }
+  }, [dateRange]);
+
+  const handleSort = (key: SortKey) => {
+    if (key === sortKey) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortKey(key); setSortDir('asc'); }
+    setCurrentPage(1);
+  };
+
+  const handleDateFilterChange = (value: string) => {
+    const f = value as DateFilterType;
+    setDateFilter(f);
+    if (f === 'custom') setShowCustomDate(true);
+    else setDateRange({ from: undefined, to: undefined });
+    setCurrentPage(1);
+  };
+
+  const clearAllFilters = () => {
+    setSearchTerm(''); setFilterStatus('all');
+    setDateFilter('all'); setDateRange({ from: undefined, to: undefined });
+    setCurrentPage(1);
+  };
+
+  const filtered = agents.filter(a => {
+    const q = searchTerm.toLowerCase();
+    const matchSearch = a.full_name.toLowerCase().includes(q)
+      || a.email.toLowerCase().includes(q)
+      || a.agency_name.toLowerCase().includes(q)
+      || a.city?.toLowerCase().includes(q);
+    const matchStatus = filterStatus === 'all' || a.status === filterStatus;
+    const matchDate   = dateFilter === 'all' || isDateInRange(a.created_at, getRange(dateFilter));
+    return matchSearch && matchStatus && matchDate;
   });
 
-  const formatDateSafe = (dateString: string | null): string | null => {
-    if (!dateString) return null;
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return null;
-      
-      return date.toLocaleDateString('en-IN', { 
-        year: 'numeric', 
-        month: 'short', 
-        day: 'numeric',
-        timeZone: 'Asia/Kolkata'
-      });
-    } catch {
-      return null;
+  const sorted = [...filtered].sort((a, b) => {
+    let av: string | number = '', bv: string | number = '';
+    switch (sortKey) {
+      case 'full_name':    av = a.full_name    ?? ''; bv = b.full_name    ?? ''; break;
+      case 'agency_name':  av = a.agency_name  ?? ''; bv = b.agency_name  ?? ''; break;
+      case 'city':         av = a.city         ?? ''; bv = b.city         ?? ''; break;
+      case 'status':       av = a.status       ?? ''; bv = b.status       ?? ''; break;
+      case 'created_at':   av = new Date(a.created_at ?? 0).getTime(); bv = new Date(b.created_at ?? 0).getTime(); break;
+      case 'domains':      av = a.domains?.length ?? 0; bv = b.domains?.length ?? 0; break;
     }
-  };
+    if (typeof av === 'string') { const c = av.localeCompare(bv as string); return sortDir === 'asc' ? c : -c; }
+    return sortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number);
+  });
 
-  const formatTimeSafe = (dateString: string | null): string | null => {
-    if (!dateString) return null;
-    
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return null;
-      
-      return date.toLocaleTimeString('en-IN', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        second: '2-digit', 
-        hour12: true,
-        timeZone: 'Asia/Kolkata'
-      });
-    } catch {
-      return null;
-    }
-  };
+  // ── Pagination ────────────────────────────────────────────────────────────
 
-  const formatDateForDomain = (dateString: string | null) => {
-    const formatted = formatDateSafe(dateString);
-    return formatted || 'N/A';
-  };
+  const totalPages = Math.max(1, Math.ceil(sorted.length / ITEMS_PER_PAGE));
+  const safePage   = Math.min(currentPage, totalPages);
+  const startIdx   = (safePage - 1) * ITEMS_PER_PAGE;
+  const paginated  = sorted.slice(startIdx, startIdx + ITEMS_PER_PAGE);
 
-  const isAnyFilterActive = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
-
-  // Get display text for date filter button
-  const getDateFilterDisplay = () => {
-    if (dateFilter === 'custom' && dateRange.from && dateRange.to) {
-      return `${format(dateRange.from, 'MMM d')} - ${format(dateRange.to, 'MMM d')}`;
-    }
-    
-    switch (dateFilter) {
-      case 'today':
-        return 'Today';
-      case 'week':
-        return 'This Week';
-      case 'month':
-        return 'This Month';
-      case 'last7':
-        return 'Last 7 Days';
-      case 'last30':
-        return 'Last 30 Days';
-      case 'custom':
-        return 'Custom Range';
-      default:
-        return 'Date Range';
-    }
+  const pageNumbers = (): (number | 'ellipsis')[] => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1);
+    const pages: (number | 'ellipsis')[] = [1];
+    if (safePage > 3) pages.push('ellipsis');
+    for (let p = Math.max(2, safePage - 1); p <= Math.min(totalPages - 1, safePage + 1); p++) pages.push(p);
+    if (safePage < totalPages - 2) pages.push('ellipsis');
+    pages.push(totalPages);
+    return pages;
   };
 
   if (loading) return <Loading />;
 
+  // ── Render ────────────────────────────────────────────────────────────────
+
   return (
-    <div className="space-y-6">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Agent Management</h1>
-          <p className="text-sm text-gray-600 mt-1">Manage and verify agent registrations</p>
+    <div className="h-full flex flex-col gap-3 overflow-hidden">
+
+      {/* ── Filters — flex-none, never grows ── */}
+      <div className="flex-shrink-0 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        {/* Search */}
+        <div className="relative w-full sm:w-xl lg:w-xl">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+          <Input
+            placeholder="Search name, email, agency…"
+            value={searchTerm}
+            onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+            className="pl-9 h-9 text-sm bg-gray-50 border-gray-200 focus:bg-white"
+          />
         </div>
-        <Link href="/agents/addAgent">
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all">
-            + Add Agent
-          </Button>
-        </Link>
-      </div>
 
-      {/* Filter & Search Bar - Compact Responsive */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-4">
-        <div className="flex flex-col gap-4">
-          {/* Top Row: Search and Filters */}
-          <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center">
-            
-            {/* Search Input - More Responsive Width */}
-            <div className="relative w-full lg:flex-1 lg:max-w-2xl">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              <Input
-                type="text"
-                placeholder="Search agents by name, email, or agency..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 h-10 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:bg-white focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition-all"
-              />
-            </div>
+        {/* Dropdowns */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={filterStatus} onValueChange={v => { setFilterStatus(v); setCurrentPage(1); }}>
+            <SelectTrigger className="w-36 h-9 text-sm bg-gray-50 border-gray-200 shrink-0">
+              <Filter className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+              <SelectItem value="rejected">Rejected</SelectItem>
+            </SelectContent>
+          </Select>
 
-            {/* Filter Controls - Responsive Layout */}
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center sm:flex-wrap lg:flex-nowrap lg:gap-2">
-              
-              {/* Status Filter */}
-              <div className="w-full sm:w-48 lg:w-40 flex-shrink-0">
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="h-10 bg-gray-50 border border-gray-200 rounded-lg text-sm hover:border-gray-300 focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition-all">
-                    <Filter className="w-4 h-4 mr-2 text-gray-500" />
-                    <SelectValue placeholder="Status" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-lg">
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    {/* <SelectItem value="invite">Invite</SelectItem> */}
-                    <SelectItem value="approved">Approved</SelectItem>
-                    <SelectItem value="rejected">Rejected</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <Select value={dateFilter} onValueChange={handleDateFilterChange}>
+            <SelectTrigger className={cn('w-40 h-9 text-sm border-gray-200 shrink-0',
+              dateFilter !== 'all' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-gray-50')}>
+              <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
+              <SelectValue placeholder="Date Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Time</SelectItem>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">This Week</SelectItem>
+              <SelectItem value="month">This Month</SelectItem>
+              <SelectItem value="last7">Last 7 Days</SelectItem>
+              <SelectItem value="last30">Last 30 Days</SelectItem>
+              <SelectItem value="custom">Custom Range…</SelectItem>
+            </SelectContent>
+          </Select>
 
-              {/* Date Filter with Smart Display */}
-              <div className="w-full sm:w-48 lg:w-auto lg:flex-shrink-0 group relative">
-                <Select value={dateFilter} onValueChange={handleDateFilterChange}>
-                  <SelectTrigger className={`h-10 w-full lg:w-auto rounded-lg text-sm transition-all ${
-                    dateFilter !== 'all' 
-                      ? 'bg-blue-50 border border-blue-300 hover:border-blue-400 focus:border-blue-400' 
-                      : 'bg-gray-50 border border-gray-200 hover:border-gray-300 focus:border-blue-400'
-                  }`}>
-                    <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                    <SelectValue placeholder="Date Range" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-lg">
-                    <SelectItem value="all">All Time</SelectItem>
-                    <SelectItem value="today">Today</SelectItem>
-                    <SelectItem value="week">This Week</SelectItem>
-                    <SelectItem value="month">This Month</SelectItem>
-                    <SelectItem value="last7">Last 7 Days</SelectItem>
-                    <SelectItem value="last30">Last 30 Days</SelectItem>
-                    <SelectItem value="custom">Custom Range</SelectItem>
-                  </SelectContent>
-                </Select>
+          {dateFilter === 'custom' && dateRange.from && dateRange.to && (
+            <Button variant="outline" size="sm" onClick={() => setShowCustomDate(true)}
+              className="h-9 px-3 text-xs text-blue-600 border-blue-200 hover:bg-blue-50 whitespace-nowrap shrink-0">
+              <Calendar className="w-3 h-3 mr-1.5" />
+              {format(dateRange.from, 'MMM d')} – {format(dateRange.to, 'MMM d')}
+            </Button>
+          )}
 
-                {/* Hover Tooltip for Active Filter */}
-                {dateFilter !== 'all' && (
-                  <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-50">
-                    <div className="bg-gray-900 text-white px-3 py-2 rounded-lg text-xs whitespace-nowrap shadow-lg">
-                      <p className="font-medium">{getDateFilterDisplay()}</p>
-                      <p className="text-gray-300 text-xs mt-1">Click to change</p>
-                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-                    </div>
-                  </div>
-                )}
-              </div>
+          {anyFilter && (
+            <Button variant="ghost" size="sm" onClick={clearAllFilters}
+              className="h-9 px-3 text-sm text-gray-500 hover:text-rose-600 hover:bg-rose-50 shrink-0">
+              <X className="w-3.5 h-3.5 mr-1" /> Clear
+            </Button>
+          )}
+        </div>
 
-              {/* Edit/Clear Date Button - Shows When Custom Date Selected */}
-              {dateFilter === 'custom' && dateRange.from && dateRange.to && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowCustomDateModal(true)}
-                  className="h-10 px-3 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 hover:border-blue-300 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto lg:w-auto"
-                >
-                  <Calendar className="w-4 h-4 mr-1.5" />
-                  Edit Range
-                </Button>
-              )}
-
-              {/* Clear Button */}
-              {isAnyFilterActive && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={clearAllFilters}
-                  className="h-10 px-3 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors text-sm whitespace-nowrap w-full sm:w-auto lg:w-auto"
-                >
-                  <X className="w-4 h-4 mr-1.5" />
-                  Clear All
-                </Button>
-              )}
-            </div>
-          </div>
-
-          {/* Results Counter - Bottom Right on Desktop, Full Width on Mobile */}
-          <div className="flex items-center justify-between lg:justify-end">
-            <span className="text-sm text-gray-600 lg:hidden">Results:</span>
-            <span className="text-sm text-gray-600 font-medium">
-              <span className="text-blue-600 font-bold">{filteredAgents.length}</span> agents
-            </span>
-          </div>
+        {/* Result count — matches warehouse page (no Add Agent button here, moved to match) */}
+        <div className="sm:ml-auto flex items-center gap-3">
+          <span className="text-xs text-gray-400 font-medium">
+          </span>
+          <Link href="/agents/addAgent">
+            <Button size="sm" className="h-9 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 shrink-0">
+              + Add Agent
+            </Button>
+          </Link>
         </div>
       </div>
 
-      {/* Agents Table */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <Table>
+      {/* ── Table card — fills all remaining height ── */}
+      <div className="flex-1 min-h-0 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col">
+
+        {/* Scrollable table */}
+        <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
+          <Table className="min-w-[860px] w-full">
             <TableHeader>
-              <TableRow className="border-b border-gray-200 bg-gray-50">
-                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Agent</TableHead>
-                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Contact</TableHead>
-                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Agency Name</TableHead>
-                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Registered (IST)</TableHead>
-                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Domain</TableHead>
-                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm">Status</TableHead>
-                <TableHead className="h-12 px-4 font-semibold text-gray-700 text-sm text-right">Actions</TableHead>
+              <TableRow className="hover:bg-gray-50 border-b border-gray-200">
+                <SortableHead col="full_name"   label="Agent"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[200px] sticky top-0 z-10" />
+                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">E-mail</TableHead>
+                <SortableHead col="agency_name" label="Agency"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[150px] sticky top-0 z-10" />
+                <SortableHead col="created_at"  label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[140px] sticky top-0 z-10" />
+                <SortableHead col="domains"     label="Domain"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[160px] sticky top-0 z-10" />
+                <SortableHead col="status"      label="Status"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[100px] sticky top-0 z-10" />
+                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              {filteredAgents.length > 0 ? (
-                filteredAgents.map((agent) => (
-                  <TableRow
-                    key={agent.id}
-                    className="border-b border-gray-100 hover:bg-blue-50/50 transition-colors duration-100"
-                  >
-                    <TableCell className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="w-9 h-9 ring-1 ring-gray-200">
-                          {agent.profile_photo_s3_url ? (
-                            <AvatarImage 
-                              src={agent.profile_photo_s3_url} 
-                              alt={agent.full_name}
-                            />
-                          ) : null}
-                          <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-xs font-bold">
-                            {agent.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="min-w-0">
-                          <p className="font-medium text-gray-900 text-sm truncate">{agent.full_name}</p>
-                          <p className="text-xs text-gray-500 truncate">{agent.city}</p>
-                        </div>
-                      </div>
-                    </TableCell>
-                   
-                    <TableCell className="px-4 py-3">
+              {paginated.length > 0 ? paginated.map((agent, i) => (
+                <TableRow key={agent.id}
+                  className={cn('border-b border-gray-100 hover:bg-blue-100 transition-colors group cursor-pointer',
+                    i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white')}
+                  onClick={() => { setSelectedAgent(agent); setShowDetailsModal(true); setActiveTab('overview'); }}>
+
+                  {/* # */}
+
+                  {/* Agent */}
+                  <TableCell className="px-4 py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
+                        {agent.profile_photo_s3_url && <AvatarImage src={agent.profile_photo_s3_url} alt={agent.full_name} />}
+                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-xs font-bold">
+                          {agent.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm text-gray-900 truncate">{agent.email}</p>
-                        <p className="text-xs text-gray-500 truncate">{agent.mobile_number}</p>
+                        <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-[150px]">
+                          {agent.full_name}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[150px] flex items-center gap-1">
+                          <MapPin className="w-3 h-3 shrink-0" />{agent.city}
+                        </p>
                       </div>
-                    </TableCell>
-                    <TableCell className="px-4 py-3">
-                      <div className="min-w-0">
-                        <p className="text-sm text-gray-900 truncate">{agent.agency_name}</p>
-                      </div>
-                    </TableCell>
+                    </div>
+                  </TableCell>
 
+                  {/* Contact */}
+                  <TableCell className="px-4 py-3.5">
+                    <p className="text-sm text-gray-800 truncate max-w-[170px]">{agent.email}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{agent.mobile_number}</p>
+                  </TableCell>
 
-                    <TableCell className="px-4 py-3">
-                      {formatDateSafe(agent.created_at) ? (
-                        <div className="space-y-0.5">
-                          <p className="text-sm text-gray-900 font-medium">{formatDateSafe(agent.created_at)}</p>
-                          {formatTimeSafe(agent.created_at) && (
-                            <p className="text-xs text-gray-500">{formatTimeSafe(agent.created_at)}</p>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-400">—</p>
-                      )}
-                    </TableCell>
+                  {/* Agency */}
+                  <TableCell className="px-4 py-3.5">
+                    <p className="text-sm font-medium text-gray-800 truncate max-w-[140px]">{agent.agency_name}</p>
+                  </TableCell>
 
-                    <TableCell className="px-4 py-3">
-                    {agent.domains && agent.domains.length > 0 ? (
-                      <div className="flex flex-col gap-2">
-                        {agent.domains.slice(0, 1).map((domain) => (
-                          <div key={domain.id} className="grid gap-1">
-                            <span className="text-sm text-gray-800 font-medium truncate leading-tight">
-                              {domain.full_domain}
-                            </span>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs font-medium w-fit px-2 py-0.5 ${domainStatusColors[domain.status as keyof typeof domainStatusColors]}`}
-                            >
-                              {domain.status === 'active' ? '● Active' : '● Deactivated'}
-                            </Badge>
-                          </div>
-                        ))}
+                  {/* Registered */}
+                  <TableCell className="px-4 py-3.5">
+                    <p className="text-sm text-gray-800">{fmtDate(agent.created_at)}</p>
+                    {fmtTime(agent.created_at) && <p className="text-xs text-gray-400 mt-0.5">{fmtTime(agent.created_at)}</p>}
+                  </TableCell>
+
+                  {/* Domain */}
+                  <TableCell className="px-4 py-3.5">
+                    {agent.domains?.length > 0 ? (
+                      <div className="space-y-1">
+                        <p className="text-sm text-gray-800 font-medium truncate max-w-[150px]">
+                          {agent.domains[0].full_domain}
+                        </p>
+                        <span className={cn(
+                          'inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full border',
+                          domainStatusCfg[agent.domains[0].status] ?? domainStatusCfg.deactivate
+                        )}>
+                          {agent.domains[0].status === 'active' ? '● Active' : '● Deactivated'}
+                        </span>
                         {agent.domains.length > 1 && (
-                          <span className="text-xs text-blue-500 font-medium">
-                            +{agent.domains.length - 1} more domain{agent.domains.length - 1 > 1 ? 's' : ''}
-                          </span>
+                          <p className="text-xs text-blue-500 font-medium">+{agent.domains.length - 1} more</p>
                         )}
                       </div>
                     ) : (
-                      <span className="text-sm text-gray-400 italic">No domains</span>
+                      <span className="text-sm text-gray-400 italic">No domain</span>
                     )}
                   </TableCell>
-                   
-                    <TableCell className="px-4 py-3">
-                      <Badge variant="outline" className={`${statusColors[agent.status]} font-medium`}>
-                        {agent.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="px-4 py-3 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                            <MoreVertical className="w-4 h-4 text-gray-500" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-lg">
-                          <DropdownMenuItem
-                            onClick={() => { setSelectedAgent(agent); setShowDetailsModal(true); }}
-                            className="cursor-pointer text-sm"
-                          >
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Details
-                          </DropdownMenuItem>
 
-                          {/* {agent.domains && agent.domains.length > 0 && (
-                            <DropdownMenuItem
-                              onClick={() => { setSelectedAgent(agent); setShowDomainModal(true); }}
-                              className="cursor-pointer text-sm"
-                            >
-                              <Globe className="w-4 h-4 mr-2" />
-                              Manage Domains
+                  {/* Status */}
+                  <TableCell className="px-4 py-3.5"><StatusBadge status={agent.status} /></TableCell>
+
+                  {/* Actions */}
+                  <TableCell className="px-4 py-3.5 text-right" onClick={e => e.stopPropagation()}>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon"
+                          className="h-8 w-8 opacity-40 group-hover:opacity-100 transition-opacity hover:bg-gray-100">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem onClick={() => { setSelectedAgent(agent); setShowDetailsModal(true); setActiveTab('overview'); }} className="cursor-pointer text-sm py-2">
+                          <Eye className="w-4 h-4 mr-2 text-blue-500" /> View Details
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/agents/${agent.id}/edit`} className="flex items-center cursor-pointer text-sm py-2">
+                            <Pencil className="w-4 h-4 mr-2 text-gray-500" /> Edit Agent
+                          </Link>
+                        </DropdownMenuItem>
+                        {agent.status === 'pending' && (
+                          <>
+                            <DropdownMenuSeparator />
+                            {/* <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'invite')}
+                              className="cursor-pointer text-sm py-2 text-purple-600 focus:bg-purple-50">
+                              <CheckCircle className="w-4 h-4 mr-2" /> Send Invite
+                            </DropdownMenuItem> */}
+                            <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'approved')}
+                              className="cursor-pointer text-sm py-2 text-emerald-600 focus:bg-emerald-50">
+                              <CheckCircle className="w-4 h-4 mr-2" /> Approve
                             </DropdownMenuItem>
-                          )} */}
-
-                          <DropdownMenuItem asChild>
-                            <Link
-                              href={`/agents/${agent.id}/edit`}
-                              className="flex items-center cursor-pointer text-sm"
-                            >
-                              <Pencil className="w-4 h-4 mr-2" />
-                              Edit Agent
-                            </Link>
-                          </DropdownMenuItem>
-
-                          {agent.status === 'pending' && (
-                            <>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => updateAgentStatus(agent.id, 'invite')}
-                                className="cursor-pointer text-purple-600 text-sm"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Send Invite
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => updateAgentStatus(agent.id, 'approved')}
-                                className="cursor-pointer text-green-600 text-sm"
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Approve
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => updateAgentStatus(agent.id, 'rejected')}
-                                className="cursor-pointer text-red-600 text-sm"
-                              >
-                                <XCircle className="w-4 h-4 mr-2" />
-                                Reject
-                              </DropdownMenuItem>
-                            </>
-                          )}
-
-                          
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
+                            <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'rejected')}
+                              className="cursor-pointer text-sm py-2 text-rose-600 focus:bg-rose-50">
+                              <XCircle className="w-4 h-4 mr-2" /> Reject
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        {agent.status === 'invite' && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'approved')}
+                              className="cursor-pointer text-sm py-2 text-emerald-600 focus:bg-emerald-50">
+                              <CheckCircle className="w-4 h-4 mr-2" /> Approve
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'rejected')}
+                              className="cursor-pointer text-sm py-2 text-rose-600 focus:bg-rose-50">
+                              <XCircle className="w-4 h-4 mr-2" /> Reject
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              )) : (
                 <TableRow>
-                  <TableCell colSpan={6} className="px-4 py-12 text-center">
-                    <div className="space-y-2">
-                      <p className="text-base font-medium text-gray-900">No agents found</p>
-                      <p className="text-sm text-gray-500">Try adjusting your filters or search term</p>
+                  <TableCell colSpan={8} className="text-center py-24">
+                    <div className="flex flex-col items-center gap-3 text-gray-400">
+                      <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
+                        <Users className="w-7 h-7 opacity-40" />
+                      </div>
+                      <p className="font-semibold text-base text-gray-500">No agents found</p>
+                      <p className="text-sm text-gray-400">Try adjusting your search or filters</p>
+                      {anyFilter && (
+                        <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-1 text-sm">
+                          <X className="w-3.5 h-3.5 mr-1.5" /> Clear Filters
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -614,320 +617,309 @@ export default function AgentsPage() {
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex-shrink-0 border-t border-gray-100 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 bg-white">
+            {/* <p className="text-sm text-gray-500 order-2 sm:order-1">
+              Showing{' '}
+              <span className="font-semibold text-gray-700">{startIdx + 1}–{Math.min(startIdx + ITEMS_PER_PAGE, sorted.length)}</span>
+              {' '}of{' '}
+              <span className="font-semibold text-gray-700">{sorted.length}</span>
+            </p> */}
+            <Pagination className="order-1 sm:order-2">
+              <PaginationContent className="gap-0.5 flex-wrap justify-center">
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => safePage > 1 && setCurrentPage(safePage - 1)}
+                    className={cn('h-8 text-sm cursor-pointer select-none', safePage === 1 && 'pointer-events-none opacity-40')}
+                  />
+                </PaginationItem>
+                {pageNumbers().map((item, idx) =>
+                  item === 'ellipsis' ? (
+                    <PaginationItem key={`e${idx}`}><PaginationEllipsis className="h-8 w-8" /></PaginationItem>
+                  ) : (
+                    <PaginationItem key={item}>
+                      <PaginationLink onClick={() => setCurrentPage(item)} isActive={safePage === item}
+                        className={cn('h-8 w-8 text-sm cursor-pointer select-none rounded-lg font-medium',
+                          safePage === item ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:text-white' : 'hover:bg-gray-100')}>
+                        {item}
+                      </PaginationLink>
+                    </PaginationItem>
+                  )
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => safePage < totalPages && setCurrentPage(safePage + 1)}
+                    className={cn('h-8 text-sm cursor-pointer select-none', safePage === totalPages && 'pointer-events-none opacity-40')}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
-      {/* Custom Date Range Modal - Professional Design */}
-      <Dialog open={showCustomDateModal} onOpenChange={setShowCustomDateModal}>
-        <DialogContent className="bg-white border border-gray-200 sm:max-w-md rounded-lg">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-gray-900">
-              <Calendar className="w-5 h-5 inline mr-2 text-blue-600" />
-              Select Date Range
-            </DialogTitle>
-          </DialogHeader>
+      {/* ── Custom Date Modal ── */}
+      <CustomDateModal
+        open={showCustomDate}
+        onClose={() => { setShowCustomDate(false); if (!dateRange.from || !dateRange.to) setDateFilter('all'); }}
+        dateRange={dateRange}
+        onApply={(from, to) => { setDateRange({ from, to }); if (!from && !to) setDateFilter('all'); setCurrentPage(1); }}
+      />
 
-          <Separator className="bg-gray-200" />
+      {/* ── Details Modal — redesigned with tabs matching warehouse style ── */}
+      <Dialog open={showDetailsModal} onOpenChange={open => { setShowDetailsModal(open); if (!open) setTimeout(() => setSelectedAgent(null), 300); }}>
+        <DialogContent className="bg-white border border-gray-200 shadow-2xl w-full sm:max-w-2xl max-h-[90dvh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl">
+          <VisuallyHidden><DialogTitle>{selectedAgent?.full_name ?? 'Agent Details'}</DialogTitle></VisuallyHidden>
 
-          <div className="space-y-5 py-4">
-            {/* From Date */}
-            <div>
-              <label className="text-sm font-semibold text-gray-700 mb-2 block">From Date</label>
-              <Input
-                type="date"
-                value={dateRange.from ? format(dateRange.from, 'yyyy-MM-dd') : ''}
-                onChange={(e) => {
-                  const date = e.target.value ? new Date(e.target.value) : undefined;
-                  handleCustomDateSelect(date, dateRange.to);
-                }}
-                className="w-full border border-gray-300 rounded-lg h-10 px-3 focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition-all"
-              />
-            </div>
-
-            {/* To Date */}
-            <div>
-              <label className="text-sm font-semibold text-gray-700 mb-2 block">To Date</label>
-              <Input
-                type="date"
-                value={dateRange.to ? format(dateRange.to, 'yyyy-MM-dd') : ''}
-                onChange={(e) => {
-                  const date = e.target.value ? new Date(e.target.value) : undefined;
-                  handleCustomDateSelect(dateRange.from, date);
-                }}
-                className="w-full border border-gray-300 rounded-lg h-10 px-3 focus:border-blue-400 focus:ring-1 focus:ring-blue-300 transition-all"
-              />
-            </div>
-
-            {/* Preview when both dates selected */}
-            {dateRange.from && dateRange.to && (
-              <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-lg p-4 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue-900 uppercase tracking-wide">Selected Range</span>
-                  <span className="text-xs font-semibold text-blue-600 bg-white px-2 py-1 rounded">
-                    {Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 60 * 60 * 24)) + 1} days
-                  </span>
+          {/* Modal header — gradient like warehouse modal */}
+          <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 px-5 pt-5 pb-0 flex-shrink-0">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <Avatar className="w-12 h-12 ring-2 ring-white/30 shrink-0">
+                  {selectedAgent?.profile_photo_s3_url && <AvatarImage src={selectedAgent.profile_photo_s3_url} alt={selectedAgent.full_name} />}
+                  <AvatarFallback className="bg-white/20 text-white font-bold text-base">
+                    {selectedAgent?.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <h2 className="text-lg font-bold text-white leading-snug truncate">{selectedAgent?.full_name}</h2>
+                  <p className="text-blue-200 text-sm mt-0.5 truncate">{selectedAgent?.agency_name}</p>
                 </div>
-                <p className="text-sm font-semibold text-gray-900">
-                  {format(dateRange.from, 'EEEE, MMMM d, yyyy')}
+              </div>
+              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                {selectedAgent && <StatusBadge status={selectedAgent.status} />}
+                <p className="text-blue-300 text-xs font-mono">#{selectedAgent?.id?.slice(0, 8)}</p>
+              </div>
+            </div>
+
+            {/* Quick stats row */}
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {[
+                { label: 'City',    value: selectedAgent?.city ?? '—' },
+                { label: 'Domains', value: `${selectedAgent?.domains?.length ?? 0} domain(s)` },
+                { label: 'Joined',  value: fmtDate(selectedAgent?.created_at ?? null) },
+              ].map(item => (
+                <div key={item.label} className="bg-white/10 border border-white/20 rounded-xl px-3 py-2.5">
+                  <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide mb-0.5">{item.label}</p>
+                  <p className="text-white font-bold text-sm truncate">{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-blue-500/40">
+              {(['overview', 'contact', 'domains'] as const).map(tab => (
+                <button key={tab} onClick={() => setActiveTab(tab)}
+                  className={cn('px-5 py-2.5 text-sm font-semibold capitalize transition-all relative',
+                    activeTab === tab ? 'text-white' : 'text-blue-300 hover:text-blue-100')}>
+                  {tab}
+                  {activeTab === tab && <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-t bg-orange-400" />}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Modal body */}
+          <div className="flex-1 min-h-0 overflow-y-auto bg-white px-5 py-5"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
+
+            {/* Overview tab */}
+            {activeTab === 'overview' && (
+              <div className="space-y-1">
+                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5" /> Agent Details
                 </p>
-                <p className="text-xs text-gray-600">to</p>
-                <p className="text-sm font-semibold text-gray-900">
-                  {format(dateRange.to, 'EEEE, MMMM d, yyyy')}
-                </p>
+                <DetailRow icon={Users}    label="Full Name"    value={selectedAgent?.full_name} />
+                <DetailRow icon={Building2} label="Agency"      value={selectedAgent?.agency_name} />
+                <DetailRow icon={MapPin}   label="City"         value={selectedAgent?.city} />
+                <DetailRow icon={Calendar} label="Registered"   value={fmtDate(selectedAgent?.created_at ?? null)} accent="amber" />
+                <DetailRow icon={Clock}    label="Status"       value={selectedAgent?.status ? statusCfg[selectedAgent.status]?.label : '—'} accent="amber" />
+
+                {selectedAgent?.kyc_document_s3_url && (
+                  <div className="mt-5">
+                    <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">KYC Document</p>
+                    <Button variant="outline" className="w-full justify-between rounded-xl h-10 text-sm"
+                      onClick={() => selectedAgent.kyc_document_s3_url && window.open(selectedAgent.kyc_document_s3_url, '_blank')}>
+                      <span className="flex items-center gap-2"><FileText className="w-4 h-4" /> View KYC Document</span>
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* Info text */}
-            {!dateRange.from || !dateRange.to ? (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <p className="text-xs text-amber-800">
-                  <span className="font-semibold">Tip:</span> Select both from and to dates to filter agents
+            {/* Contact tab */}
+            {activeTab === 'contact' && (
+              <div className="max-w-md">
+                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5" /> Contact Information
                 </p>
-              </div>
-            ) : null}
-          </div>
-
-          <Separator className="bg-gray-200" />
-
-          <DialogFooter className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setDateRange({ from: undefined, to: undefined });
-                setDateFilter('all');
-                setShowCustomDateModal(false);
-              }}
-              className="flex-1 rounded-lg h-10"
-            >
-              Reset
-            </Button>
-            <Button
-              onClick={handleApplyCustomDate}
-              disabled={!dateRange.from || !dateRange.to}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-            >
-              Apply Filter
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Details Modal */}
-      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
-        <DialogContent className="bg-white border border-gray-200 sm:max-w-3xl rounded-lg">
-          <DialogHeader>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <DialogTitle className="text-xl font-semibold text-gray-900">{selectedAgent?.full_name}</DialogTitle>
-                <p className="text-gray-600 text-sm mt-1">{selectedAgent?.agency_name}</p>
-              </div>
-              {selectedAgent && (
-                <Badge variant="outline" className={`${statusColors[selectedAgent.status]} font-medium flex-shrink-0`}>
-                  {selectedAgent.status}
-                </Badge>
-              )}
-            </div>
-          </DialogHeader>
-
-          <Separator className="bg-gray-200" />
-
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Email Address</p>
-                <p className="text-sm text-gray-900">{selectedAgent?.email}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Mobile Number</p>
-                <p className="text-sm text-gray-900">{selectedAgent?.mobile_number}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">City</p>
-                <p className="text-sm text-gray-900">{selectedAgent?.city}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-500 mb-1">Domains</p>
-                <p className="text-sm text-gray-900">
-                  {selectedAgent?.domains?.length || 0} domain(s)
-                </p>
-              </div>
-            </div>
-
-            {selectedAgent?.kyc_document_s3_url && (
-              <>
-                <Separator className="bg-gray-200" />
-                <div>
-                  <p className="text-xs font-medium text-gray-500 mb-2">KYC Document</p>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-between rounded-lg h-10"
-                    onClick={() => selectedAgent.kyc_document_s3_url && window.open(selectedAgent.kyc_document_s3_url, '_blank')}
-                  >
-                    <span className="flex items-center gap-2">
-                      <FileText className="w-4 h-4" />
-                      View KYC Document
-                    </span>
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-
-          {selectedAgent?.status === 'pending' && (
-            <>
-              <Separator className="bg-gray-200" />
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'invite')}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg h-10"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Send Invite
-                </Button>
-                <Button
-                  onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'approved')}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-lg h-10"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Approve
-                </Button>
-                <Button
-                  onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'rejected')}
-                  variant="outline"
-                  className="flex-1 text-red-600 hover:bg-red-50 rounded-lg h-10"
-                >
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Reject
-                </Button>
-              </div>
-            </>
-          )}
-
-          {selectedAgent?.status === 'invite' && (
-            <>
-              <Separator className="bg-gray-200" />
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'approved')}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white rounded-lg h-10"
-                >
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Approve
-                </Button>
-                <Button
-                  onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'rejected')}
-                  variant="outline"
-                  className="flex-1 text-red-600 hover:bg-red-50 rounded-lg h-10"
-                >
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Reject
-                </Button>
-              </div>
-            </>
-          )}
-
-          <DialogFooter>
-            <Link href={selectedAgent ? `/agents/${selectedAgent.id}/edit` : '#'} className="flex-1">
-              <Button variant="outline" className="w-full rounded-lg h-10 gap-2">
-                <Pencil className="w-4 h-4" />
-                Edit Agent
-              </Button>
-            </Link>
-            <Button
-              variant="outline"
-              onClick={() => { setShowDetailsModal(false); setSelectedAgent(null); }}
-              className="flex-1 rounded-lg h-10"
-            >
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Domain Management Modal */}
-      <Dialog open={showDomainModal} onOpenChange={setShowDomainModal}>
-        <DialogContent className="bg-white border border-gray-200 sm:max-w-2xl rounded-lg">
-          <DialogHeader>
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <DialogTitle className="text-xl font-semibold flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-blue-600 flex-shrink-0" />
-                  <span>Domain Management</span>
-                </DialogTitle>
-                <p className="text-gray-600 text-sm mt-1">{selectedAgent?.full_name}</p>
-              </div>
-            </div>
-          </DialogHeader>
-
-          <Separator className="bg-gray-200" />
-
-          <div className="space-y-2 max-h-[400px] overflow-y-auto">
-            {selectedAgent?.domains && selectedAgent.domains.length > 0 ? (
-              selectedAgent.domains.map((domain) => (
-                <div
-                  key={domain.id}
-                  className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <Globe className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-gray-900 text-sm truncate">{domain.full_domain}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge 
-                          variant="outline"
-                          className={`text-xs font-medium ${domainStatusColors[domain.status as keyof typeof domainStatusColors]}`}
-                        >
-                          {domain.status}
-                        </Badge>
-                        <p className="text-xs text-gray-500">
-                          {domain.status === 'active' 
-                            ? `Activated on ${formatDateForDomain(domain.activated_at)}` 
-                            : `Released on ${formatDateForDomain(domain.released_at)}`}
-                        </p>
-                      </div>
+                <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                      {selectedAgent?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
+                    </div>
+                    <div>
+                      <p className="font-bold text-gray-900 text-base">{selectedAgent?.full_name}</p>
+                      <p className="text-sm text-gray-500 mt-0.5">{selectedAgent?.agency_name}</p>
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0 ml-2">
-                    {domain.status === 'active' ? (
-                      <Button
-                        onClick={() => updateDomainStatus(domain.id, 'deactivate')}
-                        variant="outline"
-                        size="sm"
-                        disabled={domainLoading}
-                        className="text-orange-600 hover:bg-orange-50 rounded-lg h-9 text-xs whitespace-nowrap"
-                      >
-                        Deactivate
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={() => updateDomainStatus(domain.id, 'active')}
-                        variant="outline"
-                        size="sm"
-                        disabled={domainLoading}
-                        className="text-green-600 hover:bg-green-50 rounded-lg h-9 text-xs whitespace-nowrap"
-                      >
-                        Activate
-                      </Button>
-                    )}
+                </div>
+                <DetailRow icon={Mail}  label="Email Address"  value={selectedAgent?.email} />
+                <DetailRow icon={Phone} label="Mobile Number"  value={selectedAgent?.mobile_number} />
+                <DetailRow icon={MapPin} label="City"          value={selectedAgent?.city} />
+              </div>
+            )}
+
+            {/* Domains tab */}
+            {activeTab === 'domains' && (
+              <div>
+                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5" /> Assigned Domains
+                  {selectedAgent?.domains?.length ? (
+                    <span className="ml-auto text-gray-400 font-normal normal-case tracking-normal text-xs">
+                      {selectedAgent.domains.length} domain{selectedAgent.domains.length !== 1 ? 's' : ''}
+                    </span>
+                  ) : null}
+                </p>
+                {selectedAgent?.domains && selectedAgent.domains.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedAgent.domains.map(dom => (
+                      <div key={dom.id}
+                        className="flex items-center justify-between p-3.5 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50/50 transition-colors">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <Globe className="w-4 h-4 text-blue-500 shrink-0" />
+                          <div className="min-w-0">
+                            <p className="font-medium text-gray-900 text-sm truncate">{dom.full_domain}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full border',
+                                domainStatusCfg[dom.status] ?? domainStatusCfg.deactivate)}>
+                                {dom.status}
+                              </span>
+                              <p className="text-xs text-gray-400">
+                                {dom.status === 'active'
+                                  ? `Activated ${fmtDate(dom.activated_at)}`
+                                  : `Released ${fmtDate(dom.released_at)}`}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="ml-3 shrink-0">
+                          {dom.status === 'active' ? (
+                            <Button onClick={() => updateDomainStatus(dom.id, 'deactivate')} variant="outline" size="sm"
+                              disabled={domainLoading} className="text-orange-600 hover:bg-orange-50 h-8 text-xs rounded-lg">
+                              Deactivate
+                            </Button>
+                          ) : (
+                            <Button onClick={() => updateDomainStatus(dom.id, 'active')} variant="outline" size="sm"
+                              disabled={domainLoading} className="text-emerald-600 hover:bg-emerald-50 h-8 text-xs rounded-lg">
+                              Activate
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-gray-400">
+                    <Globe className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-sm font-medium">No domains assigned</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Modal footer */}
+          <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50 px-5 py-4 flex items-center justify-between gap-3 flex-wrap">
+            {(selectedAgent?.status === 'pending' || selectedAgent?.status === 'invite') ? (
+              <div className="flex gap-2.5 flex-1 flex-wrap">
+                {/* {selectedAgent?.status === 'pending' && (
+                  <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'invite')} size="sm"
+                    className="flex-1 min-w-[110px] h-9 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm">
+                    <CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Send Invite
+                  </Button>
+                )} */}
+                <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'approved')} size="sm"
+                  className="flex-1 min-w-[100px] h-9 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm">
+                  <CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Approve
+                </Button>
+                <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'rejected')} size="sm" variant="outline"
+                  className="flex-1 min-w-[90px] h-9 border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-sm">
+                  <XCircle className="w-3.5 h-3.5 mr-1.5" /> Reject
+                </Button>
+              </div>
+            ) : (
+              <div className="flex-1">
+                {selectedAgent && <StatusBadge status={selectedAgent.status} />}
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Link href={selectedAgent ? `/agents/${selectedAgent.id}/edit` : '#'}>
+                <Button variant="outline" size="sm" className="h-9 px-4 text-sm font-medium">
+                  <Pencil className="w-3.5 h-3.5 mr-1.5" /> Edit
+                </Button>
+              </Link>
+              <Button variant="ghost" size="sm"
+                onClick={() => { setShowDetailsModal(false); setTimeout(() => setSelectedAgent(null), 300); }}
+                className="h-9 px-4 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 font-medium">
+                Close
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Domain Management Modal (standalone, kept for backward compat) ── */}
+      <Dialog open={showDomainModal} onOpenChange={setShowDomainModal}>
+        <DialogContent className="bg-white border border-gray-200 shadow-2xl sm:max-w-xl max-h-[80dvh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl">
+          <VisuallyHidden><DialogTitle>Domain Management</DialogTitle></VisuallyHidden>
+          <div className="px-5 py-4 border-b border-gray-100 flex-none">
+            <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
+              <Globe className="w-4 h-4 text-blue-600" /> Domain Management
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">{selectedAgent?.full_name}</p>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 space-y-2"
+            style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
+            {selectedAgent?.domains?.length ? selectedAgent.domains.map(dom => (
+              <div key={dom.id} className="flex items-center justify-between p-3.5 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <Globe className="w-4 h-4 text-blue-500 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="font-medium text-gray-900 text-sm truncate">{dom.full_domain}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full border', domainStatusCfg[dom.status] ?? domainStatusCfg.deactivate)}>
+                        {dom.status}
+                      </span>
+                      <p className="text-xs text-gray-400">
+                        {dom.status === 'active' ? `Activated ${fmtDate(dom.activated_at)}` : `Released ${fmtDate(dom.released_at)}`}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              ))
-            ) : (
-              <div className="text-center py-8 text-gray-500">
+                <div className="ml-3 shrink-0">
+                  {dom.status === 'active' ? (
+                    <Button onClick={() => updateDomainStatus(dom.id, 'deactivate')} variant="outline" size="sm"
+                      disabled={domainLoading} className="text-orange-600 hover:bg-orange-50 h-8 text-xs rounded-lg">Deactivate</Button>
+                  ) : (
+                    <Button onClick={() => updateDomainStatus(dom.id, 'active')} variant="outline" size="sm"
+                      disabled={domainLoading} className="text-emerald-600 hover:bg-emerald-50 h-8 text-xs rounded-lg">Activate</Button>
+                  )}
+                </div>
+              </div>
+            )) : (
+              <div className="text-center py-12 text-gray-400">
+                <Globe className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 <p className="text-sm font-medium">No domains assigned</p>
               </div>
             )}
           </div>
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setShowDomainModal(false)}
-              className="w-full rounded-lg h-10"
-            >
-              Close
-            </Button>
-          </DialogFooter>
+          <div className="flex-none border-t border-gray-100 bg-gray-50 px-5 py-4">
+            <Button variant="outline" onClick={() => setShowDomainModal(false)} className="w-full h-9 text-sm">Close</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

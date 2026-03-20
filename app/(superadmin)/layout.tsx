@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Menu, Settings, LogOut, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Bell, Menu, Settings, LogOut, Clock, CheckCircle, XCircle, UserCheck, Users } from 'lucide-react';
 import Sidebar, { AdminUser } from '@/components/superadmin/sidebar';
 import Loading from './loading';
 
@@ -37,13 +37,22 @@ interface WarehouseStats {
   rejected: number;
 }
 
+interface AgentStats {
+  pending: number;
+  approved: number;
+  rejected: number;
+  invite: number;
+}
+
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<AdminUser | null>(null);
-  const [stats, setStats] = useState<WarehouseStats>({ pending: 0, active: 0, rejected: 0 });
+  const [warehouseStats, setWarehouseStats] = useState<WarehouseStats>({ pending: 0, active: 0, rejected: 0 });
+  const [agentStats, setAgentStats] = useState<AgentStats>({ pending: 0, approved: 0, rejected: 0, invite: 0 });
   const pathname = usePathname();
   const router = useRouter();
   const isWarehousesPage = pathname?.startsWith('/warehouses');
+  const isAgentsPage = pathname?.startsWith('/agents');
 
   useEffect(() => {
     const handleResize = () => {
@@ -87,7 +96,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         const data = await res.json();
         if (data.success && data.warehouses) {
           const ws = data.warehouses;
-          setStats({
+          setWarehouseStats({
             pending:  ws.filter((w: { status: string }) => w.status === 'Pending').length,
             active:   ws.filter((w: { status: string }) => w.status === 'Active').length,
             rejected: ws.filter((w: { status: string }) => w.status === 'rejected').length,
@@ -97,6 +106,26 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     };
     fetchStats();
   }, [isWarehousesPage]);
+
+  useEffect(() => {
+    if (!isAgentsPage) return;
+    const fetchAgentStats = async () => {
+      try {
+        const res = await fetch('/api/superadmin/agents');
+        const data = await res.json();
+        if (data.success && data.agents) {
+          const as_ = data.agents;
+          setAgentStats({
+            pending:  as_.filter((a: { status: string }) => a.status === 'pending').length,
+            approved: as_.filter((a: { status: string }) => a.status === 'approved').length,
+            rejected: as_.filter((a: { status: string }) => a.status === 'rejected').length,
+            invite:   as_.filter((a: { status: string }) => a.status === 'invite').length,
+          });
+        }
+      } catch { /* silent */ }
+    };
+    fetchAgentStats();
+  }, [isAgentsPage]);
 
   const handleLogout = async () => {
     try {
@@ -151,20 +180,38 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                 <Menu className="w-5 h-5 text-gray-600" />
               </Button>
 
-              {/* Stats pills — desktop only, no extra height */}
+              {/* Warehouse Stats pills — desktop only */}
               {isWarehousesPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200  px-3 py-1.5">
+                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5">
                     <Clock className="w-3.5 h-12 text-amber-500 shrink-0" />
-                    <span className="text-sm font-semibold text-amber-700">{stats.pending} Pending</span>
+                    <span className="text-sm font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
                   </div>
                   <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5">
                     <CheckCircle className="w-3.5 h-12 text-emerald-500 shrink-0" />
-                    <span className="text-sm font-semibold text-emerald-700">{stats.active} Active</span>
+                    <span className="text-sm font-semibold text-emerald-700">{warehouseStats.active} Active</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200  px-3 py-1.5">
+                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5">
                     <XCircle className="w-3.5 h-12 text-rose-500 shrink-0" />
-                    <span className="text-sm font-semibold text-rose-700">{stats.rejected} Rejected</span>
+                    <span className="text-sm font-semibold text-rose-700">{warehouseStats.rejected} Rejected</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Agent Stats pills — desktop only */}
+              {isAgentsPage && (
+                <div className="hidden md:flex items-center gap-2 ml-2">
+                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 ">
+                    <Clock className="w-3.5 h-12 text-amber-500 shrink-0" />
+                    <span className="text-sm font-semibold text-amber-700">{agentStats.pending} Pending</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 ">
+                    <UserCheck className="w-3.5 h-12 text-emerald-500 shrink-0" />
+                    <span className="text-sm font-semibold text-emerald-700">{agentStats.approved} Approved</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 ">
+                    <XCircle className="w-3.5 h-12 text-rose-500 shrink-0" />
+                    <span className="text-sm font-semibold text-rose-700">{agentStats.rejected} Rejected</span>
                   </div>
                 </div>
               )}
@@ -221,23 +268,44 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             </div>
           </div>
 
-          {/* Mobile stats strip — only renders on small screens on warehouses page */}
+          {/* Mobile stats strip — warehouse */}
           {isWarehousesPage && (
             <div
               className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto"
               style={{ scrollbarWidth: 'none' }}
             >
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200  px-3 py-1 shrink-0">
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 shrink-0">
                 <Clock className="w-3 h-11 text-amber-500" />
-                <span className="text-xs font-semibold text-amber-700">{stats.pending} Pending</span>
+                <span className="text-xs font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 r px-3 py-1 shrink-0">
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 shrink-0">
                 <CheckCircle className="w-3 h-11 text-emerald-500" />
-                <span className="text-xs font-semibold text-emerald-700">{stats.active} Active</span>
+                <span className="text-xs font-semibold text-emerald-700">{warehouseStats.active} Active</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200  px-3 py-1 shrink-0">
+              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 shrink-0">
                 <XCircle className="w-3 h-11 text-rose-500" />
-                <span className="text-xs font-semibold text-rose-700">{stats.rejected} Rejected</span>
+                <span className="text-xs font-semibold text-rose-700">{warehouseStats.rejected} Rejected</span>
+              </div>
+            </div>
+          )}
+
+          {/* Mobile stats strip — agents */}
+          {isAgentsPage && (
+            <div
+              className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto"
+              style={{ scrollbarWidth: 'none' }}
+            >
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 shrink-0 ">
+                <Clock className="w-3 h-11 text-amber-500" />
+                <span className="text-xs font-semibold text-amber-700">{agentStats.pending} Pending</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 shrink-0 ">
+                <UserCheck className="w-3 h-11 text-emerald-500" />
+                <span className="text-xs font-semibold text-emerald-700">{agentStats.approved} Approved</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 shrink-0 ">
+                <XCircle className="w-3 h-11 text-rose-500" />
+                <span className="text-xs font-semibold text-rose-700">{agentStats.rejected} Rejected</span>
               </div>
             </div>
           )}
@@ -245,8 +313,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
         {/*
          * Content area: flex-1 takes all remaining height after the header.
-         * overflow-hidden lets page components (like the warehouse table)
-         * manage their own internal scrolling via their own overflow-auto.
+         * overflow-hidden lets page components manage their own internal scrolling.
          * Pages must use h-full and flex flex-col internally to fill this space.
          */}
         <div className="flex-1 min-h-0 overflow-hidden p-4 sm:p-5">
