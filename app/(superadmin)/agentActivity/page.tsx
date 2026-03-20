@@ -14,6 +14,7 @@ import {
     Pagination, PaginationContent, PaginationEllipsis, PaginationItem,
     PaginationLink, PaginationNext, PaginationPrevious,
   } from "@/components/ui/pagination";
+import { cn } from "@/lib/utils";
 interface Activity {
     id: string;
     full_name: string;
@@ -364,6 +365,8 @@ export default function AgentActivityPage() {
                                 <PaginationLink
                                     isActive={currentPage === page}
                                     onClick={() => handlePageChange(page)}
+                                    className={cn('h-8 w-8 text-sm cursor-pointer select-none rounded-lg font-medium',
+                                    currentPage === page ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:text-white' : 'hover:bg-gray-100')}
                                 >
                                     {page}
                                 </PaginationLink>
