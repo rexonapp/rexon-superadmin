@@ -526,12 +526,7 @@ export default function AgentsPage() {
                         <p className="text-sm text-gray-800 font-medium truncate max-w-[150px]">
                           {agent.domains[0].full_domain}
                         </p>
-                        <span className={cn(
-                          'inline-flex items-center text-xs font-semibold px-2 py-0.5 rounded-full border',
-                          domainStatusCfg[agent.domains[0].status] ?? domainStatusCfg.deactivate
-                        )}>
-                          {agent.domains[0].status === 'active' ? '● Active' : '● Deactivated'}
-                        </span>
+                       
                         {agent.domains.length > 1 && (
                           <p className="text-xs text-blue-500 font-medium">+{agent.domains.length - 1} more</p>
                         )}
