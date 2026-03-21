@@ -140,15 +140,6 @@ export default function SuperAdminHome() {
               </div>
               <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
             </div>
-            <Button
-              onClick={() => router.push("/agents")}
-              variant="ghost"
-              size="sm"
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-            >
-              View All
-              <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>
           </div>
 
           <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent mb-6" />
@@ -188,7 +179,19 @@ export default function SuperAdminHome() {
 
               {/* Warehouse Activity */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Warehouse Activity</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Warehouse Activity</h3>
+
+                  <Button
+                    onClick={() => router.push("/warehouseActivity")}
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  >
+                    View All
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
 
                 <div className="space-y-3">
                   {recentActivity.map((activity: any) => (
@@ -211,7 +214,19 @@ export default function SuperAdminHome() {
 
               {/* Agent Activity */}
               <div>
-                <h3 className="text-lg font-semibold mb-4">Agent Activity</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold">Agent Activity</h3>
+
+                  <Button
+                    onClick={() => router.push("/agentActivity")}
+                    variant="ghost"
+                    size="sm"
+                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  >
+                    View All
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </div>
 
                 <div className="space-y-3">
                   {agentActivities.map((activity: any) => (

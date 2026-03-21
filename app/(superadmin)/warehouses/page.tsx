@@ -495,7 +495,7 @@ export default function WarehousesPage() {
         <div className="relative w-full sm:w-xl lg:w-xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
           <Input
-            placeholder="Search property title, city ..."
+            placeholder="Search property, city, contact…"
             value={searchTerm}
             onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             className="pl-9 h-9 text-sm bg-gray-50 border-gray-200 focus:bg-white"
