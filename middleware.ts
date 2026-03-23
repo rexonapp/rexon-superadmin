@@ -6,27 +6,21 @@ const SECRET_KEY = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-secret-key-change-this-in-production'
 )
 
-
 const AUTH_ONLY_ROUTES = ['/login', '/register']
 
-const PROTECTED_PREFIXES = [
-  '/',          // catches everything — refine below with PUBLIC_ROUTES
-]
 const PUBLIC_ROUTES = new Set([
   '/login',
   '/register',
+  '/forgot-password',
+  '/reset-password',
 ])
 
-/**
- * Routes only accessible by superadmin role.
- */
+
 const SUPERADMIN_ONLY_PREFIXES = [
   '/admin',
 ]
 
-/**
- * Routes accessible by admin OR superadmin.
- */
+
 const ADMIN_PREFIXES = [
   '/dashboard',
   '/users',
@@ -55,7 +49,11 @@ async function getSessionPayload(request: NextRequest): Promise<SessionPayload |
 }
 
 function isPublicRoute(pathname: string): boolean {
-  return PUBLIC_ROUTES.has(pathname)
+  if (PUBLIC_ROUTES.has(pathname)) return true
+  for (const route of PUBLIC_ROUTES) {
+    if (pathname.startsWith(route + '/')) return true
+  }
+  return false
 }
 
 function isAuthOnlyRoute(pathname: string): boolean {
@@ -70,26 +68,26 @@ function isAdminRoute(pathname: string): boolean {
   return ADMIN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))
 }
 
-// ─── Middleware ───────────────────────────────────────────────────────────────
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Always allow Next.js internals and static assets
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/api/auth/signin') ||
     pathname.startsWith('/api/auth/signup') ||
     pathname.startsWith('/api/auth/logout') ||
     pathname.startsWith('/api/auth/me') ||
-    pathname.includes('.') // static files (favicon.ico, images, etc.)
+    pathname.startsWith('/api/auth/forgot-password') ||   
+    pathname.startsWith('/api/auth/reset-password') ||   
+    pathname.startsWith('/api/auth/verify-reset-token') || 
+    pathname.includes('.') 
   ) {
     return NextResponse.next()
   }
 
   const session = await getSessionPayload(request)
   const isLoggedIn = !!session
-
 
   if (isAuthOnlyRoute(pathname)) {
     if (isLoggedIn) {
@@ -98,12 +96,10 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // ── 2. Public routes ───────────────────────────────────────────────────────
   if (isPublicRoute(pathname)) {
     return NextResponse.next()
   }
 
-  // ── 3. All other routes require authentication ─────────────────────────────
   if (!isLoggedIn) {
     const loginUrl = new URL('/login', request.url)
     loginUrl.searchParams.set('redirect', pathname)
@@ -112,7 +108,6 @@ export async function middleware(request: NextRequest) {
 
   const role = session.role ?? 'user'
 
-  // ── 4. Superadmin-only routes ──────────────────────────────────────────────
   if (isSuperAdminRoute(pathname)) {
     if (role !== 'superadmin') {
       return NextResponse.redirect(new URL('/unauthorized', request.url))
@@ -120,7 +115,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // ── 5. Admin + Superadmin routes ──────────────────────────────────────────
   if (isAdminRoute(pathname)) {
     if (role !== 'superadmin' && role !== 'admin') {
       return NextResponse.redirect(new URL('/unauthorized', request.url))
@@ -128,11 +122,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
-  // ── 6. Logged-in user — allow through ─────────────────────────────────────
   return NextResponse.next()
 }
 
 export const config = {
-
   matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }

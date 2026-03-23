@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Eye, EyeOff, AlertCircle, LogIn, ShieldAlert, Lock, User } from 'lucide-react'
+import Link from 'next/link'
 
 export default function SuperAdminLogin() {
   const [username, setUsername] = useState('')
@@ -151,6 +152,14 @@ export default function SuperAdminLogin() {
                   </button>
                 </div>
               </div>
+              <div className="flex justify-end -mt-1">
+                <Link
+                  href="/forgot-password"
+                  className="text-[11px] text-slate-400 hover:text-blue-500 transition-colors font-medium"
+                >
+                  Forgot password?
+                </Link>
+              </div>
 
               {/* Submit */}
               <div className="pt-1">
@@ -181,19 +190,16 @@ export default function SuperAdminLogin() {
             <div className="mt-5 flex items-start gap-2.5 bg-orange-50 border border-orange-100 rounded-2xl px-4 py-3">
               <ShieldAlert size={13} className="text-orange-400 mt-0.5 shrink-0" />
               <p className="text-[11px] text-slate-500 leading-relaxed">
-                This system is monitored.{' '}
-                <span className="font-semibold text-orange-500">Unauthorized access</span>{' '}
-                attempts are logged and reported.
+                Admin control panel. Authorized persons only.
+                <span className="font-semibold text-orange-500"> </span>{' '}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Meta footer */}
-        <div className="flex items-center justify-between mt-5 px-2">
+        {/* <div className="flex items-center justify-between mt-5 px-2">
           <span className="text-[11px] text-slate-400">© {new Date().getFullYear()} Rexon. All rights reserved.</span>
-          <span className="text-[11px] text-slate-400 bg-white border border-slate-200 rounded-md px-2 py-0.5">v2.4.1</span>
-        </div>
+        </div> */}
 
       </div>
     </div>
