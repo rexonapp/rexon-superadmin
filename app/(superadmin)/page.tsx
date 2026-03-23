@@ -296,7 +296,7 @@ export default function SuperAdminHome() {
             </Button>
 
             <Button
-              onClick={()=>router.push('/users')}
+              onClick={()=>router.push('/admin')}
               className="w-full justify-between h-12 rounded-xl bg-white/50 hover:bg-white/80 text-gray-900 border border-white/60 hover:border-white/80 shadow-sm hover:shadow-md transition-all group"
               variant="outline"
             >
