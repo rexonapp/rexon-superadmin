@@ -457,10 +457,9 @@ export default function SuperadminAgentCreation() {
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen py-8 px-4 sm:px-6 lg:px-8 bg-gray-50/40">
+    <div className="h-full overflow-y-auto py-8 px-4 sm:px-6 lg:px-8 bg-gray-50/40">
       <div className="max-w-5xl mx-auto">
 
-        {/* ── Header ── */}
         <div className="mb-8">
           <div className="flex items-center text-sm text-gray-400 mb-4 gap-1.5">
             <span className="hover:text-gray-600 cursor-pointer">Agents</span>
