@@ -504,7 +504,7 @@ export default function AgentsPage() {
 
                   {/* Contact */}
                   <TableCell className="px-4 py-3.5">
-                    <p className="text-sm text-gray-800 truncate max-w-[170px]">{agent.email}</p>
+                    <p className="text-sm text-gray-800 truncate max-w-[220px]">{agent.email}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{agent.mobile_number}</p>
                   </TableCell>
 
@@ -523,7 +523,7 @@ export default function AgentsPage() {
                   <TableCell className="px-4 py-3.5">
                     {agent.domains?.length > 0 ? (
                       <div className="space-y-1">
-                        <p className="text-sm text-gray-800 font-medium truncate max-w-[150px]">
+                        <p className="text-sm text-gray-800 font-medium truncate max-w-[250px]">
                           {agent.domains[0].full_domain}
                         </p>
                        
