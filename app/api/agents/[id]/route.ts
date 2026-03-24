@@ -14,7 +14,7 @@ const s3Client = new S3Client({
 });
 
 const BUCKET_NAME = 'rexon-web';
-const PLATFORM_DOMAIN = 'rexon.com';
+const PLATFORM_DOMAIN = 'rexonproperties.in';
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 const MAX_DOCUMENT_SIZE = 5 * 1024 * 1024;
 

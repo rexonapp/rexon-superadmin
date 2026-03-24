@@ -71,7 +71,7 @@ const LANGUAGES = [
   'Malayalam','Marathi','Bengali','Gujarati','Punjabi',
 ];
 
-const PLATFORM_DOMAIN = 'rexon.com';
+const PLATFORM_DOMAIN = 'rexonproperties.in';
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
