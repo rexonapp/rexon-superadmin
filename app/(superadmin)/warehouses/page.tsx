@@ -579,7 +579,7 @@ export default function WarehousesPage() {
             <TableBody>
               {paginated.length > 0 ? paginated.map((w, i) => (
                 <TableRow key={w.id}
-                  className={cn('border-b border-gray-100 hover:bg-blue-50/50 transition-colors group cursor-pointer',
+                  className={cn('border-b border-gray-100 hover:bg-blue-100 transition-colors group cursor-pointer',
                     i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white')}
                   onClick={() => openDetails(w)}>
 
