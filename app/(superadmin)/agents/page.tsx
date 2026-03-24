@@ -802,17 +802,7 @@ export default function AgentsPage() {
                           </div>
                         </div>
                         <div className="ml-3 shrink-0">
-                          {dom.status === 'active' ? (
-                            <Button onClick={() => updateDomainStatus(dom.id, 'deactivate')} variant="outline" size="sm"
-                              disabled={domainLoading} className="text-orange-600 hover:bg-orange-50 h-8 text-xs rounded-lg">
-                              Deactivate
-                            </Button>
-                          ) : (
-                            <Button onClick={() => updateDomainStatus(dom.id, 'active')} variant="outline" size="sm"
-                              disabled={domainLoading} className="text-emerald-600 hover:bg-emerald-50 h-8 text-xs rounded-lg">
-                              Activate
-                            </Button>
-                          )}
+                         
                         </div>
                       </div>
                     ))}
