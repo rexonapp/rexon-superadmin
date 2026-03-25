@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
     // Get pending approvals
     const pendingResult = await query(
-      "SELECT COUNT(*) as count FROM warehouses WHERE status = 'pending'"
+      "SELECT COUNT(*) as count FROM warehouses WHERE status = 'Pending'"
     );
     const pendingApprovals = parseInt(pendingResult.rows[0].count);
 
