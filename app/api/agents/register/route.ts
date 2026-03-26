@@ -1,4 +1,4 @@
-// app/api/agents/register/route.ts - WITH DEBUGGING
+// app/api/agents/register/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -6,6 +6,7 @@ import { query } from '@/lib/db';
 import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 import { sendAgentInviteEmail } from '@/lib/sendemail';
+import { getAutoApprovalFlags } from '@/lib/getAutoApprovalflag';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'ap-south-2',
@@ -76,7 +77,6 @@ async function addDomainToVercel(subdomain: string): Promise<{ success: boolean;
     const data = await res.json();
 
     if (!res.ok) {
-      // Domain already exists on project — that's fine
       if (data.error?.code === 'domain_already_in_use') {
         return { success: true };
       }
@@ -95,18 +95,7 @@ async function addDomainToVercel(subdomain: string): Promise<{ success: boolean;
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('═══════════════════════════════════════════════════════');
-    console.log('🚀 START: Agent Registration - Route.ts');
-    console.log('═══════════════════════════════════════════════════════');
-
     const formData = await request.formData();
-
-    // ── DEBUG: Log all form data keys ──
-    const allKeys = Array.from(formData.keys());
-    console.log('📋 All formData keys received:', allKeys);
-    console.log('✓ Has "domainName" key?', formData.has('domainName'));
-    console.log('✓ Raw domainName value:', formData.get('domainName'));
-    console.log('✓ DomainName type:', typeof formData.get('domainName'));
 
     // Personal Details
     const fullName = formData.get('fullName') as string;
@@ -132,16 +121,6 @@ export async function POST(request: NextRequest) {
     const agencyName = formData.get('agencyName') as string || '';
     const domainNameRaw = formData.get('domainName') as string;
     const domainName = (domainNameRaw || '').trim().toLowerCase();
-
-    // ── DEBUG: Log extracted domain data ──
-    console.log('📝 Domain extraction details:', {
-      domainNameRaw,
-      domainName,
-      domainName_type: typeof domainName,
-      domainName_length: domainName?.length,
-      domainName_isEmpty: domainName === '',
-      domainName_isFalsy: !domainName,
-    });
 
     // Additional Information
     const languagesSpokenStr = formData.get('languagesSpoken') as string;
@@ -216,7 +195,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // ── Check both active and pending to prevent race conditions ──────────
       const domainCheck = await query(
         `SELECT id FROM agent_domains WHERE domain_name = $1 AND status IN ('active', 'pending')`,
         [domainName]
@@ -281,6 +259,10 @@ export async function POST(request: NextRequest) {
     const passwordSalt = await bcrypt.genSalt(BCRYPT_ROUNDS);
     const passwordHash = await bcrypt.hash(temporaryPassword, passwordSalt);
 
+   
+    const { autoApproveAgents } = await getAutoApprovalFlags();
+    const initialStatus = autoApproveAgents ? 'Approved' : 'Pending';
+
     // ── Insert agent ──────────────────────────────────────────────────────
     const agentResult = await query(
       `INSERT INTO agents
@@ -303,10 +285,10 @@ export async function POST(request: NextRequest) {
         kycDocumentS3Key, kycDocumentS3Url,
         languagesSpoken.length > 0 ? languagesSpoken : null,
         passwordHash, passwordSalt,
-        true,   // is_temporary_password
-        true,   // terms_accepted
-        false,  // is_verified
-        'pending',
+        true,          // is_temporary_password
+        true,          // terms_accepted
+        false,         // is_verified
+        initialStatus, // ← CHANGED: was 'pending', now dynamic
       ]
     );
 
@@ -327,7 +309,6 @@ export async function POST(request: NextRequest) {
     if (domainName) {
       const fullDomain = `${domainName}.${PLATFORM_DOMAIN}`;
 
-      // 1. Save to DB as pending first
       await query(
         `INSERT INTO agent_domains
          (agent_id, domain_name, full_domain, status, is_active, created_at)
@@ -335,10 +316,8 @@ export async function POST(request: NextRequest) {
         [agentId, domainName, fullDomain]
       );
 
-      // 2. Call Vercel API to add the subdomain to rexon-crm project
       const vercelResult = await addDomainToVercel(domainName);
 
-      // 3. Update DB status based on Vercel result
       await query(
         `UPDATE agent_domains
          SET status = $1, updated_at = NOW()
@@ -347,36 +326,19 @@ export async function POST(request: NextRequest) {
       );
 
       if (!vercelResult.success) {
-        // Don't fail the whole registration — agent is created, domain just needs retry
         console.error(`Domain provisioning failed for ${fullDomain}:`, vercelResult.error);
       }
     }
 
-    // ── Send invite email with domain name ─────────────────────────────────
-    console.log('═══════════════════════════════════════════════════════');
-    console.log('📧 SENDING EMAIL');
-    console.log('═══════════════════════════════════════════════════════');
-    console.log('📧 About to call sendAgentInviteEmail with:', {
-      fullName,
-      email,
-      domainName,  // ← CHECK THIS!
-      agencyName,
-      city,
-    });
-
+    // ── Send invite email ──────────────────────────────────────────────────
     const emailResult = await sendAgentInviteEmail({
       fullName,
       email,
       temporaryPassword,
       agencyName: agencyName || undefined,
       city: city || undefined,
-      domainName: domainName || undefined,  // ← PASSING THIS
+      domainName: domainName || undefined,
     });
-
-    console.log('📧 Email send result:', emailResult);
-    console.log('═══════════════════════════════════════════════════════');
-    console.log('✅ FINISHED: Agent Registration');
-    console.log('═══════════════════════════════════════════════════════');
 
     return NextResponse.json({
       success: true,

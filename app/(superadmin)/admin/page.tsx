@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import Loading from '../loading';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface User {
@@ -211,8 +212,11 @@ export default function UsersPage() {
 
         {/* Result count */}
         <div className="sm:ml-auto">
-          <span className="text-xs text-gray-400 font-medium">
-          </span>
+          <Link href={'/admin/addUser'}>
+         <Button  size="sm"  className="h-9 px-3 bg-blue-600 hover:bg-blue-500 text-sm">
+            Add User
+         </Button>
+          </Link>
         </div>
       </div>
 

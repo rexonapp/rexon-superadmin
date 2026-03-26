@@ -3,7 +3,6 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client
 import { query } from '@/lib/db';
 import { randomBytes } from 'crypto';
 
-// ─── S3 ───────────────────────────────────────────────────────────────────────
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'ap-south-2',

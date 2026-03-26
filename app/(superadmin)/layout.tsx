@@ -2,16 +2,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { Bell, Menu, Settings, LogOut, Clock, CheckCircle, XCircle, UserCheck, Users } from 'lucide-react';
+import { Bell, Menu, Settings, LogOut, Clock, CheckCircle, XCircle, UserCheck } from 'lucide-react';
 import Sidebar, { AdminUser } from '@/components/superadmin/sidebar';
 import Loading from './loading';
+import { BrandingProvider, useBranding } from '@/lib/context/BrandingContext';
+import { Toaster } from "@/components/ui/sonner";
 
 const menuItems = [
   { label: 'Dashboard',  path: '/'           },
@@ -21,43 +23,31 @@ const menuItems = [
   { label: 'Settings',   path: '/settings'   },
 ];
 
-function getActiveLabel(pathname: string | null): string {
-  if (!pathname) return 'Dashboard';
-  const exact = menuItems.find(i => i.path === pathname);
-  if (exact) return exact.label;
-  const prefix = menuItems
-    .filter(i => i.path !== '/')
-    .find(i => pathname.startsWith(i.path));
-  return prefix?.label ?? 'Dashboard';
-}
+interface WarehouseStats { pending: number; active: number; rejected: number; }
+interface AgentStats     { pending: number; approved: number; rejected: number; invite: number; }
 
-interface WarehouseStats {
-  pending: number;
-  active: number;
-  rejected: number;
-}
 
-interface AgentStats {
-  pending: number;
-  approved: number;
-  rejected: number;
-  invite: number;
-}
-
-export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+function SuperAdminInner({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [user, setUser]               = useState<AdminUser | null>(null);
   const [warehouseStats, setWarehouseStats] = useState<WarehouseStats>({ pending: 0, active: 0, rejected: 0 });
-  const [agentStats, setAgentStats] = useState<AgentStats>({ pending: 0, approved: 0, rejected: 0, invite: 0 });
-  const pathname = usePathname();
-  const router = useRouter();
+  const [agentStats, setAgentStats]         = useState<AgentStats>({ pending: 0, approved: 0, rejected: 0, invite: 0 });
+
+  const pathname         = usePathname();
+  const router           = useRouter();
+  const { companyName, logoUrl } = useBranding();
   const isWarehousesPage = pathname?.startsWith('/warehouses');
-  const isAgentsPage = pathname?.startsWith('/agents');
+  const isAgentsPage     = pathname?.startsWith('/agents');
+
+  // Treat empty string / null / undefined all as "no image"
+  const userImageUrl: string | undefined = (user as any)?.avatar_url || undefined;
+  const userInitials = user
+    ? `${user.first_name?.[0] ?? ''}${user.last_name?.[0] ?? ''}`.toUpperCase()
+    : '';
+  const userFullName = user ? `${user.first_name} ${user.last_name}` : '';
 
   useEffect(() => {
-    const handleResize = () => {
-      setSidebarOpen(window.innerWidth >= 1024);
-    };
+    const handleResize = () => setSidebarOpen(window.innerWidth >= 1024);
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
@@ -66,18 +56,19 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch('/api/auth/me');
+        const res  = await fetch('/api/auth/me');
         const data = await res.json();
         if (data.user) {
           setUser({
-            id:         data.user.userId,
-            username:   data.user.username,
-            first_name: data.user.firstName,
-            last_name:  data.user.lastName,
-            email:      data.user.email,
-            role:       data.user.role ?? 'user',
-            is_active:  true,
-          });
+            id:          data.user.userId,
+            username:    data.user.username,
+            first_name:  data.user.firstName,
+            last_name:   data.user.lastName,
+            email:       data.user.email,
+            role:        data.user.role ?? 'user',
+            is_active:   true,
+            avatar_url:  data.user.avatarUrl ?? null,
+          } as AdminUser);
         } else {
           router.replace('/login');
         }
@@ -90,9 +81,9 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   useEffect(() => {
     if (!isWarehousesPage) return;
-    const fetchStats = async () => {
+    (async () => {
       try {
-        const res = await fetch('/api/superadmin/warehouses');
+        const res  = await fetch('/api/superadmin/warehouses');
         const data = await res.json();
         if (data.success && data.warehouses) {
           const ws = data.warehouses;
@@ -103,15 +94,14 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           });
         }
       } catch { /* silent */ }
-    };
-    fetchStats();
+    })();
   }, [isWarehousesPage]);
 
   useEffect(() => {
     if (!isAgentsPage) return;
-    const fetchAgentStats = async () => {
+    (async () => {
       try {
-        const res = await fetch('/api/superadmin/agents');
+        const res  = await fetch('/api/superadmin/agents');
         const data = await res.json();
         if (data.success && data.agents) {
           const as_ = data.agents;
@@ -123,8 +113,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           });
         }
       } catch { /* silent */ }
-    };
-    fetchAgentStats();
+    })();
   }, [isAgentsPage]);
 
   const handleLogout = async () => {
@@ -137,13 +126,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   if (!user) return <Loading />;
 
   return (
-    /*
-     * Root: covers exactly the viewport. overflow-hidden ensures nothing
-     * on this element ever scrolls — children manage their own overflow.
-     */
     <div className="fixed inset-0 bg-gray-50 flex overflow-hidden">
 
-      {/* Sidebar — fixed, absolutely positioned inside the flex row */}
       <Sidebar
         user={user}
         sidebarOpen={sidebarOpen}
@@ -151,11 +135,6 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         onLogout={handleLogout}
       />
 
-      {/*
-       * Main column: offset by sidebar width via margin.
-       * flex-col so header stacks above content.
-       * overflow-hidden so the content area below can flex properly.
-       */}
       <main
         className={`
           flex flex-col flex-1 min-w-0 min-h-0 overflow-hidden
@@ -163,24 +142,38 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           ml-0 ${sidebarOpen ? 'lg:ml-72' : 'lg:ml-20'}
         `}
       >
-
-        {/* ── Header — fixed height, never grows or shrinks ── */}
+        {/* ── Header ── */}
         <header className="flex-shrink-0 bg-white border-b border-gray-200 z-20">
-          {/* Main header bar: 64px */}
           <div className="h-16 px-4 sm:px-6 flex items-center justify-between gap-4">
 
             {/* Left */}
             <div className="flex items-center gap-3 min-w-0">
               <Button
-                variant="ghost"
-                size="icon"
+                variant="ghost" size="icon"
                 className="-ml-1 hover:bg-gray-100 shrink-0"
                 onClick={() => setSidebarOpen(!sidebarOpen)}
               >
                 <Menu className="w-5 h-5 text-gray-600" />
               </Button>
 
-              {/* Warehouse Stats pills — desktop only */}
+              {/* Mobile logo pill — hidden on lg+ (sidebar handles it) */}
+              <div className="flex items-center gap-2 lg:hidden">
+                <div className="w-7 h-7 rounded-lg overflow-hidden shadow-sm shrink-0 bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+                  {logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-white text-[10px] font-bold">
+                      {(companyName || 'R')[0].toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <span className="text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent truncate max-w-[120px]">
+                  {companyName || 'Rexon'}
+                </span>
+              </div>
+
+              {/* Warehouse stat pills */}
               {isWarehousesPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
                   <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5">
@@ -198,18 +191,18 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                 </div>
               )}
 
-              {/* Agent Stats pills — desktop only */}
+              {/* Agent stat pills */}
               {isAgentsPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 ">
+                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5">
                     <Clock className="w-3.5 h-12 text-amber-500 shrink-0" />
                     <span className="text-sm font-semibold text-amber-700">{agentStats.pending} Pending</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 ">
+                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5">
                     <UserCheck className="w-3.5 h-12 text-emerald-500 shrink-0" />
                     <span className="text-sm font-semibold text-emerald-700">{agentStats.approved} Approved</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 ">
+                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5">
                     <XCircle className="w-3.5 h-12 text-rose-500 shrink-0" />
                     <span className="text-sm font-semibold text-rose-700">{agentStats.rejected} Rejected</span>
                   </div>
@@ -226,26 +219,41 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100">
-                    <Avatar className="w-8 h-8">
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs font-bold">
-                        {user.first_name?.[0]}{user.last_name?.[0]}
-                      </AvatarFallback>
+                  {/*
+                    PLACE 3 — Header top-right avatar button
+                    • Has image  → show profile image only
+                    • No image   → show initials only
+                  */}
+                  <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 w-11 h-11 p-0">
+                    <Avatar className="w-10 h-10">
+                      {logoUrl ? (
+                        <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
+                      ) : (
+                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs font-bold">
+                          {userInitials}
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-60">
-                  <div className="px-3 py-3 border-b border-gray-100">
+
+                <DropdownMenuContent align="end" className="w-64">
+               
+
+                  {/* User row inside dropdown — always show avatar + name + email for context */}
+                  <div className="px-3 py-2.5 border-b border-gray-100">
                     <div className="flex items-center gap-3">
                       <Avatar className="w-10 h-10 shrink-0">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-sm">
-                          {user.first_name?.[0]}{user.last_name?.[0]}
-                        </AvatarFallback>
+                        {logoUrl ? (
+                          <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
+                        ) : (
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-sm">
+                            {userInitials}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="font-semibold text-sm text-gray-900 truncate">
-                          {user.first_name} {user.last_name}
-                        </p>
+                        <p className="font-semibold text-sm text-gray-900 truncate">{userFullName}</p>
                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
                         <Badge className="mt-1 text-[10px] h-4 bg-blue-100 text-blue-700 hover:bg-blue-100">
                           {user.role?.toUpperCase()}
@@ -253,6 +261,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                       </div>
                     </div>
                   </div>
+
                   <DropdownMenuItem onClick={() => router.push('/settings')} className="cursor-pointer text-sm">
                     <Settings className="w-4 h-4 mr-2 text-gray-500" /> Settings
                   </DropdownMenuItem>
@@ -268,12 +277,9 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             </div>
           </div>
 
-          {/* Mobile stats strip — warehouse */}
+          {/* Mobile stats — warehouses */}
           {isWarehousesPage && (
-            <div
-              className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto"
-              style={{ scrollbarWidth: 'none' }}
-            >
+            <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
               <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 shrink-0">
                 <Clock className="w-3 h-11 text-amber-500" />
                 <span className="text-xs font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
@@ -289,21 +295,18 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
             </div>
           )}
 
-          {/* Mobile stats strip — agents */}
+          {/* Mobile stats — agents */}
           {isAgentsPage && (
-            <div
-              className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto"
-              style={{ scrollbarWidth: 'none' }}
-            >
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 shrink-0 ">
+            <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 shrink-0">
                 <Clock className="w-3 h-11 text-amber-500" />
                 <span className="text-xs font-semibold text-amber-700">{agentStats.pending} Pending</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 shrink-0 ">
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 shrink-0">
                 <UserCheck className="w-3 h-11 text-emerald-500" />
                 <span className="text-xs font-semibold text-emerald-700">{agentStats.approved} Approved</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 shrink-0 ">
+              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 shrink-0">
                 <XCircle className="w-3 h-11 text-rose-500" />
                 <span className="text-xs font-semibold text-rose-700">{agentStats.rejected} Rejected</span>
               </div>
@@ -311,16 +314,20 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           )}
         </header>
 
-        {/*
-         * Content area: flex-1 takes all remaining height after the header.
-         * overflow-hidden lets page components manage their own internal scrolling.
-         * Pages must use h-full and flex flex-col internally to fill this space.
-         */}
         <div className="flex-1 min-h-0 overflow-hidden p-4 sm:p-5">
           {children}
         </div>
-
       </main>
     </div>
+  );
+}
+
+export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <BrandingProvider>
+      <SuperAdminInner>{children}
+      <Toaster />
+      </SuperAdminInner>
+    </BrandingProvider>
   );
 }
