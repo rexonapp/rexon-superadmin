@@ -63,17 +63,17 @@ export default function DashboardClient({ initialData }: Props) {
     }
   );
 
-  const stats: Stats                   = dashData?.stats              ?? initialData.stats;
-  const recentActivity: ActivityItem[] = dashData?.recentActivity     ?? initialData.recentActivity;
-  const agentActivities: any[]         = agentData?.data?.activities  ?? initialData.agentActivities;
+  const stats: Stats = dashData?.stats ?? initialData.stats;
+  const recentActivity: ActivityItem[] = dashData?.recentActivity ?? initialData.recentActivity;
+  const agentActivities: any[] = agentData?.data?.activities ?? initialData.agentActivities;
 
   const isRefreshing = dashValidating || agentValidating;
 
   const statCards = [
-    { label: 'Total Warehouses',  value: stats.totalWarehouses.toString(),  icon: Building2, color: 'blue' as const },
-    { label: 'Pending Approvals', value: stats.pendingApprovals.toString(), icon: Clock,     color: 'cyan' as const },
-    { label: 'Leads',             value: stats.totalUsers.toString(),        icon: Users,     color: 'blue' as const },
-    { label: 'Agent Network',     value: stats.totalAgents.toString(),       icon: UserCheck, color: 'cyan' as const },
+    { label: 'Total Warehouses', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const },
+    { label: 'Pending Approvals', value: stats.pendingApprovals.toString(), icon: Clock, color: 'cyan' as const },
+    { label: 'Leads', value: stats.totalUsers.toString(), icon: Users, color: 'blue' as const },
+    { label: 'Agent Network', value: stats.totalAgents.toString(), icon: UserCheck, color: 'cyan' as const },
   ];
 
   return (
@@ -131,65 +131,119 @@ export default function DashboardClient({ initialData }: Props) {
               </div>
               <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
             </div>
+            <div className="ml-auto">
+            <Button
+              onClick={() => router.push('/agentWarehouseActivity')}
+              variant="ghost"
+              size="sm"
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            >
+              View All
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </Button>`
+            </div>
           </div>
 
           <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent mb-6" />
 
-          {recentActivity.length > 0 || agentActivities.length > 0 ? (
+          {recentActivity.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-              {/* ── Warehouse Activity ── */}
-              <div className="flex flex-col">
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Warehouse Activity</h3>
-                  <Button
-                    onClick={() => router.push('/warehouseActivity')}
-                    variant="ghost"
-                    size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                  >
-                    View All
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div>
-
+              {/* ── Activity Table ── */}
+              <div className="col-span-1 md:col-span-2">
                 {recentActivity.length > 0 ? (
-                  /*
-                   * max-h caps the list height.
-                   * overflow-y-auto + activity-scroll = thin custom scrollbar.
-                   * scrollbar-width thin = Firefox.
-                   * pr-2 gives breathing room so thumb doesn't overlap content.
-                   */
                   <div
-                    className="activity-scroll space-y-3 pr-2"
+                    className="overflow-x-auto"
                     style={{
-                      maxHeight: '460px',
-                      overflowY: 'auto',
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#CBD5E1 transparent',
+                      maxHeight: "460px",
+                      overflowY: "auto",
+                      scrollbarWidth: "thin",
+                      scrollbarColor: "#CBD5E1 transparent",
                     }}
                   >
-                    {recentActivity.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex justify-between items-center p-3 border rounded-lg hover:bg-white/60 transition-colors"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium truncate">{activity.action}</p>
-                          <p className="text-xs text-gray-500 truncate">{activity.warehouse}</p>
-                        </div>
-                        <span className="text-xs text-gray-400 ml-2 shrink-0">{activity.time}</span>
-                      </div>
-                    ))}
+                    <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+                      <thead className="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th className="p-3 text-left  text-gray-500 font-semibold">Property</th>
+                          <th className="p-3 text-left  text-gray-500 font-semibold">Agent</th>
+                          <th className="p-3 text-left  text-gray-500 font-semibold">City</th>
+                          <th className="p-3 text-left  text-gray-500 font-semibold">Type</th>
+                          <th className="p-3 text-left  text-gray-500 font-semibold">Price</th>
+                          <th className="p-3 text-left  text-gray-500 font-semibold">Status</th>
+                          <th className="p-3 text-left  text-gray-500 font-semibold">Created</th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {recentActivity.map((activity) => (
+                          <tr key={activity.id} className="border-t hover:bg-white/60">
+                            {/* Property */}
+                            <td className="p-3 font-medium">
+                              {activity.warehouse}
+                            </td>
+
+                            {/* Agent */}
+                            <td className="p-3">
+                              <div className="flex flex-col">
+                                <span className="font-medium">{activity.full_name}</span>
+                                <span className="text-xs text-gray-500">{activity.email}</span>
+                              </div>
+                            </td>
+
+                            {/* City */}
+                            <td className="p-3">
+                              {activity.city}
+                            </td>
+
+                            {/* Type */}
+                            <td className="p-3 capitalize">
+                              {activity.action.includes("warehouse") ? "Warehouse" : "-"}
+                            </td>
+
+                            {/* Price */}
+                            <td className="p-3">₹ {activity.price_per_sqft ?? "-"}</td>
+
+                            {/* Status */}
+                            <td className="p-3">
+                              <span
+                                className={`px-3 py-1 rounded-full text-xs font-semibold border
+                                  ${
+                                    activity.status === "success"
+                                      ? "bg-green-50 text-green-700 border-green-200"
+                                      : activity.status === "pending"
+                                      ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                      : activity.status === "rejected"
+                                      ? "bg-red-50 text-red-700 border-red-200"
+                                      : "bg-gray-50 text-gray-600 border-gray-200"
+                                  }`}
+                              >
+                                {activity.status === "success"
+                                  ? "Active"
+                                  : activity.status === "pending"
+                                    ? "Pending"
+                                    : activity.status === "rejected"
+                                      ? "Rejected"
+                                      : activity.status}
+                              </span>
+                            </td>
+
+                            {/* Created */}
+                            <td className="p-3 text-gray-500">{activity.time}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-400 py-6 text-center">No warehouse activity</p>
+                  <p className="text-sm text-gray-400 py-6 text-center">
+                    No recent activity found
+                  </p>
                 )}
               </div>
 
               {/* ── Agent Activity ── */}
-              <div className="flex flex-col">
-                <div className="flex justify-between items-center mb-4">
+              {/* <div className="flex flex-col"> */}
+              {/* <div className="flex justify-between items-center mb-4">
                   <h3 className="text-lg font-semibold">Agent Activity</h3>
                   <Button
                     onClick={() => router.push('/agentActivity')}
@@ -200,9 +254,9 @@ export default function DashboardClient({ initialData }: Props) {
                     View All
                     <ArrowRight className="w-4 h-4 ml-1" />
                   </Button>
-                </div>
+                </div> */}
 
-                {agentActivities.length > 0 ? (
+              {/* {agentActivities.length > 0 ? (
                   <div
                     className="activity-scroll space-y-3 pr-2"
                     style={{
@@ -232,8 +286,8 @@ export default function DashboardClient({ initialData }: Props) {
                   </div>
                 ) : (
                   <p className="text-sm text-gray-400 py-6 text-center">No agent activity</p>
-                )}
-              </div>
+                )} */}
+              {/* </div> */}
 
             </div>
           ) : (

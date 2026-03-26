@@ -17,10 +17,13 @@ export interface ActivityItem {
   id: string;
   action: string;
   warehouse?: string;
+  city?: string;
   user?: string;
+  price_per_sqft?: string;
+  full_name?: string;
   email?: string;
   time: string;
-  status: 'success' | 'warning' | 'info' | 'pending';
+  status: 'success' | 'warning' | 'info' | 'pending' | 'rejected';
 }
 
 export interface DashboardData {

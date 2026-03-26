@@ -94,7 +94,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
     <TableHead
       onClick={() => onSort(col)}
       className={cn(
-        'text-xs font-bold uppercase tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer',
+        'text-xs font-bold tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer',
         'hover:bg-gray-100 transition-colors',
         active ? 'text-blue-600 bg-blue-50/60' : 'text-gray-500',
         className
@@ -289,7 +289,7 @@ function DetailRow({ icon: Icon, label, value, accent = 'blue' }: {
         <Icon className="w-4 h-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{label}</p>
+        <p className="text-xs font-bold text-gray-400 tracking-wide">{label}</p>
         <p className="text-sm font-semibold text-gray-800 mt-0.5 break-words">{value}</p>
       </div>
     </div>
@@ -570,7 +570,7 @@ export default function WarehousesPage() {
                     sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
                     className={cn(c.className, 'bg-gray-50 sticky top-0 z-10')} />
                 ))}
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">
+                <TableHead className="text-xs font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">
                   Actions
                 </TableHead>
               </TableRow>
