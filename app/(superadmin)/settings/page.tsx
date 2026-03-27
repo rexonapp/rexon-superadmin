@@ -1,11 +1,16 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import { Shield, Save, Building2, Mail, Camera, X, ZoomIn, ZoomOut, RotateCcw, Check, Loader2 } from 'lucide-react';
+import {
+  Shield, Save, Building2, Mail, Camera, X,
+  ZoomIn, ZoomOut, RotateCcw, Check, Loader2,
+  AlertTriangle,
+} from 'lucide-react';
 import GlassCard from '@/components/superadmin/GlassCard';
 import { useBranding } from '@/lib/context/BrandingContext';
 import { toast } from 'sonner';
@@ -15,14 +20,106 @@ import { toast } from 'sonner';
 ───────────────────────────────────────────────────────────── */
 interface SettingsState {
   companyName: string;
-  logoFinal: string;           // data-URL (new) | S3 URL (loaded) | '' (cleared)
+  logoFinal: string;
   autoApproveListings: boolean;
   autoApproveAgents: boolean;
   maintenanceMode: boolean;
   minWarehouseSize: string;
   maxListingsPerUser: string;
-  sendgridApiKey: string | undefined; // undefined = don't touch existing key in DB
-  sendgridConfigured: boolean;        // read-only, from server
+  sendgridApiKey: string | undefined;
+  sendgridConfigured: boolean;
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Unsaved Changes Modal
+───────────────────────────────────────────────────────────── */
+interface UnsavedChangesModalProps {
+  onStay: () => void;
+  onLeave: () => void;
+  onSaveAndLeave: () => Promise<void>;
+}
+
+function UnsavedChangesModal({ onStay, onLeave, onSaveAndLeave }: UnsavedChangesModalProps) {
+  const [saving, setSaving] = useState(false);
+
+  const handleSaveAndLeave = async () => {
+    setSaving(true);
+    try {
+      await onSaveAndLeave();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onStay(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onStay]);
+
+  return (
+    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+        onClick={onStay}
+      />
+
+      {/* Modal */}
+      <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        {/* Top accent bar */}
+        <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400" />
+
+        <div className="p-6 space-y-5">
+          {/* Icon + Title */}
+          <div className="flex items-start gap-4">
+            <div className="shrink-0 w-11 h-11 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center shadow-sm">
+              <AlertTriangle className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-gray-900 leading-snug">
+                You have unsaved changes
+              </h3>
+              <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+                Your changes will be permanently lost if you leave this page without saving.
+              </p>
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-100" />
+
+          {/* Action buttons */}
+          <div className="flex flex-col-reverse sm:flex-row gap-2.5">
+            <Button
+              variant="outline"
+              onClick={onLeave}
+              className="flex-1 h-10 border-gray-200 text-gray-600 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50 font-medium transition-all text-sm"
+            >
+              Discard & Leave
+            </Button>
+            <Button
+              variant="outline"
+              onClick={onStay}
+              className="flex-1 h-10 border-gray-200 text-gray-700 hover:bg-gray-50 font-medium transition-all text-sm"
+            >
+              Keep Editing
+            </Button>
+            <Button
+              onClick={handleSaveAndLeave}
+              disabled={saving}
+              className="flex-1 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-md shadow-blue-500/20 transition-all text-sm gap-2"
+            >
+              {saving
+                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...</>
+                : <><Save className="w-3.5 h-3.5" /> Save & Leave</>}
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -133,6 +230,8 @@ function LogoCropModal({ imageSrc, onConfirm, onCancel }: CropModalProps) {
    Main Settings Page
 ───────────────────────────────────────────────────────────── */
 export default function SettingsPage() {
+  const router = useRouter();
+
   const [settings, setSettings] = useState<SettingsState>({
     companyName:          '',
     logoFinal:            '',
@@ -145,14 +244,94 @@ export default function SettingsPage() {
     sendgridConfigured:   false,
   });
 
-  const [loading, setLoading] = useState(true);
-  const [saving,  setSaving]  = useState(false);
-  const [cropSrc, setCropSrc] = useState<string | null>(null);
+  // The "clean" baseline — what was last saved/loaded from the server
+  const savedSettings = useRef<SettingsState | null>(null);
+
+  const [loading, setLoading]               = useState(true);
+  const [saving,  setSaving]                = useState(false);
+  const [isDirty, setIsDirty]               = useState(false);
+  const [cropSrc, setCropSrc]               = useState<string | null>(null);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+
+  // Stores the href the user tried to navigate to
+  const pendingNavUrl = useRef<string | null>(null);
+  // Set true right before we programmatically push so the guard ignores it
+  const allowNavRef   = useRef(false);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { setLogoUrl, setCompanyName } = useBranding();
 
+  /* ── Dirty detection ──────────────────────────────────────── */
+  useEffect(() => {
+    if (!savedSettings.current) return;
+    const s = savedSettings.current;
+    const dirty =
+      settings.companyName         !== s.companyName         ||
+      settings.logoFinal           !== s.logoFinal           ||
+      settings.autoApproveListings !== s.autoApproveListings ||
+      settings.autoApproveAgents   !== s.autoApproveAgents   ||
+      settings.maintenanceMode     !== s.maintenanceMode     ||
+      settings.minWarehouseSize    !== s.minWarehouseSize    ||
+      settings.maxListingsPerUser  !== s.maxListingsPerUser  ||
+      (settings.sendgridApiKey !== undefined && settings.sendgridApiKey !== '');
+    setIsDirty(dirty);
+  }, [settings]);
 
-  // Load existing settings on mount
+  /* ── Browser unload guard (tab close / hard refresh) ─────── */
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
+
+  /* ── Click capture guard ──────────────────────────────────── */
+  // Runs in the capture phase — fires before React's synthetic events and
+  // before Next.js Link's onClick, so we can cancel navigation reliably.
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const handleClick = (e: MouseEvent) => {
+      // If we just allowed a nav (after modal "Leave"), skip
+      if (allowNavRef.current) return;
+
+      // Walk up the DOM to find the nearest <a> tag
+      let el = e.target as HTMLElement | null;
+      while (el && el.tagName !== 'A') {
+        el = el.parentElement;
+      }
+      if (!el) return;
+
+      const anchor = el as HTMLAnchorElement;
+      const href   = anchor.getAttribute('href');
+
+      // Ignore non-navigation or external hrefs
+      if (!href) return;
+      if (href.startsWith('http://') || href.startsWith('https://')) return;
+      if (href.startsWith('#')) return;
+      if (anchor.target === '_blank') return;
+
+      // Compare just the pathname (strip query/hash for comparison)
+      const targetPath  = href.split('?')[0].split('#')[0];
+      const currentPath = window.location.pathname;
+      if (targetPath === currentPath) return;
+
+      // Intercept — show unsaved modal instead of navigating
+      e.preventDefault();
+      e.stopPropagation();
+      pendingNavUrl.current = href;
+      setShowUnsavedModal(true);
+    };
+
+    // capture: true = fires before bubbling, before Next.js Link handler
+    document.addEventListener('click', handleClick, true);
+    return () => document.removeEventListener('click', handleClick, true);
+  }, [isDirty]);
+
+  /* ── Load settings ────────────────────────────────────────── */
   useEffect(() => {
     async function load() {
       try {
@@ -160,8 +339,7 @@ export default function SettingsPage() {
         const data = await res.json();
         if (data.success && data.settings) {
           const s = data.settings;
-          setSettings(p => ({
-            ...p,
+          const loaded: SettingsState = {
             companyName:         s.company_name           ?? '',
             logoFinal:           s.logo_s3_url            ?? '',
             autoApproveListings: s.auto_approve_listings  ?? false,
@@ -171,7 +349,9 @@ export default function SettingsPage() {
             maxListingsPerUser:  String(s.max_listings_per_user ?? 10),
             sendgridConfigured:  s.sendgrid_configured    ?? false,
             sendgridApiKey:      undefined,
-          }));
+          };
+          setSettings(loaded);
+          savedSettings.current = loaded;
         }
       } catch (err) {
         console.error('Failed to load settings:', err);
@@ -182,6 +362,96 @@ export default function SettingsPage() {
     load();
   }, []);
 
+  /* ── Core save logic ──────────────────────────────────────── */
+  const performSave = useCallback(async () => {
+    const payload: Record<string, unknown> = {
+      companyName:         settings.companyName,
+      autoApproveListings: settings.autoApproveListings,
+      autoApproveAgents:   settings.autoApproveAgents,
+      maintenanceMode:     settings.maintenanceMode,
+      minWarehouseSize:    Number(settings.minWarehouseSize)  || 100,
+      maxListingsPerUser:  Number(settings.maxListingsPerUser) || 10,
+    };
+
+    if (settings.logoFinal === '') {
+      payload.logoFinal = '';
+    } else if (settings.logoFinal.startsWith('data:')) {
+      payload.logoFinal = settings.logoFinal;
+    }
+
+    if (settings.sendgridApiKey !== undefined) {
+      payload.sendgridApiKey = settings.sendgridApiKey;
+    }
+
+    const res  = await fetch('/api/superadmin/settings', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (data.success) {
+      if (data.logoUrl)              setLogoUrl(data.logoUrl);
+      if (settings.logoFinal === '') setLogoUrl('');
+      setCompanyName(settings.companyName);
+
+      const updated: SettingsState = {
+        ...settings,
+        logoFinal:          data.logoUrl ?? (settings.logoFinal === '' ? '' : settings.logoFinal),
+        sendgridApiKey:     undefined,
+        sendgridConfigured: settings.sendgridApiKey ? true : settings.sendgridConfigured,
+      };
+      setSettings(updated);
+      savedSettings.current = updated;
+      setIsDirty(false);
+      toast.success('Settings saved successfully');
+    } else {
+      throw new Error(data.error || 'Unknown error');
+    }
+  }, [settings, setLogoUrl, setCompanyName]);
+
+  /* ── Save button ──────────────────────────────────────────── */
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await performSave();
+    } catch (err) {
+      console.error('Save error:', err);
+      toast.error('Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* ── Modal: Stay ──────────────────────────────────────────── */
+  const handleStay = useCallback(() => {
+    setShowUnsavedModal(false);
+    pendingNavUrl.current = null;
+  }, []);
+
+  /* ── Modal: Leave without saving ─────────────────────────── */
+  const handleLeave = useCallback(() => {
+    setShowUnsavedModal(false);
+    allowNavRef.current = true;
+    const url = pendingNavUrl.current;
+    pendingNavUrl.current = null;
+    if (url) router.push(url);
+    // Reset allow flag after a tick so the guard re-arms for future use
+    setTimeout(() => { allowNavRef.current = false; }, 100);
+  }, [router]);
+
+  /* ── Modal: Save then leave ───────────────────────────────── */
+  const handleSaveAndLeave = useCallback(async () => {
+    await performSave();
+    allowNavRef.current = true;
+    setShowUnsavedModal(false);
+    const url = pendingNavUrl.current;
+    pendingNavUrl.current = null;
+    if (url) router.push(url);
+    setTimeout(() => { allowNavRef.current = false; }, 100);
+  }, [performSave, router]);
+
+  /* ── File handlers ────────────────────────────────────────── */
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -194,53 +464,6 @@ export default function SettingsPage() {
   const handleCropConfirm = (dataUrl: string) => {
     setSettings(p => ({ ...p, logoFinal: dataUrl }));
     setCropSrc(null);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const payload: Record<string, unknown> = {
-        companyName:         settings.companyName,
-        autoApproveListings: settings.autoApproveListings,
-        autoApproveAgents:   settings.autoApproveAgents,
-        maintenanceMode:     settings.maintenanceMode,
-        minWarehouseSize:    Number(settings.minWarehouseSize)  || 100,
-        maxListingsPerUser:  Number(settings.maxListingsPerUser) || 10,
-      };
-
-      if (settings.logoFinal === '') {
-        payload.logoFinal = '';                     
-      } else if (settings.logoFinal.startsWith('data:')) {
-        payload.logoFinal = settings.logoFinal;     
-      }
-
-      if (settings.sendgridApiKey !== undefined) {
-        payload.sendgridApiKey = settings.sendgridApiKey;
-      }
-
-      const res  = await fetch('/api/superadmin/settings', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify(payload),
-      });
-      const data = await res.json();
-
-      if (data.success) {
-        if (data.logoUrl)            setLogoUrl(data.logoUrl);
-        if (settings.logoFinal === '') setLogoUrl('');
-        setCompanyName(settings.companyName);
-
-        if (data.logoUrl) setSettings(p => ({ ...p, logoFinal: data.logoUrl }));
-        if (settings.sendgridApiKey) setSettings(p => ({ ...p, sendgridApiKey: undefined, sendgridConfigured: true }));
-       toast.success('Settings saved successfully');
-      } else {
-        toast.error('Failed to save settings: ' + (data.error || 'Unknown error'));}
-    } catch (err) {
-      console.error('Save error:', err);
-      alert('Failed to save settings');
-    } finally {
-      setSaving(false);
-    }
   };
 
   const approvalSettings = [
@@ -261,8 +484,18 @@ export default function SettingsPage() {
 
   return (
     <>
+      {/* Crop modal */}
       {cropSrc && (
         <LogoCropModal imageSrc={cropSrc} onConfirm={handleCropConfirm} onCancel={() => setCropSrc(null)} />
+      )}
+
+      {/* Unsaved changes modal */}
+      {showUnsavedModal && (
+        <UnsavedChangesModal
+          onStay={handleStay}
+          onLeave={handleLeave}
+          onSaveAndLeave={handleSaveAndLeave}
+        />
       )}
 
       <div className="h-full">
@@ -272,14 +505,33 @@ export default function SettingsPage() {
           <GlassCard className="px-5 py-4" gradient="blue">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">System Settings</h2>
-                <p className="text-xs text-gray-500 mt-0.5 font-medium">Configure system-wide settings and preferences</p>
+                <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                  System Settings
+                </h2>
+                <p className="text-xs text-gray-500 mt-0.5 font-medium">
+                  Configure system-wide settings and preferences
+                </p>
               </div>
-              <Button onClick={handleSave} disabled={saving} size="sm"
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/30 transition-all">
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                {saving ? 'Saving...' : 'Save Changes'}
-              </Button>
+
+              <div className="flex items-center gap-3">
+                {/* Unsaved badge */}
+                {isDirty && (
+                  <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold shadow-sm animate-in fade-in duration-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                    Unsaved changes
+                  </span>
+                )}
+
+                <Button
+                  onClick={handleSave}
+                  disabled={saving || !isDirty}
+                  size="sm"
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
             </div>
           </GlassCard>
 
@@ -295,7 +547,6 @@ export default function SettingsPage() {
             <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent mb-4" />
 
             <div className="flex items-center gap-5 p-4 rounded-xl bg-white/40 border border-white/40 shadow-sm">
-              {/* Logo uploader */}
               <div className="relative shrink-0">
                 <div
                   onClick={() => fileInputRef.current?.click()}

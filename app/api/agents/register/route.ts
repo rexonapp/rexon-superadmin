@@ -261,7 +261,9 @@ export async function POST(request: NextRequest) {
 
    
     const { autoApproveAgents } = await getAutoApprovalFlags();
-    const initialStatus = autoApproveAgents ? 'Approved' : 'Pending';
+    console.log('autoApproveAgents:', autoApproveAgents);
+    const initialStatus = autoApproveAgents ? 'approved' : 'pending';
+    console.log(initialStatus,'inital status')
 
     // ── Insert agent ──────────────────────────────────────────────────────
     const agentResult = await query(
