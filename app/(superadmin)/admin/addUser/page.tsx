@@ -157,7 +157,7 @@ export default function AddUserPage() {
         return
       }
       setSuccess('User added successfully!')
-      handleClear()
+      handleCancel()
       setTimeout(() => setSuccess(''), 3000)
       router.back();
     } catch {
@@ -167,10 +167,11 @@ export default function AddUserPage() {
     }
   }
 
-  const handleClear = () => {
+  const handleCancel = () => {
     setForm({ username: '', email: '', firstName: '', lastName: '', phone: '', password: '', confirmPassword: '', role: 'user' })
     setError('')
     setSuccess('')
+    router.back();
   }
 
   return (
@@ -371,8 +372,8 @@ export default function AddUserPage() {
                 <div className="flex gap-3 pt-2">
                   <Button
                     type="submit"
-                    className="flex-1 h-10 text-sm font-semibold rounded-lg transition-all duration-200 hover:shadow-md active:scale-95"
-                    style={{ background: 'linear-gradient(135deg, #ff8c00 0%, #ff6b00 100%)', color: 'white', border: 'none' }}
+                    className="flex-1 h-10 text-sm font-semibold rounded-lg transition-all bg-blue-500  hover:bg-blue-600 duration-200 hover:shadow-md active:scale-95"
+                    style={{ color: 'white', border: 'none' }}
                     disabled={loading || usernameStatus === 'taken' || emailStatus === 'taken' || emailStatus === 'invalid'}
                   >
                     {loading ? (
@@ -394,9 +395,9 @@ export default function AddUserPage() {
                     variant="outline"
                     className="flex-1 h-10 text-sm font-semibold rounded-lg transition-all"
                     style={{ borderColor: '#d0e0ff', color: '#0f4c75' }}
-                    onClick={handleClear}
+                    onClick={handleCancel}
                   >
-                    Clear
+                    Cancel
                   </Button>
                 </div>
               </form>

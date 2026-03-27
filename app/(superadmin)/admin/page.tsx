@@ -228,14 +228,14 @@ export default function UsersPage() {
           <Table className="min-w-[760px] w-full">
             <TableHeader>
               <TableRow className="hover:bg-gray-50 border-b border-gray-200">
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[200px] sticky top-0 z-10">Username</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[250px] sticky top-0 z-10">Name</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[200px] sticky top-0 z-10">E-mail</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[110px] sticky top-0 z-10">Role</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[100px] sticky top-0 z-10">Status</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[130px] sticky top-0 z-10">Last Login</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[120px] sticky top-0 z-10">Joined</TableHead>
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">Actions</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[200px] sticky top-0 z-10">Username</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[250px] sticky top-0 z-10">Name</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[200px] sticky top-0 z-10">E-mail</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[110px] sticky top-0 z-10">Role</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[100px] sticky top-0 z-10">Status</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[130px] sticky top-0 z-10">Last Login</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[120px] sticky top-0 z-10">Joined</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
 

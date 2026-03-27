@@ -17,7 +17,7 @@ import {
   Search, Filter, Eye, CheckCircle, XCircle, MoreVertical,
   FileText, Pencil, Globe, X, Calendar,
   ChevronsUpDown, ChevronUp, ChevronDown, Users,
-  Phone, Mail, MapPin, Hash, Clock, Building2,
+  Phone, Mail, MapPin, Hash, Clock, Building2, Ban, RotateCcw,
 } from 'lucide-react';
 import Loading from '../loading';
 import Link from 'next/link';
@@ -44,7 +44,7 @@ interface Agent {
   city: string;
   agency_name: string;
   is_verified: boolean;
-  status: 'pending' | 'approved' | 'rejected' | 'invite';
+  status: 'pending' | 'approved' | 'rejected' | 'invite' | 'deactivated';
   created_at: string | null;
   kyc_document_s3_url: string | null;
   profile_photo_s3_url: string | null;
@@ -61,10 +61,11 @@ const ITEMS_PER_PAGE = 10;
 // ── Status config ─────────────────────────────────────────────────────────────
 
 const statusCfg: Record<string, { badge: string; dot: string; label: string }> = {
-  pending:  { badge: 'bg-amber-50 text-amber-700 border border-amber-200',       dot: 'bg-amber-400 animate-pulse', label: 'Pending'  },
-  approved: { badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500',             label: 'Approved' },
-  rejected: { badge: 'bg-rose-50 text-rose-700 border border-rose-200',          dot: 'bg-rose-500',                label: 'Rejected' },
-  invite:   { badge: 'bg-purple-50 text-purple-700 border border-purple-200',    dot: 'bg-purple-400',              label: 'Invited'  },
+  pending:     { badge: 'bg-amber-50 text-amber-700 border border-amber-200',       dot: 'bg-amber-400 animate-pulse', label: 'Pending'     },
+  approved:    { badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500',             label: 'Approved'    },
+  rejected:    { badge: 'bg-rose-50 text-rose-700 border border-rose-200',          dot: 'bg-rose-500',                label: 'Rejected'    },
+  invite:      { badge: 'bg-purple-50 text-purple-700 border border-purple-200',    dot: 'bg-purple-400',              label: 'Invited'     },
+  deactivated: { badge: 'bg-gray-100 text-gray-500 border border-gray-300',         dot: 'bg-gray-400',                label: 'Deactivated' },
 };
 
 const domainStatusCfg: Record<string, string> = {
@@ -119,7 +120,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
     <TableHead
       onClick={() => onSort(col)}
       className={cn(
-        'text-xs font-bold uppercase tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer transition-colors',
+        'text-l font-bold  tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer transition-colors',
         'hover:bg-gray-100',
         col === sortKey ? 'text-blue-600 bg-blue-50/60' : 'text-gray-500 bg-gray-50',
         className,
@@ -214,7 +215,7 @@ function DetailRow({ icon: Icon, label, value, accent = 'blue' }: {
         <Icon className="w-4 h-4" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{label}</p>
+        <p className="text-xs font-bold text-gray-400  tracking-wide">{label}</p>
         <p className="text-sm font-semibold text-gray-800 mt-0.5 break-words">{value}</p>
       </div>
     </div>
@@ -255,7 +256,7 @@ export default function AgentsPage() {
     })();
   }, []);
 
-  const updateAgentStatus = async (agentId: string, status: 'approved' | 'rejected' | 'invite') => {
+  const updateAgentStatus = async (agentId: string, status: 'approved' | 'rejected' | 'invite' | 'deactivated' | 'pending') => {
     try {
       const res = await fetch(`/api/superadmin/agents/${agentId}/status`, {
         method: 'PATCH',
@@ -264,8 +265,16 @@ export default function AgentsPage() {
       });
       const d = await res.json();
       if (d.success) {
-        setAgents(prev => prev.map(a => a.id === agentId ? { ...a, status, is_verified: status === 'approved' } : a));
-        setShowDetailsModal(false); setSelectedAgent(null);
+        setAgents(prev => prev.map(a =>
+          a.id === agentId
+            ? { ...a, status, is_verified: status === 'approved' }
+            : a
+        ));
+        if (selectedAgent?.id === agentId) {
+          setSelectedAgent(prev => prev ? { ...prev, status, is_verified: status === 'approved' } : null);
+        }
+        setShowDetailsModal(false);
+        setSelectedAgent(null);
       }
     } catch (e) { console.error(e); }
   };
@@ -382,7 +391,7 @@ export default function AgentsPage() {
   return (
     <div className="h-full flex flex-col gap-3 overflow-hidden">
 
-      {/* ── Filters — flex-none, never grows ── */}
+      {/* ── Filters ── */}
       <div className="flex-shrink-0 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         {/* Search */}
         <div className="relative w-full sm:w-xl lg:w-xl">
@@ -407,6 +416,7 @@ export default function AgentsPage() {
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
+              <SelectItem value="deactivated">Deactivated</SelectItem>
             </SelectContent>
           </Select>
 
@@ -443,10 +453,7 @@ export default function AgentsPage() {
           )}
         </div>
 
-        {/* Result count — matches warehouse page (no Add Agent button here, moved to match) */}
         <div className="sm:ml-auto flex items-center gap-3">
-          <span className="text-xs text-gray-400 font-medium">
-          </span>
           <Link href="/agents/addAgent">
             <Button size="sm" className="h-9 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 shrink-0">
               + Add Agent
@@ -455,39 +462,45 @@ export default function AgentsPage() {
         </div>
       </div>
 
-      {/* ── Table card — fills all remaining height ── */}
+      {/* ── Table card ── */}
       <div className="flex-1 min-h-0 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col">
 
-        {/* Scrollable table */}
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
           <Table className="min-w-[860px] w-full">
             <TableHeader>
               <TableRow className="hover:bg-gray-50 border-b border-gray-200">
                 <SortableHead col="full_name"   label="Agent"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[200px] sticky top-0 z-10" />
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">E-mail</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">E-mail</TableHead>
                 <SortableHead col="agency_name" label="Agency"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[150px] sticky top-0 z-10" />
                 <SortableHead col="created_at"  label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[140px] sticky top-0 z-10" />
                 <SortableHead col="domains"     label="Domain"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[160px] sticky top-0 z-10" />
                 <SortableHead col="status"      label="Status"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[100px] sticky top-0 z-10" />
-                <TableHead className="text-xs font-bold uppercase tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">Actions</TableHead>
+                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {paginated.length > 0 ? paginated.map((agent, i) => (
                 <TableRow key={agent.id}
-                  className={cn('border-b border-gray-100 hover:bg-blue-100 transition-colors group cursor-pointer',
-                    i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white')}
+                  className={cn(
+                    'border-b border-gray-100 hover:bg-blue-100 transition-colors group cursor-pointer',
+                    i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white',
+                    // Visually dim deactivated rows
+                    agent.status === 'deactivated' && 'opacity-60',
+                  )}
                   onClick={() => { setSelectedAgent(agent); setShowDetailsModal(true); setActiveTab('overview'); }}>
-
-                  {/* # */}
 
                   {/* Agent */}
                   <TableCell className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
                       <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
                         {agent.profile_photo_s3_url && <AvatarImage src={agent.profile_photo_s3_url} alt={agent.full_name} />}
-                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-xs font-bold">
+                        <AvatarFallback className={cn(
+                          'text-white text-xs font-bold',
+                          agent.status === 'deactivated'
+                            ? 'bg-gray-400'
+                            : 'bg-gradient-to-br from-blue-400 to-indigo-400'
+                        )}>
                           {agent.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
@@ -526,7 +539,6 @@ export default function AgentsPage() {
                         <p className="text-sm text-gray-800 font-medium truncate max-w-[250px]">
                           {agent.domains[0].full_domain}
                         </p>
-                       
                         {agent.domains.length > 1 && (
                           <p className="text-xs text-blue-500 font-medium">+{agent.domains.length - 1} more</p>
                         )}
@@ -549,44 +561,101 @@ export default function AgentsPage() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuItem onClick={() => { setSelectedAgent(agent); setShowDetailsModal(true); setActiveTab('overview'); }} className="cursor-pointer text-sm py-2">
+
+                        <DropdownMenuItem
+                          onClick={() => { setSelectedAgent(agent); setShowDetailsModal(true); setActiveTab('overview'); }}
+                          className="cursor-pointer text-sm py-2">
                           <Eye className="w-4 h-4 mr-2 text-blue-500" /> View Details
                         </DropdownMenuItem>
+
                         <DropdownMenuItem asChild>
                           <Link href={`/agents/${agent.id}/edit`} className="flex items-center cursor-pointer text-sm py-2">
                             <Pencil className="w-4 h-4 mr-2 text-gray-500" /> Edit Agent
                           </Link>
                         </DropdownMenuItem>
+
+                        {/* ── Pending actions ── */}
                         {agent.status === 'pending' && (
                           <>
                             <DropdownMenuSeparator />
-                            {/* <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'invite')}
-                              className="cursor-pointer text-sm py-2 text-purple-600 focus:bg-purple-50">
-                              <CheckCircle className="w-4 h-4 mr-2" /> Send Invite
-                            </DropdownMenuItem> */}
-                            <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'approved')}
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'approved')}
                               className="cursor-pointer text-sm py-2 text-emerald-600 focus:bg-emerald-50">
                               <CheckCircle className="w-4 h-4 mr-2" /> Approve
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'rejected')}
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'rejected')}
                               className="cursor-pointer text-sm py-2 text-rose-600 focus:bg-rose-50">
                               <XCircle className="w-4 h-4 mr-2" /> Reject
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'deactivated')}
+                              className="cursor-pointer text-sm py-2 text-gray-500 focus:bg-gray-50">
+                              <Ban className="w-4 h-4 mr-2" /> Deactivate
+                            </DropdownMenuItem>
                           </>
                         )}
+
+                        {/* ── Invite actions ── */}
                         {agent.status === 'invite' && (
                           <>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'approved')}
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'approved')}
                               className="cursor-pointer text-sm py-2 text-emerald-600 focus:bg-emerald-50">
                               <CheckCircle className="w-4 h-4 mr-2" /> Approve
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => updateAgentStatus(agent.id, 'rejected')}
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'rejected')}
                               className="cursor-pointer text-sm py-2 text-rose-600 focus:bg-rose-50">
                               <XCircle className="w-4 h-4 mr-2" /> Reject
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'deactivated')}
+                              className="cursor-pointer text-sm py-2 text-red-500 focus:bg-gray-50">
+                              <Ban className="w-4 h-4 mr-2" /> Deactivate
+                            </DropdownMenuItem>
                           </>
                         )}
+
+                        {/* ── Approved actions ── */}
+                        {agent.status === 'approved' && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'deactivated')}
+                              className="cursor-pointer text-sm py-2 text-red-500 focus:bg-gray-50">
+                              <Ban className="w-4 h-4 mr-2" /> Deactivate
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* ── Rejected actions ── */}
+                        {agent.status === 'rejected' && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'deactivated')}
+                              className="cursor-pointer text-sm py-2 text-red-500 focus:bg-gray-50">
+                              <Ban className="w-4 h-4 mr-2" /> Deactivate
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
+                        {/* ── Deactivated actions — reactivate back to pending ── */}
+                        {agent.status === 'deactivated' && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => updateAgentStatus(agent.id, 'pending')}
+                              className="cursor-pointer text-sm py-2 text-blue-600 focus:bg-blue-50">
+                              <RotateCcw className="w-4 h-4 mr-2" /> Reactivate
+                            </DropdownMenuItem>
+                          </>
+                        )}
+
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -616,12 +685,6 @@ export default function AgentsPage() {
         {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex-shrink-0 border-t border-gray-100 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 bg-white">
-            {/* <p className="text-sm text-gray-500 order-2 sm:order-1">
-              Showing{' '}
-              <span className="font-semibold text-gray-700">{startIdx + 1}–{Math.min(startIdx + ITEMS_PER_PAGE, sorted.length)}</span>
-              {' '}of{' '}
-              <span className="font-semibold text-gray-700">{sorted.length}</span>
-            </p> */}
             <Pagination className="order-1 sm:order-2">
               <PaginationContent className="gap-0.5 flex-wrap justify-center">
                 <PaginationItem>
@@ -663,12 +726,12 @@ export default function AgentsPage() {
         onApply={(from, to) => { setDateRange({ from, to }); if (!from && !to) setDateFilter('all'); setCurrentPage(1); }}
       />
 
-      {/* ── Details Modal — redesigned with tabs matching warehouse style ── */}
+      {/* ── Details Modal ── */}
       <Dialog open={showDetailsModal} onOpenChange={open => { setShowDetailsModal(open); if (!open) setTimeout(() => setSelectedAgent(null), 300); }}>
         <DialogContent className="bg-white border border-gray-200 shadow-2xl w-full sm:max-w-2xl max-h-[90dvh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl">
           <VisuallyHidden><DialogTitle>{selectedAgent?.full_name ?? 'Agent Details'}</DialogTitle></VisuallyHidden>
 
-          {/* Modal header — gradient like warehouse modal */}
+          {/* Modal header */}
           <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 px-5 pt-5 pb-0 flex-shrink-0">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -726,11 +789,11 @@ export default function AgentsPage() {
                 <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <Users className="w-3.5 h-3.5" /> Agent Details
                 </p>
-                <DetailRow icon={Users}    label="Full Name"    value={selectedAgent?.full_name} />
-                <DetailRow icon={Building2} label="Agency"      value={selectedAgent?.agency_name} />
-                <DetailRow icon={MapPin}   label="City"         value={selectedAgent?.city} />
-                <DetailRow icon={Calendar} label="Registered"   value={fmtDate(selectedAgent?.created_at ?? null)} accent="amber" />
-                <DetailRow icon={Clock}    label="Status"       value={selectedAgent?.status ? statusCfg[selectedAgent.status]?.label : '—'} accent="amber" />
+                <DetailRow icon={Users}     label="Full Name"  value={selectedAgent?.full_name} />
+                <DetailRow icon={Building2} label="Agency"     value={selectedAgent?.agency_name} />
+                <DetailRow icon={MapPin}    label="City"       value={selectedAgent?.city} />
+                <DetailRow icon={Calendar}  label="Registered" value={fmtDate(selectedAgent?.created_at ?? null)} accent="amber" />
+                <DetailRow icon={Clock}     label="Status"     value={selectedAgent?.status ? statusCfg[selectedAgent.status]?.label : '—'} accent="amber" />
 
                 {selectedAgent?.kyc_document_s3_url && (
                   <div className="mt-5">
@@ -762,8 +825,8 @@ export default function AgentsPage() {
                     </div>
                   </div>
                 </div>
-                <DetailRow icon={Mail}  label="Email Address"  value={selectedAgent?.email} />
-                <DetailRow icon={Phone} label="Mobile Number"  value={selectedAgent?.mobile_number} />
+                <DetailRow icon={Mail}   label="Email Address" value={selectedAgent?.email} />
+                <DetailRow icon={Phone}  label="Mobile Number" value={selectedAgent?.mobile_number} />
                 <DetailRow icon={MapPin} label="City"          value={selectedAgent?.city} />
               </div>
             )}
@@ -801,9 +864,6 @@ export default function AgentsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="ml-3 shrink-0">
-                         
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -819,28 +879,62 @@ export default function AgentsPage() {
 
           {/* Modal footer */}
           <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50 px-5 py-4 flex items-center justify-between gap-3 flex-wrap">
-            {(selectedAgent?.status === 'pending' || selectedAgent?.status === 'invite') ? (
-              <div className="flex gap-2.5 flex-1 flex-wrap">
-                {/* {selectedAgent?.status === 'pending' && (
-                  <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'invite')} size="sm"
-                    className="flex-1 min-w-[110px] h-9 bg-purple-600 hover:bg-purple-700 text-white font-bold text-sm">
-                    <CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Send Invite
+
+            {/* Action buttons based on current status */}
+            <div className="flex gap-2.5 flex-1 flex-wrap">
+
+              {/* Pending / Invite — show Approve + Reject + Deactivate */}
+              {(selectedAgent?.status === 'pending' || selectedAgent?.status === 'invite') && (
+                <>
+                  <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'approved')} size="sm"
+                    className="flex-1 min-w-[100px] h-9 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm">
+                    <CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Approve
                   </Button>
-                )} */}
-                <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'approved')} size="sm"
-                  className="flex-1 min-w-[100px] h-9 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm">
-                  <CheckCircle className="w-3.5 h-3.5 mr-1.5" /> Approve
-                </Button>
-                <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'rejected')} size="sm" variant="outline"
-                  className="flex-1 min-w-[90px] h-9 border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-sm">
-                  <XCircle className="w-3.5 h-3.5 mr-1.5" /> Reject
-                </Button>
-              </div>
-            ) : (
-              <div className="flex-1">
-                {selectedAgent && <StatusBadge status={selectedAgent.status} />}
-              </div>
-            )}
+                  <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'rejected')} size="sm" variant="outline"
+                    className="flex-1 min-w-[90px] h-9 border-rose-300 text-rose-600 hover:bg-rose-50 font-bold text-sm">
+                    <XCircle className="w-3.5 h-3.5 mr-1.5" /> Reject
+                  </Button>
+                  <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'deactivated')} size="sm" variant="outline"
+                    className="flex-1 min-w-[110px] h-9 border-red-500 text-gray-500 hover:bg-gray-100 font-bold text-sm">
+                    <Ban className="w-3.5 h-3.5 mr-1.5" /> Deactivate
+                  </Button>
+                </>
+              )}
+
+              {/* Approved — show Deactivate */}
+              {selectedAgent?.status === 'approved' && (
+                <>
+                  <StatusBadge status={selectedAgent.status} />
+                  <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'deactivated')} size="sm" variant="outline"
+                    className="h-9 px-4 border-gray-300 text-red-500 hover:bg-gray-100 font-bold text-sm">
+                    <Ban className="w-3.5 h-3.5 mr-1.5" /> Deactivate
+                  </Button>
+                </>
+              )}
+
+              {/* Rejected — show Deactivate */}
+              {selectedAgent?.status === 'rejected' && (
+                <>
+                  <StatusBadge status={selectedAgent.status} />
+                  <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'deactivated')} size="sm" variant="outline"
+                    className="h-9 px-4 border-gray-300 text-red-500 hover:bg-gray-100 font-bold text-sm">
+                    <Ban className="w-3.5 h-3.5 mr-1.5" /> Deactivate
+                  </Button>
+                </>
+              )}
+
+              {/* Deactivated — show Reactivate (back to pending) */}
+              {selectedAgent?.status === 'deactivated' && (
+                <>
+                  <StatusBadge status={selectedAgent.status} />
+                  <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'pending')} size="sm"
+                    className="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm">
+                    <RotateCcw className="w-3.5 h-3.5 mr-1.5" /> Reactivate
+                  </Button>
+                </>
+              )}
+            </div>
+
             <div className="flex items-center gap-2">
               <Link href={selectedAgent ? `/agents/${selectedAgent.id}/edit` : '#'}>
                 <Button variant="outline" size="sm" className="h-9 px-4 text-sm font-medium">
@@ -857,7 +951,7 @@ export default function AgentsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* ── Domain Management Modal (standalone, kept for backward compat) ── */}
+      {/* ── Domain Management Modal ── */}
       <Dialog open={showDomainModal} onOpenChange={setShowDomainModal}>
         <DialogContent className="bg-white border border-gray-200 shadow-2xl sm:max-w-xl max-h-[80dvh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl">
           <VisuallyHidden><DialogTitle>Domain Management</DialogTitle></VisuallyHidden>

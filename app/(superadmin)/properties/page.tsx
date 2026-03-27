@@ -94,7 +94,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
     <TableHead
       onClick={() => onSort(col)}
       className={cn(
-        'text-xs font-bold tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer',
+        'text-l font-bold tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer',
         'hover:bg-gray-100 transition-colors',
         active ? 'text-blue-600 bg-blue-50/60' : 'text-gray-500',
         className
@@ -506,10 +506,17 @@ export default function WarehousesPage() {
           <Select value={filterStatus} onValueChange={v => { setFilterStatus(v); setCurrentPage(1); }}>
             <SelectTrigger className="w-36 h-9 text-sm bg-gray-50 border-gray-200 shrink-0">
               <Filter className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
-              <SelectValue placeholder="All Status" />
+              <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
+            <SelectContent
+              side="bottom"
+              align="start"
+              sideOffset={4}
+              position="popper"
+              avoidCollisions={false}
+              className="max-h-60 overflow-y-auto"
+            >              
+              <SelectItem value="all">Status</SelectItem>
               <SelectItem value="Pending">Pending</SelectItem>
               <SelectItem value="Active">Active</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
@@ -522,7 +529,14 @@ export default function WarehousesPage() {
               <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               <SelectValue placeholder="Date Range" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent
+              side="bottom"
+              align="start"
+              sideOffset={4}
+              position="popper"
+              avoidCollisions={false}
+              className="max-h-60 overflow-y-auto"
+            >              
               <SelectItem value="all">All Time</SelectItem>
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="week">This Week</SelectItem>
@@ -570,7 +584,7 @@ export default function WarehousesPage() {
                     sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
                     className={cn(c.className, 'bg-gray-50 sticky top-0 z-10')} />
                 ))}
-                <TableHead className="text-xs font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">
+                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">
                   Actions
                 </TableHead>
               </TableRow>
@@ -685,12 +699,7 @@ export default function WarehousesPage() {
         {/* Pagination — always at bottom of card, never scrolls */}
         {totalPages > 1 && (
           <div className="flex-shrink-0 border-t border-gray-100 px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2 bg-white">
-            {/* <p className="text-sm text-gray-500 order-2 sm:order-1">
-              Showing{' '}
-              <span className="font-semibold text-gray-700">{startIndex + 1}–{Math.min(startIndex + ITEMS_PER_PAGE, sorted.length)}</span>
-              {' '}of{' '}
-              <span className="font-semibold text-gray-700">{sorted.length}</span>
-            </p> */}
+          
             <Pagination className="order-1 sm:order-2">
               <PaginationContent className="gap-0.5 flex-wrap justify-center">
                 <PaginationItem>
@@ -748,9 +757,9 @@ export default function WarehousesPage() {
                 <h2 className="text-lg font-bold text-white leading-snug">{selected?.title}</h2>
                 <p className="text-blue-200 text-sm mt-0.5 truncate">{selected?.property_name}</p>
               </div>
-              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+              <div className="flex flex-col items-end gap-1.5 py-4 flex-shrink-0">
                 {selected && <StatusBadge status={selected.status} />}
-                <p className="text-blue-300 text-xs font-mono">#{selected?.id?.slice(0, 8)}</p>
+                {/* <p className="text-blue-300 text-xs font-mono">#{selected?.id?.slice(0, 8)}</p> */}
               </div>
             </div>
 
@@ -899,7 +908,7 @@ export default function WarehousesPage() {
             )}
             <Button variant="ghost" size="sm"
               onClick={() => { setShowModal(false); setTimeout(() => setSelected(null), 300); }}
-              className="h-9 text-gray-500 hover:text-gray-700 hover:bg-gray-100 font-medium text-sm px-4">
+              className="h-9 text-gray-900 hover:text-gray-700 hover:bg-gray-300 bg-gray-200 font-medium text-sm px-4">
               Close
             </Button>
           </div>

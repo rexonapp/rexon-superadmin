@@ -17,7 +17,7 @@ export async function PATCH(
     const { status } = await request.json();
     const { agentId } = await params;
 
-    if (!['pending', 'approved', 'rejected'].includes(status)) {
+    if (!['pending', 'approved', 'rejected','deactivated'].includes(status)) {
       return NextResponse.json({ success: false, error: 'Invalid status' }, { status: 400 });
     }
 
