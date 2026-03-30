@@ -23,6 +23,7 @@ import {
 import Loading from '../loading';
 import { cn } from '@/lib/utils';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { useNotifications } from '@/lib/context/NotificationContext';
 
 interface WarehouseImage {
   id: string; s3_url: string; file_name: string; is_primary: boolean; image_order: number;
@@ -313,6 +314,7 @@ export default function WarehousesPage() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   const isAnyFilterActive = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
+  const { refetchNotifications } = useNotifications();
 
   useEffect(() => { fetchWarehouses(); }, []);
 
@@ -360,6 +362,8 @@ export default function WarehousesPage() {
         setWarehouses(prev => prev.map(w => w.id === id ? { ...w, status, is_verified: status === 'Active' } : w));
         setShowModal(false);
         setSelected(null);
+        refetchNotifications();
+        refetchNotifications();
       }
     } catch (e) { console.error(e); }
   }

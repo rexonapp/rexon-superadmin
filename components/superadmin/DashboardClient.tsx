@@ -303,7 +303,7 @@ export default function DashboardClient({ initialData }: Props) {
         </GlassCard>
 
         {/* ── Quick Actions ── */}
-        <GlassCard className="p-6" gradient="cyan">
+        {/* <GlassCard className="p-6" gradient="cyan">
           <div className="flex items-center gap-3 mb-6">
             <div className="p-2 rounded-lg bg-cyan-500/10 ring-4 ring-cyan-500/10">
               <Sparkles className="w-5 h-5 text-cyan-600" />
@@ -351,18 +351,9 @@ export default function DashboardClient({ initialData }: Props) {
 
             <Separator className="my-4 bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
 
-            {/* <div className="p-3 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200/50">
-              <p className="text-xs text-gray-500 flex items-center gap-1.5">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    isRefreshing ? 'bg-amber-400 animate-pulse' : 'bg-cyan-500 animate-pulse'
-                  }`}
-                />
-                {isRefreshing ? 'Refreshing data…' : 'Live data · refreshes every 30 s'}
-              </p>
-            </div> */}
+           
           </div>
-        </GlassCard>
+        </GlassCard> */}
 
       </div>
     </>

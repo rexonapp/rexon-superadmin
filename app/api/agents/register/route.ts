@@ -7,6 +7,7 @@ import { randomBytes } from 'crypto';
 import bcrypt from 'bcrypt';
 import { sendAgentInviteEmail } from '@/lib/sendemail';
 import { getAutoApprovalFlags } from '@/lib/getAutoApprovalflag';
+import { createAgentNotification, createSuperadminNotification } from '@/lib/notifications';
 
 const s3Client = new S3Client({
   region: process.env.AWS_REGION || 'ap-south-2',
@@ -330,6 +331,34 @@ export async function POST(request: NextRequest) {
       if (!vercelResult.success) {
         console.error(`Domain provisioning failed for ${fullDomain}:`, vercelResult.error);
       }
+    }
+    const superadmins = await query(
+      `SELECT id FROM superadmins WHERE is_active = TRUE`
+    );
+
+    await Promise.all(
+      superadmins.rows.map((sa: { id: string }) =>
+        createSuperadminNotification({
+          type:           'new_agent',
+          title:          'New Agent Registered',
+          message:        `${fullName} from ${agencyName || city || 'Unknown'} has registered${
+            initialStatus === 'approved' ? ' and was auto-approved.' : ' and is awaiting verification.'
+          }`,
+          referenceId:    agentId,
+          referenceTable: 'agents',
+          superadminId:   sa.id,
+        })
+      )
+    );
+    if (initialStatus === 'approved') {
+      await createAgentNotification({
+        agentId,
+        type:           'agent_approved',
+        title:          'Account Approved',
+        message:        'Congratulations! Your agent account has been automatically approved. You can now log in.',
+        referenceId:    agentId,
+        referenceTable: 'agents',
+      });
     }
 
     // ── Send invite email ──────────────────────────────────────────────────

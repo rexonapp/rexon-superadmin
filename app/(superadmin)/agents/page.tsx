@@ -23,6 +23,7 @@ import Loading from '../loading';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
+import { useNotifications } from '@/lib/context/NotificationContext';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -243,8 +244,8 @@ export default function AgentsPage() {
 
   const anyFilter = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
 
-  // ── Data ──────────────────────────────────────────────────────────────────
-
+  const { refetchNotifications } = useNotifications(); 
+  
   useEffect(() => {
     (async () => {
       try {
@@ -275,6 +276,7 @@ export default function AgentsPage() {
         }
         setShowDetailsModal(false);
         setSelectedAgent(null);
+        refetchNotifications();
       }
     } catch (e) { console.error(e); }
   };
