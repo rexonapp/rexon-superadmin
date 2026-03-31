@@ -376,7 +376,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
   const router           = useRouter();
   const { companyName, logoUrl } = useBranding();
 
-  const isWarehousesPage = pathname?.startsWith('/warehouses');
+  const isWarehousesPage = pathname?.startsWith('/properties');
   const isAgentsPage     = pathname?.startsWith('/agents');
 
   // const logoUrl: string | undefined = (user as any)?.avatar_url || undefined;
@@ -569,15 +569,15 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
               {/* Warehouse stat pills */}
               {isWarehousesPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-md">
+                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 ">
                     <Clock className="w-3.5 h-11.5 text-amber-500 shrink-0" />
                     <span className="text-sm font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-md">
+                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 ">
                     <CheckCircle className="w-3.5 h-11.5 text-emerald-500 shrink-0" />
                     <span className="text-sm font-semibold text-emerald-700">{warehouseStats.active} Active</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-md">
+                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 ">
                     <XCircle className="w-3.5 h-11.5 text-rose-500 shrink-0" />
                     <span className="text-sm font-semibold text-rose-700">{warehouseStats.rejected} Rejected</span>
                   </div>
@@ -587,15 +587,15 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
               {/* Agent stat pills */}
               {isAgentsPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-md">
+                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 ">
                     <Clock className="w-3.5 h-11.5 text-amber-500 shrink-0" />
                     <span className="text-sm font-semibold text-amber-700">{agentStats.pending} Pending</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-md">
+                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 ">
                     <UserCheck className="w-3.5 h-11.5 text-emerald-500 shrink-0" />
                     <span className="text-sm font-semibold text-emerald-700">{agentStats.approved} Approved</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-md">
+                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 ">
                     <XCircle className="w-3.5 h-11.5 text-rose-500 shrink-0" />
                     <span className="text-sm font-semibold text-rose-700">{agentStats.rejected} Rejected</span>
                   </div>
@@ -674,15 +674,15 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
           {/* ── Mobile stat pills: warehouses ── */}
           {isWarehousesPage && (
             <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded shrink-0">
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1  shrink-0">
                 <Clock className="w-3 h-11 text-amber-500" />
                 <span className="text-xs font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded shrink-0">
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1  shrink-0">
                 <CheckCircle className="w-3 h-11 text-emerald-500" />
                 <span className="text-xs font-semibold text-emerald-700">{warehouseStats.active} Active</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded shrink-0">
+              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1  shrink-0">
                 <XCircle className="w-3 h-11 text-rose-500" />
                 <span className="text-xs font-semibold text-rose-700">{warehouseStats.rejected} Rejected</span>
               </div>
@@ -692,15 +692,15 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
           {/* ── Mobile stat pills: agents ── */}
           {isAgentsPage && (
             <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded shrink-0">
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1  shrink-0">
                 <Clock className="w-3 h-11 text-amber-500" />
                 <span className="text-xs font-semibold text-amber-700">{agentStats.pending} Pending</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded shrink-0">
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1  shrink-0">
                 <UserCheck className="w-3 h-11 text-emerald-500" />
                 <span className="text-xs font-semibold text-emerald-700">{agentStats.approved} Approved</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded shrink-0">
+              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1  shrink-0">
                 <XCircle className="w-3 h-11 text-rose-500" />
                 <span className="text-xs font-semibold text-rose-700">{agentStats.rejected} Rejected</span>
               </div>
