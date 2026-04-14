@@ -748,9 +748,8 @@ export default function AgentsPage() {
                   <p className="text-blue-200 text-sm mt-0.5 truncate">{selectedAgent?.agency_name}</p>
                 </div>
               </div>
-              <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+              <div className="flex mt-4 flex-col items-end gap-1.5 flex-shrink-0">
                 {selectedAgent && <StatusBadge status={selectedAgent.status} />}
-                <p className="text-blue-300 text-xs font-mono">#{selectedAgent?.id?.slice(0, 8)}</p>
               </div>
             </div>
 
@@ -945,7 +944,7 @@ export default function AgentsPage() {
               </Link>
               <Button variant="ghost" size="sm"
                 onClick={() => { setShowDetailsModal(false); setTimeout(() => setSelectedAgent(null), 300); }}
-                className="h-9 px-4 text-sm text-gray-500 hover:text-gray-700 hover:bg-gray-100 font-medium">
+                className="h-9 px-4 text-sm text-gray-500 hover:text-gray-700 bg-gray-200 hover:bg-gray-300 font-medium">
                 Close
               </Button>
             </div>
