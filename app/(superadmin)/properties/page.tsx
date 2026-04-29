@@ -305,7 +305,7 @@ export default function WarehousesPage() {
   const [selected, setSelected] = useState<Warehouse | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [loadingImages, setLoadingImages] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'contact' | 'location'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'contact' | 'location' | 'amenities'>('overview');
   const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
   const [showCustomDateModal, setShowCustomDateModal] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
@@ -781,7 +781,7 @@ export default function WarehousesPage() {
             </div>
 
             <div className="flex border-b border-blue-500/40">
-              {(['overview', 'contact', 'location'] as const).map(tab => (
+              {(['overview', 'contact', 'location', 'amenities'] as const).map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
                   className={cn('px-5 py-2.5 text-sm font-semibold capitalize transition-all relative',
                     activeTab === tab ? 'text-white' : 'text-blue-300 hover:text-blue-100')}>
@@ -823,7 +823,7 @@ export default function WarehousesPage() {
                       <p className="text-sm text-gray-600 leading-relaxed bg-amber-50 rounded-xl p-3.5 border border-amber-100">{selected.description}</p>
                     </div>
                   )}
-                  {(() => {
+                  {/* {(() => {
                     const list = selected?.amenities ? parseAmenities(selected.amenities) : [];
                     return list.length > 0 ? (
                       <div className="mt-4">
@@ -835,7 +835,7 @@ export default function WarehousesPage() {
                         </div>
                       </div>
                     ) : null;
-                  })()}
+                  })()} */}
                 </div>
               </div>
             )}
@@ -893,6 +893,35 @@ export default function WarehousesPage() {
                 )}
               </div>
             )}
+
+            {activeTab === 'amenities' && (() => {
+              const list = selected?.amenities ? parseAmenities(selected.amenities) : [];
+
+              return (
+                <div className="max-w-lg">
+                  <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-3">
+                    Amenities
+                  </p>
+
+                  {list.length > 0 ? (
+                    <div className="flex flex-wrap gap-2">
+                      {list.map((a, idx) => (
+                        <span
+                          key={idx}
+                          className="bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full"
+                        >
+                          {a}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 ">
+                      No amenities are provided
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           <div className="flex-shrink-0 border-t border-gray-100 bg-gray-50 px-5 py-4 flex items-center justify-between gap-3 flex-wrap">
