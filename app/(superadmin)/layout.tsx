@@ -617,7 +617,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
 
               {/* ── Avatar dropdown ── */}
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                {/* <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100 w-11 h-11 p-0">
                     <Avatar className="w-10 h-10">
                       {logoUrl
@@ -630,7 +630,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                       }
                     </Avatar>
                   </Button>
-                </DropdownMenuTrigger>
+                </DropdownMenuTrigger> */}
 
                 <DropdownMenuContent align="end" className="w-64">
                   {/* User info */}
