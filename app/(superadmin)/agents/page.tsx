@@ -109,8 +109,8 @@ function StatusBadge({ status }: { status: string }) {
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
   if (col !== sortKey) return <ChevronsUpDown className="w-3 h-3 text-gray-400 ml-1 shrink-0" />;
   return sortDir === 'asc'
-    ? <ChevronUp   className="w-3 h-3 text-blue-500 ml-1 shrink-0" />
-    : <ChevronDown className="w-3 h-3 text-blue-500 ml-1 shrink-0" />;
+    ? <ChevronUp   className="w-3 h-3 text-brand-teal-medium ml-1 shrink-0" />
+    : <ChevronDown className="w-3 h-3 text-brand-teal-medium ml-1 shrink-0" />;
 }
 
 function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
@@ -123,7 +123,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
       className={cn(
         'text-l font-bold  tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer transition-colors',
         'hover:bg-gray-100',
-        col === sortKey ? 'text-blue-600 bg-blue-50/60' : 'text-gray-500 bg-gray-50',
+        col === sortKey ? 'text-brand-teal-medium bg-brand-teal/10' : 'text-gray-500 bg-gray-50',
         className,
       )}
     >
@@ -181,15 +181,15 @@ function CustomDateModal({ open, onClose, dateRange, onApply }: {
                   max={isFrom ? toVal || undefined : undefined}
                   min={isFrom ? undefined : fromVal || undefined}
                   onChange={e => { isFrom ? setFromVal(e.target.value) : setToVal(e.target.value); setError(''); }}
-                  className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+                  className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal bg-gray-50"
                 />
               </div>
             );
           })}
           {fromVal && toVal && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 flex items-center gap-2">
-              <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-              <p className="text-xs font-medium text-blue-700">
+            <div className="bg-brand-teal/8 border border-brand-teal/25 rounded-lg px-3 py-2.5 flex items-center gap-2">
+              <Calendar className="w-3.5 h-3.5 text-brand-teal-medium shrink-0" />
+              <p className="text-xs font-medium text-brand-teal-dark">
                 {format(new Date(fromVal), 'MMM d, yyyy')} → {format(new Date(toVal), 'MMM d, yyyy')}
               </p>
             </div>
@@ -212,7 +212,7 @@ function DetailRow({ icon: Icon, label, value, accent = 'blue' }: {
   return (
     <div className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
       <div className={cn('w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0',
-        accent === 'amber' ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-blue-50 border-blue-100 text-blue-600')}>
+        accent === 'amber' ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-brand-teal/8 border-brand-teal/15 text-brand-teal-medium')}>
         <Icon className="w-4 h-4" />
       </div>
       <div className="min-w-0 flex-1">
@@ -424,7 +424,7 @@ export default function AgentsPage() {
 
           <Select value={dateFilter} onValueChange={handleDateFilterChange}>
             <SelectTrigger className={cn('w-40 h-9 text-sm border-gray-200 shrink-0',
-              dateFilter !== 'all' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-gray-50')}>
+              dateFilter !== 'all' ? 'bg-brand-teal/8 border-brand-teal/35 text-brand-teal-dark' : 'bg-gray-50')}>
               <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               <SelectValue placeholder="Date Range" />
             </SelectTrigger>
@@ -441,7 +441,7 @@ export default function AgentsPage() {
 
           {dateFilter === 'custom' && dateRange.from && dateRange.to && (
             <Button variant="outline" size="sm" onClick={() => setShowCustomDate(true)}
-              className="h-9 px-3 text-xs text-blue-600 border-blue-200 hover:bg-blue-50 whitespace-nowrap shrink-0">
+              className="h-9 px-3 text-xs text-brand-teal-medium border-brand-teal/25 hover:bg-brand-teal/10 whitespace-nowrap shrink-0">
               <Calendar className="w-3 h-3 mr-1.5" />
               {format(dateRange.from, 'MMM d')} – {format(dateRange.to, 'MMM d')}
             </Button>
@@ -457,7 +457,7 @@ export default function AgentsPage() {
 
         <div className="sm:ml-auto flex items-center gap-3">
           <Link href="/agents/addAgent">
-            <Button size="sm" className="h-9 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 shrink-0">
+            <Button size="sm" className="h-9 bg-brand-teal-deep hover:bg-brand-teal-dark text-white text-sm font-semibold px-4 shrink-0">
               + Add Agent
             </Button>
           </Link>
@@ -485,7 +485,7 @@ export default function AgentsPage() {
               {paginated.length > 0 ? paginated.map((agent, i) => (
                 <TableRow key={agent.id}
                   className={cn(
-                    'border-b border-gray-100 hover:bg-blue-100 transition-colors group cursor-pointer',
+                    'border-b border-gray-100 hover:bg-brand-teal/15 transition-colors group cursor-pointer',
                     i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white',
                     // Visually dim deactivated rows
                     agent.status === 'deactivated' && 'opacity-60',
@@ -501,13 +501,13 @@ export default function AgentsPage() {
                           'text-white text-xs font-bold',
                           agent.status === 'deactivated'
                             ? 'bg-gray-400'
-                            : 'bg-gradient-to-br from-blue-400 to-indigo-400'
+                            : 'bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark'
                         )}>
                           {agent.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-[150px]">
+                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[150px]">
                           {agent.full_name}
                         </p>
                         <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[150px] flex items-center gap-1">
@@ -542,7 +542,7 @@ export default function AgentsPage() {
                           {agent.domains[0].full_domain}
                         </p>
                         {agent.domains.length > 1 && (
-                          <p className="text-xs text-blue-500 font-medium">+{agent.domains.length - 1} more</p>
+                          <p className="text-xs text-brand-teal-medium font-medium">+{agent.domains.length - 1} more</p>
                         )}
                       </div>
                     ) : (
@@ -567,7 +567,7 @@ export default function AgentsPage() {
                         <DropdownMenuItem
                           onClick={() => { setSelectedAgent(agent); setShowDetailsModal(true); setActiveTab('overview'); }}
                           className="cursor-pointer text-sm py-2">
-                          <Eye className="w-4 h-4 mr-2 text-blue-500" /> View Details
+                          <Eye className="w-4 h-4 mr-2 text-brand-teal-medium" /> View Details
                         </DropdownMenuItem>
 
                         <DropdownMenuItem asChild>
@@ -652,7 +652,7 @@ export default function AgentsPage() {
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               onClick={() => updateAgentStatus(agent.id, 'pending')}
-                              className="cursor-pointer text-sm py-2 text-blue-600 focus:bg-blue-50">
+                              className="cursor-pointer text-sm py-2 text-brand-teal-medium focus:bg-brand-teal/8">
                               <RotateCcw className="w-4 h-4 mr-2" /> Reactivate
                             </DropdownMenuItem>
                           </>
@@ -702,7 +702,7 @@ export default function AgentsPage() {
                     <PaginationItem key={item}>
                       <PaginationLink onClick={() => setCurrentPage(item)} isActive={safePage === item}
                         className={cn('h-8 w-8 text-sm cursor-pointer select-none rounded-lg font-medium',
-                          safePage === item ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:text-white' : 'hover:bg-gray-100')}>
+                          safePage === item ? 'bg-brand-teal-deep text-white border-brand-teal-deep hover:bg-brand-teal-dark hover:text-white' : 'hover:bg-gray-100')}>
                         {item}
                       </PaginationLink>
                     </PaginationItem>
@@ -734,7 +734,7 @@ export default function AgentsPage() {
           <VisuallyHidden><DialogTitle>{selectedAgent?.full_name ?? 'Agent Details'}</DialogTitle></VisuallyHidden>
 
           {/* Modal header */}
-          <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 px-5 pt-5 pb-0 flex-shrink-0">
+          <div className="bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange px-5 pt-5 pb-0 flex-shrink-0">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Avatar className="w-12 h-12 ring-2 ring-white/30 shrink-0">
@@ -745,7 +745,7 @@ export default function AgentsPage() {
                 </Avatar>
                 <div className="min-w-0">
                   <h2 className="text-lg font-bold text-white leading-snug truncate">{selectedAgent?.full_name}</h2>
-                  <p className="text-blue-200 text-sm mt-0.5 truncate">{selectedAgent?.agency_name}</p>
+                  <p className="text-white/85 text-sm mt-0.5 truncate">{selectedAgent?.agency_name}</p>
                 </div>
               </div>
               <div className="flex mt-4 flex-col items-end gap-1.5 flex-shrink-0">
@@ -761,18 +761,18 @@ export default function AgentsPage() {
                 { label: 'Joined',  value: fmtDate(selectedAgent?.created_at ?? null) },
               ].map(item => (
                 <div key={item.label} className="bg-white/10 border border-white/20 rounded-xl px-3 py-2.5">
-                  <p className="text-blue-200 text-xs font-semibold uppercase tracking-wide mb-0.5">{item.label}</p>
+                  <p className="text-white/85 text-xs font-semibold uppercase tracking-wide mb-0.5">{item.label}</p>
                   <p className="text-white font-bold text-sm truncate">{item.value}</p>
                 </div>
               ))}
             </div>
 
             {/* Tabs */}
-            <div className="flex border-b border-blue-500/40">
+            <div className="flex border-b border-white/30">
               {(['overview', 'contact', 'domains'] as const).map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)}
                   className={cn('px-5 py-2.5 text-sm font-semibold capitalize transition-all relative',
-                    activeTab === tab ? 'text-white' : 'text-blue-300 hover:text-blue-100')}>
+                    activeTab === tab ? 'text-white' : 'text-white/70 hover:text-white')}>
                   {tab}
                   {activeTab === tab && <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-t bg-orange-400" />}
                 </button>
@@ -787,7 +787,7 @@ export default function AgentsPage() {
             {/* Overview tab */}
             {activeTab === 'overview' && (
               <div className="space-y-1">
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <p className="text-xs font-bold text-brand-teal-medium uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <Users className="w-3.5 h-3.5" /> Agent Details
                 </p>
                 <DetailRow icon={Users}     label="Full Name"  value={selectedAgent?.full_name} />
@@ -812,12 +812,12 @@ export default function AgentsPage() {
             {/* Contact tab */}
             {activeTab === 'contact' && (
               <div className="max-w-md">
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <p className="text-xs font-bold text-brand-teal-medium uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <Phone className="w-3.5 h-3.5" /> Contact Information
                 </p>
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-teal to-brand-orange flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
                       {selectedAgent?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
                     </div>
                     <div>
@@ -835,7 +835,7 @@ export default function AgentsPage() {
             {/* Domains tab */}
             {activeTab === 'domains' && (
               <div>
-                <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                <p className="text-xs font-bold text-brand-teal-medium uppercase tracking-widest mb-3 flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5" /> Assigned Domains
                   {selectedAgent?.domains?.length ? (
                     <span className="ml-auto text-gray-400 font-normal normal-case tracking-normal text-xs">
@@ -849,7 +849,7 @@ export default function AgentsPage() {
                       <div key={dom.id}
                         className="flex items-center justify-between p-3.5 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50/50 transition-colors">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <Globe className="w-4 h-4 text-blue-500 shrink-0" />
+                          <Globe className="w-4 h-4 text-brand-teal-medium shrink-0" />
                           <div className="min-w-0">
                             <p className="font-medium text-gray-900 text-sm truncate">{dom.full_domain}</p>
                             <div className="flex items-center gap-2 mt-1">
@@ -929,7 +929,7 @@ export default function AgentsPage() {
                 <>
                   <StatusBadge status={selectedAgent.status} />
                   <Button onClick={() => selectedAgent && updateAgentStatus(selectedAgent.id, 'pending')} size="sm"
-                    className="h-9 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm">
+                    className="h-9 px-4 bg-brand-teal-deep hover:bg-brand-teal-dark text-white font-bold text-sm">
                     <RotateCcw className="w-3.5 h-3.5 mr-1.5" /> Reactivate
                   </Button>
                 </>
@@ -958,7 +958,7 @@ export default function AgentsPage() {
           <VisuallyHidden><DialogTitle>Domain Management</DialogTitle></VisuallyHidden>
           <div className="px-5 py-4 border-b border-gray-100 flex-none">
             <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-blue-600" /> Domain Management
+              <Globe className="w-4 h-4 text-brand-teal-medium" /> Domain Management
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">{selectedAgent?.full_name}</p>
           </div>
@@ -967,7 +967,7 @@ export default function AgentsPage() {
             {selectedAgent?.domains?.length ? selectedAgent.domains.map(dom => (
               <div key={dom.id} className="flex items-center justify-between p-3.5 border border-gray-200 rounded-xl hover:border-gray-300 hover:bg-gray-50/50 transition-colors">
                 <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <Globe className="w-4 h-4 text-blue-500 shrink-0" />
+                  <Globe className="w-4 h-4 text-brand-teal-medium shrink-0" />
                   <div className="min-w-0">
                     <p className="font-medium text-gray-900 text-sm truncate">{dom.full_domain}</p>
                     <div className="flex items-center gap-2 mt-1">

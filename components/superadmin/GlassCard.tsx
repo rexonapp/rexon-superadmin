@@ -13,20 +13,20 @@ interface GlassCardProps {
 
 const gradients = {
   violet: 'from-violet-500/10 via-transparent to-indigo-500/10',
-  blue: 'from-blue-500/10 via-transparent to-cyan-500/10',
+  blue: 'from-brand-teal/10 via-transparent to-brand-orange/10',
   emerald: 'from-emerald-500/10 via-transparent to-teal-500/10',
   amber: 'from-amber-500/10 via-transparent to-orange-500/10',
   rose: 'from-rose-500/10 via-transparent to-pink-500/10',
-  cyan: 'from-cyan-500/10 via-transparent to-blue-500/10',
+  cyan: 'from-brand-teal-medium/10 via-transparent to-brand-teal/10',
 };
 
 const borderGradients = {
   violet: 'hover:border-violet-300/50',
-  blue: 'hover:border-blue-300/50',
+  blue: 'hover:border-brand-teal/30',
   emerald: 'hover:border-emerald-300/50',
   amber: 'hover:border-amber-300/50',
   rose: 'hover:border-rose-300/50',
-  cyan: 'hover:border-cyan-300/50',
+  cyan: 'hover:border-brand-teal-medium/30',
 };
 
 export default function GlassCard({

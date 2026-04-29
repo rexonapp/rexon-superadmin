@@ -127,8 +127,8 @@ export function DateRangeFilter({ onApply, onClear, isActive }: DateFilterProps)
           variant={isActive ? "default" : "outline"}
           className={`w-full md:w-auto gap-2 ${
             isActive 
-              ? 'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white' 
-              : 'bg-white/50 border-white/60 hover:bg-white hover:border-cyan-400'
+              ? 'bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep text-white' 
+              : 'bg-white/50 border-white/60 hover:bg-white hover:border-brand-teal-medium'
           }`}
         >
           <Calendar className="w-4 h-4" />
@@ -149,7 +149,7 @@ export function DateRangeFilter({ onApply, onClear, isActive }: DateFilterProps)
                   variant="ghost"
                   size="sm"
                   onClick={() => handleQuickFilter(filter.getRange())}
-                  className="w-full justify-start text-sm font-medium text-gray-700 hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                  className="w-full justify-start text-sm font-medium text-gray-700 hover:bg-brand-teal/15 hover:text-brand-orange-dark transition-colors"
                 >
                   {filter.label}
                 </Button>
@@ -180,7 +180,7 @@ export function DateRangeFilter({ onApply, onClear, isActive }: DateFilterProps)
                       type="date"
                       value={fromDate}
                       onChange={(e) => handleFromDateChange(e.target.value)}
-                      className="border-gray-300 focus:border-blue-400 focus:ring-blue-400"
+                      className="border-gray-300 focus:border-brand-teal-medium focus:ring-brand-teal-medium"
                     />
                   </div>
                   <div>
@@ -189,19 +189,19 @@ export function DateRangeFilter({ onApply, onClear, isActive }: DateFilterProps)
                       type="date"
                       value={toDate}
                       onChange={(e) => handleToDateChange(e.target.value)}
-                      className="border-gray-300 focus:border-blue-400 focus:ring-blue-400"
+                      className="border-gray-300 focus:border-brand-teal-medium focus:ring-brand-teal-medium"
                     />
                   </div>
                 </div>
 
                 {isValid && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-blue-900">Selected Range</p>
-                    <p className="text-sm text-blue-700 mt-1">
+                  <div className="bg-brand-teal/8 border border-brand-teal/25 rounded-lg p-3">
+                    <p className="text-xs font-semibold text-brand-teal-dark">Selected Range</p>
+                    <p className="text-sm text-brand-teal-dark mt-1">
                       {format(selectedRange.from!, 'EEEE, MMMM d, yyyy')} to {format(selectedRange.to!, 'EEEE, MMMM d, yyyy')}
                     </p>
                     {selectedRange.from && selectedRange.to && (
-                      <p className="text-xs text-blue-600 mt-2">
+                      <p className="text-xs text-brand-teal-medium mt-2">
                         {Math.ceil((selectedRange.to.getTime() - selectedRange.from.getTime()) / (1000 * 60 * 60 * 24))} days
                       </p>
                     )}
@@ -222,7 +222,7 @@ export function DateRangeFilter({ onApply, onClear, isActive }: DateFilterProps)
               <Button
                 onClick={handleApply}
                 disabled={!isValid}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Apply Filter
               </Button>

@@ -58,11 +58,11 @@ export default function SuperAdminSidebar({ session }: SuperAdminSidebarProps) {
           <div className="p-6 border-b border-white/20">
             <div className="flex items-center justify-between">
               <div className={`flex items-center gap-3 transition-all duration-300 ${!sidebarOpen && 'lg:opacity-0'}`}>
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-teal-deep to-brand-orange-deep flex items-center justify-center">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-brand-teal-deep to-brand-orange-deep bg-clip-text text-transparent">
                     WarehouseOS
                   </h1>
                   <p className="text-xs text-gray-600">Super Admin</p>
@@ -88,11 +88,11 @@ export default function SuperAdminSidebar({ session }: SuperAdminSidebarProps) {
                   href={item.href}
                   className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 group ${
                     isActive 
-                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg scale-105' 
+                      ? 'bg-gradient-to-r from-brand-teal-deep to-brand-orange-deep text-white shadow-lg scale-105' 
                       : 'hover:bg-white/50 text-gray-700'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-600 group-hover:text-blue-600'} transition-colors`} />
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-600 group-hover:text-brand-teal-medium'} transition-colors`} />
                   <span className={`font-semibold transition-all duration-300 ${
                     !sidebarOpen ? 'lg:opacity-0 lg:w-0' : 'opacity-100'
                   }`}>
@@ -109,7 +109,7 @@ export default function SuperAdminSidebar({ session }: SuperAdminSidebarProps) {
           {/* User Profile */}
           <div className={`absolute bottom-0 left-0 right-0 p-4 border-t border-white/20 bg-white/20 transition-all duration-300 ${!sidebarOpen && 'lg:opacity-0'}`}>
             <div className="flex items-center gap-3 p-3 rounded-xl bg-white/40 backdrop-blur-sm mb-2">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-teal-deep to-brand-orange-deep flex items-center justify-center text-white font-bold">
                 {session?.first_name?.[0]}{session?.last_name?.[0]}
               </div>
               <div className="flex-1 min-w-0">

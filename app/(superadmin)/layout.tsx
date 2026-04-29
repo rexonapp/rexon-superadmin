@@ -55,8 +55,8 @@ function NotifIcon({ type }: { type: string }) {
   }
   if (type === 'new_warehouse') {
     return (
-      <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
-        <Warehouse className="w-4 h-4 text-blue-600" />
+      <div className="w-9 h-9 rounded-full bg-brand-teal/12 flex items-center justify-center shrink-0">
+        <Warehouse className="w-4 h-4 text-brand-teal-medium" />
       </div>
     );
   }
@@ -119,7 +119,7 @@ function AllNotificationsModal({
             {unreadCount > 0 && (
               <button
                 onClick={onMarkAllRead}
-                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                className="flex items-center gap-1 text-xs text-brand-teal hover:text-brand-orange-dark font-medium transition-colors"
               >
                 <Check className="w-3 h-3" />
                 Mark all read
@@ -153,7 +153,7 @@ function AllNotificationsModal({
                 key={n.id}
                 className={cn(
                   'flex items-start gap-3 px-5 py-3.5 group transition-colors duration-100',
-                  !n.is_read ? 'bg-blue-50/70 hover:bg-blue-50' : 'bg-white hover:bg-gray-50'
+                  !n.is_read ? 'bg-brand-teal/8 hover:bg-brand-teal/10' : 'bg-white hover:bg-gray-50'
                 )}
               >
                 <NotifIcon type={n.type} />
@@ -171,7 +171,7 @@ function AllNotificationsModal({
                   <p className="text-[10px] text-gray-400 mt-1.5 font-medium">{timeAgo(n.created_at)}</p>
                 </div>
                 <div className="flex flex-col items-center gap-2 shrink-0 pt-0.5">
-                  {!n.is_read && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
+                  {!n.is_read && <span className="w-2 h-2 bg-brand-teal rounded-full" />}
                   <button
                     onClick={() => onDelete(n.id)}
                     className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-rose-500 mt-auto"
@@ -266,7 +266,7 @@ function NotifDropdown({
               {unreadCount > 0 && (
                 <button
                   onClick={onMarkAllRead}
-                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                  className="flex items-center gap-1 text-xs text-brand-teal hover:text-brand-orange-dark font-medium transition-colors"
                 >
                   <Check className="w-3 h-3" />
                   Mark all read
@@ -290,7 +290,7 @@ function NotifDropdown({
                     key={n.id}
                     className={cn(
                       'flex items-start gap-3 px-4 py-3 group transition-colors duration-100',
-                      !n.is_read ? 'bg-blue-50/70 hover:bg-blue-50' : 'bg-white hover:bg-gray-50'
+                      !n.is_read ? 'bg-brand-teal/8 hover:bg-brand-teal/10' : 'bg-white hover:bg-gray-50'
                     )}
                   >
                     <NotifIcon type={n.type} />
@@ -308,7 +308,7 @@ function NotifDropdown({
                       <p className="text-[10px] text-gray-400 mt-1.5 font-medium">{timeAgo(n.created_at)}</p>
                     </div>
                     <div className="flex flex-col items-center gap-2 shrink-0 pt-0.5">
-                      {!n.is_read && <span className="w-2 h-2 bg-blue-500 rounded-full" />}
+                      {!n.is_read && <span className="w-2 h-2 bg-brand-teal rounded-full" />}
                       <button
                         onClick={() => onDelete(n.id)}
                         className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-300 hover:text-rose-500 mt-auto"
@@ -327,7 +327,7 @@ function NotifDropdown({
                 {hasMore ? (
                   <button
                     onClick={() => { setOpen(false); setShowAll(true); }}
-                    className="w-full px-4 py-2.5 text-xs font-semibold text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors flex items-center justify-center gap-1.5"
+                    className="w-full px-4 py-2.5 text-xs font-semibold text-brand-teal hover:text-brand-orange-dark hover:bg-brand-teal/10 transition-colors flex items-center justify-center gap-1.5"
                   >
                     See all {notifications.length} notifications
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -554,14 +554,14 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
 
               {/* Mobile logo */}
               <div className="flex items-center gap-2 lg:hidden">
-                <div className="w-7 h-7 rounded-lg overflow-hidden shadow-sm shrink-0 bg-gradient-to-br from-blue-600 to-cyan-600 flex items-center justify-center">
+                <div className="w-7 h-7 rounded-lg overflow-hidden shadow-sm shrink-0 bg-gradient-to-br from-brand-teal-deep to-brand-orange flex items-center justify-center">
                   {logoUrl
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                     : <span className="text-white text-[10px] font-bold">{(companyName || 'R')[0].toUpperCase()}</span>
                   }
                 </div>
-                <span className="text-sm font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent truncate max-w-[120px]">
+                <span className="text-sm font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal to-brand-orange bg-clip-text text-transparent truncate max-w-[120px]">
                   {companyName || 'Rexon'}
                 </span>
               </div>
@@ -623,7 +623,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                       {logoUrl
                         ? <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
                         : (
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white text-xs font-bold">
+                          <AvatarFallback className="bg-gradient-to-br from-brand-teal-deep via-brand-teal to-brand-orange text-white text-xs font-bold">
                             {userInitials}
                           </AvatarFallback>
                         )
@@ -640,7 +640,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                         {logoUrl
                           ? <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
                           : (
-                            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-cyan-500 text-white font-bold text-sm">
+                            <AvatarFallback className="bg-gradient-to-br from-brand-teal-deep via-brand-teal to-brand-orange text-white font-bold text-sm">
                               {userInitials}
                             </AvatarFallback>
                           )
@@ -649,7 +649,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                       <div className="min-w-0">
                         <p className="font-semibold text-sm text-gray-900 truncate">{userFullName}</p>
                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                        <Badge className="mt-1 text-[10px] h-4 bg-blue-100 text-blue-700 hover:bg-blue-100">
+                        <Badge className="mt-1 text-[10px] h-4 bg-brand-teal/15 text-brand-teal-dark hover:bg-brand-teal/15">
                           {user.role?.toUpperCase()}
                         </Badge>
                       </div>

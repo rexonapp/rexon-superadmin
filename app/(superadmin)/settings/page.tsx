@@ -109,7 +109,7 @@ function UnsavedChangesModal({ onStay, onLeave, onSaveAndLeave }: UnsavedChanges
             <Button
               onClick={handleSaveAndLeave}
               disabled={saving}
-              className="flex-1 h-10 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold shadow-md shadow-blue-500/20 transition-all text-sm gap-2"
+              className="flex-1 h-10 bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep text-white font-semibold shadow-md shadow-brand-teal/20 transition-all text-sm gap-2"
             >
               {saving
                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...</>
@@ -190,14 +190,14 @@ function LogoCropModal({ imageSrc, onConfirm, onCancel }: CropModalProps) {
 
         <div className="flex justify-center">
           <div
-            className="relative rounded-full border-4 border-blue-200 shadow-lg cursor-grab active:cursor-grabbing select-none"
+            className="relative rounded-full border-4 border-brand-teal/25 shadow-lg cursor-grab active:cursor-grabbing select-none"
             style={{ width: PREVIEW, height: PREVIEW }}
             onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
             onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={imageSrc} alt="crop preview" draggable={false} style={{ position: 'absolute', width: baseW * scale, height: baseH * scale, left: PREVIEW / 2 + position.x - (baseW * scale) / 2, top: PREVIEW / 2 + position.y - (baseH * scale) / 2, pointerEvents: 'none', userSelect: 'none' }} />
-            <div className="absolute inset-0 rounded-full ring-2 ring-blue-400/40 pointer-events-none" />
+            <div className="absolute inset-0 rounded-full ring-2 ring-brand-teal-medium/40 pointer-events-none" />
           </div>
         </div>
 
@@ -207,7 +207,7 @@ function LogoCropModal({ imageSrc, onConfirm, onCancel }: CropModalProps) {
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => setScale(s => Math.max(0.3, s - 0.1))} className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"><ZoomOut className="w-4 h-4 text-gray-600" /></button>
-            <input type="range" min="30" max="300" step="5" value={Math.round(scale * 100)} onChange={e => setScale(Number(e.target.value) / 100)} className="flex-1 accent-blue-500" />
+            <input type="range" min="30" max="300" step="5" value={Math.round(scale * 100)} onChange={e => setScale(Number(e.target.value) / 100)} className="flex-1 accent-brand-teal" />
             <button onClick={() => setScale(s => Math.min(3, s + 0.1))} className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"><ZoomIn className="w-4 h-4 text-gray-600" /></button>
           </div>
         </div>
@@ -216,7 +216,7 @@ function LogoCropModal({ imageSrc, onConfirm, onCancel }: CropModalProps) {
           <Button variant="outline" size="sm" onClick={() => { setScale(1); setPosition({ x: 0, y: 0 }); }} className="flex-1 gap-1.5 text-gray-600">
             <RotateCcw className="w-3.5 h-3.5" /> Reset
           </Button>
-          <Button size="sm" onClick={handleConfirm} className="flex-1 gap-1.5 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white">
+          <Button size="sm" onClick={handleConfirm} className="flex-1 gap-1.5 bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep text-white">
             <Check className="w-3.5 h-3.5" /> Apply
           </Button>
         </div>
@@ -471,13 +471,13 @@ export default function SettingsPage() {
     { id: 'autoApproveAgents',   label: 'Auto-approve agents',   description: 'New agent registrations are approved immediately without manual review' },
   ];
 
-  const ic = { blue: 'p-2.5 rounded-xl bg-blue-500/10 ring-4 ring-blue-500/10', cyan: 'p-2.5 rounded-xl bg-cyan-500/10 ring-4 ring-cyan-500/10' };
-  const iv = { blue: 'w-5 h-5 text-blue-600', cyan: 'w-5 h-5 text-cyan-600' };
+  const ic = { blue: 'p-2.5 rounded-xl bg-brand-teal/10 ring-4 ring-brand-teal/10', cyan: 'p-2.5 rounded-xl bg-brand-teal-medium/10 ring-4 ring-brand-teal-medium/10' };
+  const iv = { blue: 'w-5 h-5 text-brand-teal-medium', cyan: 'w-5 h-5 text-brand-teal' };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 animate-spin text-blue-500" />
+        <Loader2 className="w-6 h-6 animate-spin text-brand-teal-medium" />
       </div>
     );
   }
@@ -505,7 +505,7 @@ export default function SettingsPage() {
           <GlassCard className="px-5 py-4" gradient="blue">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
+                <h2 className="text-xl font-bold bg-gradient-to-r from-brand-teal-deep to-brand-orange bg-clip-text text-transparent">
                   System Settings
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5 font-medium">
@@ -526,7 +526,7 @@ export default function SettingsPage() {
                   onClick={handleSave}
                   disabled={saving || !isDirty}
                   size="sm"
-                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 shadow-lg shadow-blue-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep shadow-lg shadow-brand-teal/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? 'Saving...' : 'Save Changes'}
@@ -544,19 +544,19 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500 font-medium">Platform identity shown across the app and emails</p>
               </div>
             </div>
-            <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent mb-4" />
+            <Separator className="bg-gradient-to-r from-transparent via-brand-teal/25 to-transparent mb-4" />
 
             <div className="flex items-center gap-5 p-4 rounded-xl bg-white/40 border border-white/40 shadow-sm">
               <div className="relative shrink-0">
                 <div
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-20 h-20 rounded-full border-2 border-dashed border-blue-300 bg-blue-50/60 hover:bg-blue-100/60 hover:border-blue-400 cursor-pointer transition-all group shadow-md"
+                  className="w-20 h-20 rounded-full border-2 border-dashed border-brand-teal/35 bg-brand-teal/10 hover:bg-brand-teal/15 hover:border-brand-teal cursor-pointer transition-all group shadow-md"
                 >
                   {settings.logoFinal ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={settings.logoFinal} alt="Logo" className="w-full h-full object-cover rounded-full" />
                   ) : (
-                    <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-blue-400 group-hover:text-blue-500 transition-colors">
+                    <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-brand-teal group-hover:text-brand-teal transition-colors">
                       <Camera className="w-5 h-5" />
                       <span className="text-[9px] font-semibold text-center leading-tight">Upload<br />Logo</span>
                     </div>
@@ -589,10 +589,10 @@ export default function SettingsPage() {
                   placeholder="e.g. WarehouseHub"
                   value={settings.companyName}
                   onChange={e => setSettings({ ...settings, companyName: e.target.value })}
-                  className="bg-white/70 focus:bg-white focus:border-cyan-400 font-medium transition-all h-9 text-sm"
+                  className="bg-white/70 focus:bg-white focus:border-brand-teal-medium font-medium transition-all h-9 text-sm"
                 />
                 {settings.logoFinal && settings.logoFinal.startsWith('data:') && (
-                  <button onClick={() => fileInputRef.current?.click()} className="text-xs text-blue-500 hover:text-blue-700 font-semibold underline underline-offset-2 transition-colors">
+                  <button onClick={() => fileInputRef.current?.click()} className="text-xs text-brand-teal-medium hover:text-brand-orange-dark font-semibold underline underline-offset-2 transition-colors">
                     Re-adjust logo position & zoom →
                   </button>
                 )}
@@ -609,11 +609,11 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500 font-medium">Control how listings and agents are approved</p>
               </div>
             </div>
-            <Separator className="bg-gradient-to-r from-transparent via-cyan-200 to-transparent mb-4" />
+            <Separator className="bg-gradient-to-r from-transparent via-brand-teal/25 to-transparent mb-4" />
 
             <div className="space-y-2.5">
               {approvalSettings.map(setting => (
-                <div key={setting.id} className="flex items-center justify-between p-4 rounded-xl bg-white/40 hover:bg-cyan-50/60 border border-white/40 hover:border-cyan-200 shadow-sm transition-colors duration-150">
+                <div key={setting.id} className="flex items-center justify-between p-4 rounded-xl bg-white/40 hover:bg-brand-teal/8 border border-white/40 hover:border-brand-teal/25 shadow-sm transition-colors duration-150">
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900 text-sm">{setting.label}</p>
                     <p className="text-xs text-gray-500 mt-0.5 font-medium">{setting.description}</p>
@@ -621,7 +621,7 @@ export default function SettingsPage() {
                   <Switch
                     checked={settings[setting.id as keyof typeof settings] as boolean}
                     onCheckedChange={checked => setSettings({ ...settings, [setting.id]: checked })}
-                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-600 data-[state=checked]:to-cyan-600 ml-4"
+                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-brand-teal-deep data-[state=checked]:to-brand-orange ml-4"
                   />
                 </div>
               ))}
@@ -637,12 +637,12 @@ export default function SettingsPage() {
                 <p className="text-xs text-gray-500 font-medium">SendGrid is used to send all transactional emails</p>
               </div>
             </div>
-            <Separator className="bg-gradient-to-r from-transparent via-cyan-200 to-transparent mb-4" />
+            <Separator className="bg-gradient-to-r from-transparent via-brand-teal/25 to-transparent mb-4" />
 
             <div className="p-4 rounded-xl bg-white/40 border border-white/40 shadow-sm">
               <div className="flex items-center gap-2 mb-3">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-700 text-xs font-bold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 inline-block" /> SendGrid
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-teal/8 border border-brand-teal/25 text-brand-teal-dark text-xs font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-teal/80 inline-block" /> SendGrid
                 </span>
                 <span className="text-xs text-gray-400 font-medium">
                   {settings.sendgridConfigured ? '✓ Key configured' : 'Active provider'}
@@ -660,7 +660,7 @@ export default function SettingsPage() {
                   placeholder={settings.sendgridConfigured ? 'Leave blank to keep existing' : 'SG.••••••••••••••••••••'}
                   value={settings.sendgridApiKey ?? ''}
                   onChange={e => setSettings({ ...settings, sendgridApiKey: e.target.value === '' ? undefined : e.target.value })}
-                  className="w-64 bg-white/60 border-white/60 focus:bg-white focus:border-cyan-400 font-mono transition-all h-9 text-sm"
+                  className="w-64 bg-white/60 border-white/60 focus:bg-white focus:border-brand-teal-medium font-mono transition-all h-9 text-sm"
                 />
               </div>
             </div>

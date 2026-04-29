@@ -15,11 +15,11 @@ interface StatCardProps {
 
 const colorClasses = {
   blue: {
-    bg: 'bg-blue-500/10',
-    text: 'text-blue-600',
-    gradient: 'from-blue-500/20 via-transparent to-cyan-500/20',
-    ring: 'ring-blue-500/20',
-    badge: 'bg-blue-100 text-blue-700',
+    bg: 'bg-brand-teal/10',
+    text: 'text-brand-teal-medium',
+    gradient: 'from-brand-teal/20 via-transparent to-brand-teal-deep/20',
+    ring: 'ring-brand-teal/20',
+    badge: 'bg-brand-teal/15 text-brand-teal-dark',
   },
   purple: {
     bg: 'bg-purple-500/10',
@@ -36,11 +36,11 @@ const colorClasses = {
     badge: 'bg-violet-100 text-violet-700',
   },
   orange: {
-    bg: 'bg-orange-500/10',
-    text: 'text-orange-600',
-    gradient: 'from-orange-500/20 via-transparent to-amber-500/20',
-    ring: 'ring-orange-500/20',
-    badge: 'bg-orange-100 text-orange-700',
+    bg: 'bg-brand-orange/10',
+    text: 'text-brand-orange-hover',
+    gradient: 'from-brand-orange/20 via-transparent to-brand-orange-deep/20',
+    ring: 'ring-brand-orange/20',
+    badge: 'bg-brand-orange/15 text-brand-orange-dark',
   },
   amber: {
     bg: 'bg-amber-500/10',
@@ -64,11 +64,11 @@ const colorClasses = {
     badge: 'bg-rose-100 text-rose-700',
   },
   cyan: {
-    bg: 'bg-cyan-500/10',
-    text: 'text-cyan-600',
-    gradient: 'from-cyan-500/20 via-transparent to-blue-500/20',
-    ring: 'ring-cyan-500/20',
-    badge: 'bg-cyan-100 text-cyan-700',
+    bg: 'bg-brand-teal-medium/10',
+    text: 'text-brand-teal',
+    gradient: 'from-brand-teal-medium/20 via-transparent to-brand-teal/20',
+    ring: 'ring-brand-teal-medium/20',
+    badge: 'bg-brand-teal-medium/15 text-brand-teal-deep',
   },
 };
 

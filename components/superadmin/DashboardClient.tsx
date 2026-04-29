@@ -98,7 +98,7 @@ export default function DashboardClient({ initialData }: Props) {
       {/* Refreshing toast */}
       {isRefreshing && (
         <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-full px-3 py-1.5 shadow-sm text-xs text-gray-500">
-          <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />
+          <RefreshCw className="w-3 h-3 animate-spin text-brand-teal-medium" />
           Refreshing…
         </div>
       )}
@@ -126,8 +126,8 @@ export default function DashboardClient({ initialData }: Props) {
           {/* Card header */}
           <div className="flex flex-row items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-blue-500/10 ring-4 ring-blue-500/10">
-                <Activity className="w-5 h-5 text-blue-600" />
+              <div className="p-2 rounded-lg bg-brand-teal/10 ring-4 ring-brand-teal/10">
+                <Activity className="w-5 h-5 text-brand-teal-medium" />
               </div>
               <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
             </div>
@@ -136,15 +136,15 @@ export default function DashboardClient({ initialData }: Props) {
               onClick={() => router.push('/agentWarehouseActivity')}
               variant="ghost"
               size="sm"
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+              className="text-brand-teal hover:text-brand-orange-dark hover:bg-brand-teal/10"
             >
               View All
               <ArrowRight className="w-4 h-4 ml-1" />
-            </Button>`
+            </Button>
             </div>
           </div>
 
-          <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent mb-6" />
+          <Separator className="bg-gradient-to-r from-transparent via-brand-teal/25 to-transparent mb-6" />
 
           {recentActivity.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -249,7 +249,7 @@ export default function DashboardClient({ initialData }: Props) {
                     onClick={() => router.push('/agentActivity')}
                     variant="ghost"
                     size="sm"
-                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                    className="text-brand-teal-medium hover:text-brand-orange-dark hover:bg-brand-teal/10"
                   >
                     View All
                     <ArrowRight className="w-4 h-4 ml-1" />
@@ -293,8 +293,8 @@ export default function DashboardClient({ initialData }: Props) {
           ) : (
             <div className="text-center py-16 text-gray-500">
               <div className="relative inline-block">
-                <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl" />
-                <Clock className="w-16 h-16 mx-auto mb-4 text-blue-300 relative" />
+                <div className="absolute inset-0 bg-brand-teal/20 rounded-full blur-xl" />
+                <Clock className="w-16 h-16 mx-auto mb-4 text-brand-teal/40 relative" />
               </div>
               <p className="text-lg font-semibold text-gray-700">No recent activity</p>
               <p className="text-sm text-gray-500 mt-1">Activity will appear here</p>
@@ -305,18 +305,18 @@ export default function DashboardClient({ initialData }: Props) {
         {/* ── Quick Actions ── */}
         {/* <GlassCard className="p-6" gradient="cyan">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 rounded-lg bg-cyan-500/10 ring-4 ring-cyan-500/10">
-              <Sparkles className="w-5 h-5 text-cyan-600" />
+            <div className="p-2 rounded-lg bg-brand-teal-medium/10 ring-4 ring-brand-teal-medium/10">
+              <Sparkles className="w-5 h-5 text-brand-teal" />
             </div>
             <h3 className="text-lg font-bold text-gray-900">Quick Actions</h3>
           </div>
 
-          <Separator className="bg-gradient-to-r from-transparent via-cyan-200 to-transparent mb-6" />
+          <Separator className="bg-gradient-to-r from-transparent via-brand-teal/25 to-transparent mb-6" />
 
           <div className="space-y-3">
             <Button
               onClick={() => router.push('/warehouses')}
-              className="w-full justify-between h-12 rounded-xl bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 hover:from-blue-700 hover:via-cyan-700 hover:to-sky-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-cyan-500/40 transition-all group"
+              className="w-full justify-between h-12 rounded-xl bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange hover:from-brand-teal-dark hover:via-brand-teal-medium hover:to-brand-orange-deep text-white shadow-lg shadow-brand-teal/30 hover:shadow-xl hover:shadow-brand-orange/25 transition-all group"
             >
               <span className="flex items-center gap-2 font-semibold">
                 <Building2 className="w-4 h-4" />
@@ -331,7 +331,7 @@ export default function DashboardClient({ initialData }: Props) {
               variant="outline"
             >
               <span className="flex items-center gap-2 font-semibold">
-                <UserCheck className="w-4 h-4 text-cyan-600" />
+                <UserCheck className="w-4 h-4 text-brand-teal" />
                 Verify Agents
               </span>
               <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
@@ -343,13 +343,13 @@ export default function DashboardClient({ initialData }: Props) {
               variant="outline"
             >
               <span className="flex items-center gap-2 font-semibold">
-                <Users className="w-4 h-4 text-blue-600" />
+                <Users className="w-4 h-4 text-brand-teal-medium" />
                 Manage Admin Users
               </span>
               <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
             </Button>
 
-            <Separator className="my-4 bg-gradient-to-r from-transparent via-cyan-200 to-transparent" />
+            <Separator className="my-4 bg-gradient-to-r from-transparent via-brand-teal/25 to-transparent" />
 
            
           </div>

@@ -79,7 +79,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
       >
         <div className="h-full relative">
           <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/95 backdrop-blur-2xl border-r border-white/40 shadow-2xl" />
-          <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 via-cyan-500/5 to-sky-500/5 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-teal/8 via-brand-orange/5 to-brand-teal-deep/8 pointer-events-none" />
 
           <div className="relative h-full flex flex-col">
 
@@ -91,33 +91,33 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-600 via-cyan-600 to-sky-600 flex items-center justify-center">
+                    <div className="w-full h-full bg-gradient-to-br from-brand-teal-deep via-brand-teal to-brand-orange flex items-center justify-center">
                       <User2Icon className="w-6 h-6 text-white" />
                     </div>
                   )}
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${sidebarOpen ? 'opacity-100 max-w-xs' : 'lg:opacity-0 lg:max-w-0 opacity-100 max-w-xs'}`}>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 bg-clip-text text-transparent whitespace-nowrap">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal-medium to-brand-orange bg-clip-text text-transparent whitespace-nowrap">
                     {companyName || 'Rexon'}
                   </h1>
-                  <p className="text-xs font-medium text-blue-600/70 whitespace-nowrap">Super Admin Panel</p>
+                  <p className="text-xs font-medium text-brand-teal-medium whitespace-nowrap">Super Admin Panel</p>
                 </div>
               </div>
 
               <Button
                 onClick={() => setSidebarOpen(false)}
                 variant="ghost" size="icon"
-                className="lg:hidden w-8 h-8 rounded-lg hover:bg-blue-50 text-gray-500"
+                className="lg:hidden w-8 h-8 rounded-lg hover:bg-brand-teal/10 text-gray-500"
                 aria-label="Close sidebar"
               >
                 <X className="w-5 h-5" />
               </Button>
             </div>
 
-            <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent" />
+            <Separator className="bg-gradient-to-r from-transparent via-brand-teal/20 to-transparent" />
 
             {/* ── Nav ── */}
-            <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-200 scrollbar-track-transparent">
+            <nav className="flex-1 px-3 py-5 space-y-1.5 overflow-y-auto scrollbar-thin scrollbar-thumb-brand-teal/25 scrollbar-track-transparent">
               {menuItems.map((item) => {
                 const Icon     = item.icon;
                 const isActive = item.path === '/'
@@ -132,8 +132,8 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                     className={`
                       w-full h-12 rounded-xl transition-all duration-300 group relative overflow-hidden
                       ${isActive
-                        ? 'bg-gradient-to-r from-blue-600 via-cyan-600 to-sky-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-cyan-500/40'
-                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50 hover:text-blue-700'
+                        ? 'bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange text-white shadow-lg shadow-brand-teal/30 hover:shadow-xl hover:shadow-brand-orange/25'
+                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-brand-teal/10 hover:to-brand-orange/10 hover:text-brand-orange-dark'
                       }
                       justify-start gap-4 px-4
                       ${!sidebarOpen ? 'lg:justify-center lg:px-0' : ''}
@@ -142,7 +142,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                     {isActive && (
                       <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     )}
-                    <Icon className={`w-5 h-5 relative z-10 shrink-0 transition-colors ${isActive ? 'text-white' : 'text-gray-600 group-hover:text-blue-600'}`} />
+                    <Icon className={`w-5 h-5 relative z-10 shrink-0 transition-colors ${isActive ? 'text-white' : 'text-gray-600 group-hover:text-brand-teal-medium'}`} />
                     <span className={`font-semibold relative z-10 transition-all duration-300 ${!sidebarOpen ? 'lg:hidden' : ''}`}>
                       {item.label}
                     </span>
@@ -151,7 +151,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
               })}
             </nav>
 
-            <Separator className="bg-gradient-to-r from-transparent via-blue-200 to-transparent" />
+            <Separator className="bg-gradient-to-r from-transparent via-brand-teal/20 to-transparent" />
 
             {/* ── User profile (bottom of sidebar) ── */}
             <div className="p-3">
@@ -160,7 +160,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                   <Button
                     variant="ghost"
                     className={`
-                      w-full h-auto p-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-cyan-50
+                      w-full h-auto p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-teal/10 hover:to-brand-orange/10
                       transition-all duration-300 group
                       justify-start gap-3
                       ${!sidebarOpen ? 'lg:justify-center lg:px-2' : ''}
@@ -171,11 +171,11 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                       • Has image  → show image only, no name/role text
                       • No image   → show initials + name/role text (hidden when collapsed)
                     */}
-                    <Avatar className="w-10 h-10 ring-2 ring-blue-200 group-hover:ring-blue-400 transition-all shrink-0">
+                    <Avatar className="w-10 h-10 ring-2 ring-brand-teal/25 group-hover:ring-brand-orange-hover/50 transition-all shrink-0">
                       {logoUrl ? (
                         <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
                       ) : (
-                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-sm font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-sm font-bold">
                           {userInitials}
                         </AvatarFallback>
                       )}
@@ -185,7 +185,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                     {!userImageUrl && (
                       <div className={`flex-1 text-left overflow-hidden ${!sidebarOpen ? 'lg:hidden' : ''}`}>
                         <p className="font-semibold text-sm text-gray-900 truncate">{userFullName}</p>
-                        <p className="text-xs text-blue-600/70 truncate font-medium">{user.role?.toUpperCase()}</p>
+                        <p className="text-xs text-brand-teal-medium truncate font-medium">{user.role?.toUpperCase()}</p>
                       </div>
                     )}
                   </Button>
@@ -195,13 +195,13 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                   PLACE 2 — Sidebar dropdown menu header
                   Always shows avatar + full name + email (dropdown context needs it)
                 */}
-                <DropdownMenuContent side="top" align="start" className="w-56 border-blue-200 shadow-xl mb-1">
-                  <div className="px-3 py-2 border-b border-blue-100 flex items-center gap-2.5">
+                <DropdownMenuContent side="top" align="start" className="w-56 border-brand-teal/25 shadow-xl mb-1">
+                  <div className="px-3 py-2 border-b border-brand-teal/15 flex items-center gap-2.5">
                     <Avatar className="w-8 h-8 shrink-0">
                       {logoUrl ? (
                         <AvatarImage src={logoUrl} alt={logoUrl} className="object-cover" />
                       ) : (
-                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-500 text-white text-xs font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
                           {userInitials}
                         </AvatarFallback>
                       )}
@@ -213,12 +213,12 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                   </div>
                   <DropdownMenuItem
                     onClick={() => { router.push('/settings'); setSidebarOpen(false); }}
-                    className="cursor-pointer hover:bg-blue-50 mt-1"
+                    className="cursor-pointer hover:bg-brand-teal/10 mt-1"
                   >
-                    <Settings className="w-4 h-4 mr-2 text-blue-600" />
+                    <Settings className="w-4 h-4 mr-2 text-brand-teal-medium" />
                     Settings
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-blue-100" />
+                  <DropdownMenuSeparator className="bg-brand-teal/15" />
                   <DropdownMenuItem
                     onClick={onLogout}
                     className="cursor-pointer text-red-600 focus:text-red-600 hover:bg-red-50"

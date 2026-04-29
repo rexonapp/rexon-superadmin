@@ -93,8 +93,8 @@ function StatusBadge({ status }: { status: string }) {
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
     if (col !== sortKey) return <ChevronsUpDown className="w-3 h-3 text-gray-400 ml-1 shrink-0" />;
     return sortDir === 'asc'
-        ? <ChevronUp className="w-3 h-3 text-blue-500 ml-1 shrink-0" />
-        : <ChevronDown className="w-3 h-3 text-blue-500 ml-1 shrink-0" />;
+        ? <ChevronUp className="w-3 h-3 text-brand-teal-medium ml-1 shrink-0" />
+        : <ChevronDown className="w-3 h-3 text-brand-teal-medium ml-1 shrink-0" />;
 }
 
 function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
@@ -108,7 +108,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
             className={cn(
                 'text-xs font-bold tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer',
                 'hover:bg-gray-100 transition-colors',
-                active ? 'text-blue-600 bg-blue-50/60' : 'text-gray-500',
+                active ? 'text-brand-teal-medium bg-brand-teal/10' : 'text-gray-500',
                 className
             )}
         >
@@ -166,18 +166,18 @@ function CustomDateModal({ open, onClose, dateRange, onApply }: {
                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Start Date</label>
                         <input type="date" value={fromVal} max={toVal || undefined}
                             onChange={e => { setFromVal(e.target.value); setError(''); }}
-                            className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50" />
+                            className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-gray-50" />
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">End Date</label>
                         <input type="date" value={toVal} min={fromVal || undefined}
                             onChange={e => { setToVal(e.target.value); setError(''); }}
-                            className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50" />
+                            className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-gray-50" />
                     </div>
                     {fromVal && toVal && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                            <p className="text-[13px] font-medium text-blue-700">
+                        <div className="bg-brand-teal/8 border border-brand-teal/25 rounded-lg px-3 py-2.5 flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-brand-teal-medium shrink-0" />
+                            <p className="text-[13px] font-medium text-brand-teal-dark">
                                     {format(new Date(fromVal + "T00:00:00"), 'MMM d, yyyy')} → {format(new Date(toVal + "T23:59:59"), 'MMM d, yyyy')}
                                 </p>
                         </div>
@@ -465,7 +465,7 @@ export default function WarehousesPage() {
 
                     <Select value={dateFilter} onValueChange={handleDateFilterChange}>
                         <SelectTrigger className={cn('w-40 h-9 text-sm border-gray-200 shrink-0',
-                            dateFilter !== 'all' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-gray-50')}>
+                            dateFilter !== 'all' ? 'bg-brand-teal/8 border-brand-teal/35 text-brand-teal-dark' : 'bg-gray-50')}>
                             <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
                             <SelectValue placeholder="Date Range" />
                         </SelectTrigger>
@@ -482,7 +482,7 @@ export default function WarehousesPage() {
 
                     {dateFilter === 'custom' && dateRange.from && dateRange.to && (
                         <Button variant="outline" size="sm" onClick={() => setShowCustomDateModal(true)}
-                            className="h-9 px-3 text-xs text-blue-600 border-blue-200 hover:bg-blue-50 whitespace-nowrap shrink-0">
+                            className="h-9 px-3 text-xs text-brand-teal-medium border-brand-teal/25 hover:bg-brand-teal/10 whitespace-nowrap shrink-0">
                             <Calendar className="w-3 h-3 mr-1.5" />
                             {format(dateRange.from, 'MMM d')} – {format(dateRange.to, 'MMM d')}
                         </Button>
@@ -524,7 +524,7 @@ export default function WarehousesPage() {
                             {paginated.length > 0 ? paginated.map((w, i) => (
                                 <TableRow key={`${w.warehouse_id}-${w.agent_id}-${w.created_at}-${i}`}
 
-                                    className={cn('border-b border-gray-100 hover:bg-blue-100 transition-colors group cursor-pointer',
+                                    className={cn('border-b border-gray-100 hover:bg-brand-teal/15 transition-colors group cursor-pointer',
                                         i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white')}
                                     // onClick={() => openDetails(w)}
                                     >
@@ -613,7 +613,7 @@ export default function WarehousesPage() {
                                         <PaginationItem key={item}>
                                             <PaginationLink onClick={() => handlePageChange(item)} isActive={safePage === item}
                                                 className={cn('h-8 w-8 text-sm cursor-pointer select-none rounded-lg font-medium',
-                                                    safePage === item ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:text-white' : 'hover:bg-gray-100')}>
+                                                    safePage === item ? 'bg-brand-teal-deep text-white border-brand-teal-deep hover:bg-brand-teal-dark hover:text-white' : 'hover:bg-gray-100')}>
                                                 {item}
                                             </PaginationLink>
                                         </PaginationItem>

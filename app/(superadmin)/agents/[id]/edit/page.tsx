@@ -455,8 +455,8 @@ export default function EditAgentPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
-                    <User className="h-5 w-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-brand-teal/8 rounded-lg flex items-center justify-center mr-3">
+                    <User className="h-5 w-5 text-brand-teal-medium" />
                   </div>
                   <CardTitle>Personal Details</CardTitle>
                 </div>
@@ -562,8 +562,8 @@ export default function EditAgentPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
-                    <MapPin className="h-5 w-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-brand-teal/8 rounded-lg flex items-center justify-center mr-3">
+                    <MapPin className="h-5 w-5 text-brand-teal-medium" />
                   </div>
                   <CardTitle>Address Information</CardTitle>
                 </div>
@@ -613,8 +613,8 @@ export default function EditAgentPage() {
             <Card>
               <CardHeader>
                 <div className="flex items-center">
-                  <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center mr-3">
-                    <Briefcase className="h-5 w-5 text-blue-600" />
+                  <div className="w-10 h-10 bg-brand-teal/8 rounded-lg flex items-center justify-center mr-3">
+                    <Briefcase className="h-5 w-5 text-brand-teal-medium" />
                   </div>
                   <CardTitle>Professional Information</CardTitle>
                 </div>
@@ -645,7 +645,7 @@ export default function EditAgentPage() {
                         'h-11 pl-3 pr-44',
                         touchedFields.has('domainName') && fieldErrors.domainName ? 'border-red-500 focus-visible:ring-red-500' :
                         domainStatus === 'available' ? 'border-green-500 focus-visible:ring-green-500' :
-                        domainStatus === 'unchanged' ? 'border-blue-400 focus-visible:ring-blue-400' :
+                        domainStatus === 'unchanged' ? 'border-brand-teal-medium focus-visible:ring-brand-teal-medium' :
                         domainStatus === 'taken' ? 'border-red-500 focus-visible:ring-red-500' : ''
                       )}
                     />
@@ -655,7 +655,7 @@ export default function EditAgentPage() {
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                       {domainStatus === 'checking' && <Loader2 className="h-4 w-4 animate-spin text-gray-400" />}
                       {domainStatus === 'available' && !fieldErrors.domainName && <CheckCircle2 className="h-4 w-4 text-green-500" />}
-                      {domainStatus === 'unchanged' && <CheckCircle2 className="h-4 w-4 text-blue-400" />}
+                      {domainStatus === 'unchanged' && <CheckCircle2 className="h-4 w-4 text-brand-teal" />}
                       {(domainStatus === 'taken' || (touchedFields.has('domainName') && fieldErrors.domainName)) && <AlertCircle className="h-4 w-4 text-red-500" />}
                     </span>
                   </div>
@@ -670,7 +670,7 @@ export default function EditAgentPage() {
                     <p className="text-sm text-green-600 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" /><strong>{formData.domainName}.{PLATFORM_DOMAIN}</strong>&nbsp;is available!</p>
                   )}
                   {!fieldErrors.domainName && domainStatus === 'unchanged' && (
-                    <p className="text-sm text-blue-500 flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" />Current domain: <strong>{formData.domainName}.{PLATFORM_DOMAIN}</strong></p>
+                    <p className="text-sm text-brand-teal-medium flex items-center gap-1"><CheckCircle2 className="h-3.5 w-3.5" />Current domain: <strong>{formData.domainName}.{PLATFORM_DOMAIN}</strong></p>
                   )}
                   {!fieldErrors.domainName && domainStatus === 'taken' && (
                     <p className="text-sm text-red-500 flex items-center gap-1"><AlertCircle className="h-3.5 w-3.5" /><strong>{formData.domainName}.{PLATFORM_DOMAIN}</strong>&nbsp;is already taken.</p>
@@ -718,9 +718,9 @@ export default function EditAgentPage() {
                   {formData.languagesSpoken.length > 0 && (
                     <div className="flex flex-wrap gap-2 mt-2">
                       {formData.languagesSpoken.map(language => (
-                        <Badge key={language} variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200 px-3 py-1.5">
+                        <Badge key={language} variant="secondary" className="bg-brand-teal/12 text-brand-teal-dark hover:bg-brand-teal/20 px-3 py-1.5">
                           {language}
-                          <button type="button" onClick={() => toggleLanguage(language)} className="ml-2 hover:text-blue-600">
+                          <button type="button" onClick={() => toggleLanguage(language)} className="ml-2 hover:text-brand-teal-medium">
                             <X className="h-3 w-3" />
                           </button>
                         </Badge>
@@ -773,7 +773,7 @@ export default function EditAgentPage() {
                           <span className="absolute top-2 left-2 bg-green-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">New</span>
                         )}
                         {existingProfileUrl && !profilePreview && (
-                          <span className="absolute top-2 left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-0.5 rounded-full">Current</span>
+                          <span className="absolute top-2 left-2 bg-brand-teal text-white text-xs font-semibold px-2 py-0.5 rounded-full">Current</span>
                         )}
                         <div className="absolute inset-0 group-hover:bg-black/20 transition-all duration-200 rounded-lg flex items-center justify-center">
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-2">
@@ -793,10 +793,10 @@ export default function EditAgentPage() {
                     </div>
                   ) : (
                     <Label htmlFor="profileImage" className="block w-full cursor-pointer">
-                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-500 hover:bg-blue-50 transition-all">
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-brand-teal hover:bg-brand-teal/10 transition-all">
                         <input id="profileImage" type="file" accept="image/jpeg,image/jpg,image/png,image/webp,image/gif" onChange={handleProfileImageChange} className="hidden" />
-                        <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <User className="h-6 w-6 text-blue-600" />
+                        <div className="w-12 h-12 bg-brand-teal/12 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <User className="h-6 w-6 text-brand-teal-medium" />
                         </div>
                         <p className="text-sm font-medium text-gray-900 mb-1">Upload Photo</p>
                         <p className="text-xs text-gray-500">JPG, PNG, WEBP, GIF (max 2MB)</p>
@@ -815,16 +815,16 @@ export default function EditAgentPage() {
                 <CardContent className="space-y-4">
                   {/* Existing KYC */}
                   {existingKycUrl && (
-                    <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                      <p className="text-xs text-blue-600 font-semibold mb-2 uppercase tracking-wide">Current Document</p>
+                    <div className="rounded-lg border border-brand-teal/25 bg-brand-teal/8 p-3">
+                      <p className="text-xs text-brand-teal-medium font-semibold mb-2 uppercase tracking-wide">Current Document</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                          <FileText className="h-4 w-4 text-blue-500 flex-shrink-0" />
+                          <FileText className="h-4 w-4 text-brand-teal-medium flex-shrink-0" />
                           <span className="text-sm text-gray-700 truncate">{existingKycName}</span>
                         </div>
                         <div className="flex items-center gap-1 flex-shrink-0 ml-2">
                           <a href={existingKycUrl} target="_blank" rel="noopener noreferrer">
-                            <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-blue-500 hover:bg-blue-100" title="View document">
+                            <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-brand-teal-medium hover:bg-brand-teal/15" title="View document">
                               <ExternalLink className="h-4 w-4" />
                             </Button>
                           </a>
@@ -838,10 +838,10 @@ export default function EditAgentPage() {
 
                   {/* Upload new */}
                   <Label htmlFor="documents" className="block w-full cursor-pointer">
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 hover:bg-blue-50 transition-all">
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-brand-teal hover:bg-brand-teal/10 transition-all">
                       <input id="documents" type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={handleDocumentChange} className="hidden" />
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <Upload className="h-5 w-5 text-blue-600" />
+                      <div className="w-10 h-10 bg-brand-teal/12 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <Upload className="h-5 w-5 text-brand-teal-medium" />
                       </div>
                       <p className="text-sm font-medium text-gray-900">{existingKycUrl ? 'Upload Replacement' : 'Upload Document'}</p>
                       <p className="text-xs text-gray-500">PDF or JPG (max 5MB)</p>
@@ -873,7 +873,7 @@ export default function EditAgentPage() {
                 <Button
                   onClick={handleSubmit}
                   disabled={saving}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 text-base font-bold shadow-md hover:shadow-lg"
+                  className="w-full bg-brand-teal-deep hover:bg-brand-teal-dark text-white py-6 text-base font-bold shadow-md hover:shadow-lg"
                 >
                   {saving ? (
                     <><div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" /><span>Saving…</span></>

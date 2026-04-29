@@ -81,8 +81,8 @@ function StatusBadge({ status }: { status: string }) {
 function SortIcon({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
     if (col !== sortKey) return <ChevronsUpDown className="w-3 h-3 text-black ml-1 shrink-0" />;
     return sortDir === 'asc'
-        ? <ChevronUp className="w-3 h-3 text-blue-500 ml-1 shrink-0" />
-        : <ChevronDown className="w-3 h-3 text-blue-500 ml-1 shrink-0" />;
+        ? <ChevronUp className="w-3 h-3 text-brand-teal-medium ml-1 shrink-0" />
+        : <ChevronDown className="w-3 h-3 text-brand-teal-medium ml-1 shrink-0" />;
 }
 
 function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
@@ -96,7 +96,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
             className={cn(
                 'text-[11px] font-bold uppercase tracking-[0.07em] h-11 px-4 whitespace-nowrap select-none cursor-pointer',
                 'hover:bg-gray-100 transition-colors',
-                active ? 'text-blue-600 bg-gray-100' : 'text-gray-400',
+                active ? 'text-brand-teal-medium bg-gray-100' : 'text-gray-400',
                 className
             )}
         >
@@ -155,18 +155,18 @@ function CustomDateModal({ open, onClose, dateRange, onApply }: {
                         <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Start Date</label>
                         <input type="date" value={fromVal} max={toVal || undefined}
                             onChange={e => { setFromVal(e.target.value); setError(''); }}
-                            className="w-full h-10 rounded-lg border border-gray-200 px-3 text-[14px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50" />
+                            className="w-full h-10 rounded-lg border border-gray-200 px-3 text-[14px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-gray-50" />
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">End Date</label>
                         <input type="date" value={toVal} min={fromVal || undefined}
                             onChange={e => { setToVal(e.target.value); setError(''); }}
-                            className="w-full h-10 rounded-lg border border-gray-200 px-3 text-[14px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50" />
+                            className="w-full h-10 rounded-lg border border-gray-200 px-3 text-[14px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-gray-50" />
                     </div>
                     {fromVal && toVal && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                            <p className="text-[13px] font-medium text-blue-700">
+                        <div className="bg-brand-teal/8 border border-brand-teal/25 rounded-lg px-3 py-2.5 flex items-center gap-2">
+                            <Calendar className="w-3.5 h-3.5 text-brand-teal-medium shrink-0" />
+                            <p className="text-[13px] font-medium text-brand-teal-dark">
                             {format(new Date(fromVal + "T00:00:00"), 'MMM d, yyyy')} → {format(new Date(toVal + "T23:59:59"), 'MMM d, yyyy')}
                             </p>
                         </div>
@@ -188,9 +188,9 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
     useEffect(() => { setCurrent(0); setImgError({}); }, [images]);
 
     if (loading) return (
-        <div className="w-full h-48 rounded-xl flex flex-col items-center justify-center gap-3 bg-blue-50 border-2 border-dashed border-blue-200">
-            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-blue-500 font-medium">Loading images…</p>
+        <div className="w-full h-48 rounded-xl flex flex-col items-center justify-center gap-3 bg-brand-teal/8 border-2 border-dashed border-brand-teal/25">
+            <div className="w-6 h-6 border-2 border-brand-teal-deep border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-brand-teal-medium font-medium">Loading images…</p>
         </div>
     );
 
@@ -242,7 +242,7 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
                     {images.map((thumb, i) => (
                         <button key={thumb.id} onClick={() => setCurrent(i)}
                             className={cn('flex-shrink-0 w-11 h-8 rounded-md overflow-hidden border-2 transition-all',
-                                i === current ? 'border-blue-500 scale-105' : 'border-gray-200 opacity-60 hover:opacity-90')}>
+                                i === current ? 'border-brand-teal scale-105' : 'border-gray-200 opacity-60 hover:opacity-90')}>
                             {imgError[i]
                                 ? <div className="w-full h-full bg-gray-100 flex items-center justify-center"><ImageIcon className="w-3 h-3 text-gray-400" /></div>
                                 : <img src={thumb.s3_url} alt="" className="w-full h-full object-cover" onError={() => setImgError(p => ({ ...p, [i]: true }))} />}
@@ -258,8 +258,8 @@ function RowThumb({ warehouse }: { warehouse: Warehouse }) {
     const [error, setError] = useState(false);
     const img = warehouse.images?.find(i => i.is_primary) ?? warehouse.images?.[0];
     if (!img || error) return (
-        <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0 border border-blue-100">
-            <Building2 className="w-4 h-4 text-blue-300" />
+        <div className="w-8 h-8 rounded-lg bg-brand-teal/8 flex items-center justify-center flex-shrink-0 border border-brand-teal/15">
+            <Building2 className="w-4 h-4 text-brand-teal-medium" />
         </div>
     );
     return (
@@ -281,7 +281,7 @@ function DetailRow({ icon: Icon, label, value, accent = 'blue' }: {
     return (
         <div className="flex items-center gap-3 py-2.5 border-b border-gray-100 last:border-0">
             <div className={cn('w-8 h-8 rounded-lg border flex items-center justify-center flex-shrink-0',
-                accent === 'amber' ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-blue-50 border-blue-100 text-blue-600')}>
+                accent === 'amber' ? 'bg-amber-50 border-amber-100 text-amber-600' : 'bg-brand-teal/8 border-brand-teal/15 text-brand-teal-medium')}>
                 <Icon className="w-3.5 h-3.5" />
             </div>
             <div className="min-w-0">
@@ -495,7 +495,7 @@ export default function WarehousesPage() {
 
                     <Select value={dateFilter} onValueChange={handleDateFilterChange}>
                         <SelectTrigger className={cn('w-[130px] sm:w-[150px] h-9 text-[13px] border-gray-200 shrink-0',
-                            dateFilter !== 'all' ? 'bg-blue-50 border-blue-300 text-blue-700' : 'bg-gray-50')}>
+                            dateFilter !== 'all' ? 'bg-brand-teal/8 border-brand-teal/35 text-brand-teal-dark' : 'bg-gray-50')}>
                             <Calendar className="w-3 h-3 mr-1.5 text-gray-400" />
                             <SelectValue placeholder="Date Range" />
                         </SelectTrigger>
@@ -512,7 +512,7 @@ export default function WarehousesPage() {
 
                     {dateFilter === 'custom' && dateRange.from && dateRange.to && (
                         <Button variant="outline" size="sm" onClick={() => setShowCustomDateModal(true)}
-                            className="h-9 px-3 text-[12.5px] text-blue-600 border-blue-200 hover:bg-blue-50 whitespace-nowrap shrink-0">
+                            className="h-9 px-3 text-[12.5px] text-brand-teal-medium border-brand-teal/25 hover:bg-brand-teal/10 whitespace-nowrap shrink-0">
                             <Calendar className="w-3 h-3 mr-1.5" />
                             {format(new Date(dateRange.from), 'MMM d, yyyy')} → {format(new Date(dateRange.to), 'MMM d, yyyy')}
                         </Button>
@@ -553,13 +553,13 @@ export default function WarehousesPage() {
                         <TableBody>
                             {paginated.length > 0 ? paginated.map((w, i) => (
                                 <TableRow key={w.id}
-                                    className={cn('border-b border-gray-100 hover:bg-blue-50/40 transition-colors group',
+                                    className={cn('border-b border-gray-100 hover:bg-brand-teal/10/40 transition-colors group',
                                         i % 2 === 1 ? 'bg-gray-50/40' : 'bg-white')}>
                                     <TableCell className="px-4 py-4">
                                         <div className="flex items-center gap-2.5">
                                             <RowThumb warehouse={w} />
                                             <div className="min-w-0">
-                                                <p className="text-[13px] font-semibold text-gray-900 group-hover:text-blue-600 transition-colors leading-tight truncate max-w-[180px]">
+                                                <p className="text-[13px] font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors leading-tight truncate max-w-[180px]">
                                                     {w.title}
                                                 </p>
                                                 <p className="text-[11.5px] text-gray-400 mt-0.5 truncate max-w-[180px]">{w.property_name}</p>
@@ -647,7 +647,7 @@ export default function WarehousesPage() {
                                             isActive={currentPage === page}
                                             className={cn(
                                                 'h-8 w-8 text-[12.5px] cursor-pointer rounded-lg font-medium',
-                                                currentPage === page && 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:text-white'
+                                                currentPage === page && 'bg-brand-teal-deep text-white border-brand-teal-deep hover:bg-brand-teal-dark hover:text-white'
                                             )}>
                                             {page}
                                         </PaginationLink>
@@ -688,11 +688,11 @@ export default function WarehousesPage() {
                     <VisuallyHidden><DialogTitle>{selected?.title ?? 'Warehouse Details'}</DialogTitle></VisuallyHidden>
 
                     {/* Modal header */}
-                    <div className="bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 px-4 sm:px-5 pt-4 pb-0 flex-shrink-0">
+                    <div className="bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange px-4 sm:px-5 pt-4 pb-0 flex-shrink-0">
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                                    <span className="text-blue-100 text-[11px] font-bold uppercase tracking-wide bg-white/15 rounded-full px-2 py-0.5">
+                                    <span className="text-white/90 text-[11px] font-bold uppercase tracking-wide bg-white/15 rounded-full px-2 py-0.5">
                                         {selected?.property_type ?? '—'}
                                     </span>
                                     {selected?.is_featured && (
@@ -702,11 +702,11 @@ export default function WarehousesPage() {
                                     )}
                                 </div>
                                 <h2 className="text-[15px] sm:text-[17px] font-bold text-white leading-snug truncate">{selected?.title}</h2>
-                                <p className="text-blue-200 text-[12px] sm:text-[12.5px] mt-0.5 truncate">{selected?.property_name}</p>
+                                <p className="text-white/85 text-[12px] sm:text-[12.5px] mt-0.5 truncate">{selected?.property_name}</p>
                             </div>
                             <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                                 {selected && <StatusBadge status={selected.status} />}
-                                <p className="text-blue-300 text-[11px] font-mono">#{selected?.id?.slice(0, 8)}</p>
+                                <p className="text-white/70 text-[11px] font-mono">#{selected?.id?.slice(0, 8)}</p>
                             </div>
                         </div>
 
@@ -718,17 +718,17 @@ export default function WarehousesPage() {
                                 { label: 'City', value: selected?.city },
                             ].map(item => (
                                 <div key={item.label} className="bg-white/10 border border-white/20 rounded-lg px-2 sm:px-3 py-2">
-                                    <p className="text-blue-200 text-[10px] font-semibold uppercase tracking-wide mb-0.5">{item.label}</p>
+                                    <p className="text-white/85 text-[10px] font-semibold uppercase tracking-wide mb-0.5">{item.label}</p>
                                     <p className="text-white font-bold text-[12px] sm:text-[13px] truncate">{item.value ?? '—'}</p>
                                 </div>
                             ))}
                         </div>
 
-                        <div className="flex mt-3 border-b border-blue-500/40">
+                        <div className="flex mt-3 border-b border-white/30">
                             {(['overview', 'contact', 'location'] as const).map(tab => (
                                 <button key={tab} onClick={() => setActiveTab(tab)}
                                     className={cn('px-3 sm:px-4 py-2.5 text-[12px] font-bold capitalize transition-all relative',
-                                        activeTab === tab ? 'text-white' : 'text-blue-300 hover:text-blue-100')}>
+                                        activeTab === tab ? 'text-white' : 'text-white/70 hover:text-white')}>
                                     {tab}
                                     {activeTab === tab && <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-t bg-orange-400" />}
                                 </button>
@@ -742,7 +742,7 @@ export default function WarehousesPage() {
                             // Stack on mobile, side-by-side on md+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 <div>
-                                    <p className="text-[10.5px] font-bold text-blue-600 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                                    <p className="text-[10.5px] font-bold text-brand-teal-medium uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
                                         <ImageIcon className="w-3.5 h-3.5" /> Photos
                                         <span className="ml-auto text-gray-400 font-normal normal-case tracking-normal text-[11.5px]">
                                             {selected?.images ? `${selected.images.length} photo${selected.images.length !== 1 ? 's' : ''}` : ''}
@@ -751,7 +751,7 @@ export default function WarehousesPage() {
                                     <ImageGallery images={selected?.images ?? []} loading={loadingImages} />
                                 </div>
                                 <div>
-                                    <p className="text-[10.5px] font-bold text-blue-600 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                                    <p className="text-[10.5px] font-bold text-brand-teal-medium uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
                                         <Building2 className="w-3.5 h-3.5" /> Property Details
                                     </p>
                                     <DetailRow icon={Building2} label="Property Type" value={selected?.property_type} />
@@ -788,14 +788,14 @@ export default function WarehousesPage() {
                             <div className="max-w-md">
                                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
                                     <div className="flex items-center gap-3.5">
-                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-teal to-brand-orange flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                                             {selected?.contact_person_name?.charAt(0)?.toUpperCase() ?? '?'}
                                         </div>
                                         <div>
                                             <p className="font-bold text-gray-900 text-[14.5px]">{selected?.contact_person_name}</p>
                                             {selected?.contact_person_designation && <p className="text-[12.5px] text-gray-500">{selected.contact_person_designation}</p>}
                                             {selected?.contact_person_relation && (
-                                                <span className="text-[11px] bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-semibold mt-1 inline-block">
+                                                <span className="text-[11px] bg-brand-teal/12 text-brand-teal-dark px-2 py-0.5 rounded-full font-semibold mt-1 inline-block">
                                                     {selected.contact_person_relation}
                                                 </span>
                                             )}
@@ -816,7 +816,7 @@ export default function WarehousesPage() {
 
                         {activeTab === 'location' && (
                             <div className="max-w-lg">
-                                <p className="text-[10.5px] font-bold text-blue-600 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                                <p className="text-[10.5px] font-bold text-brand-teal-medium uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
                                     <MapPin className="w-3.5 h-3.5" /> Location Details
                                 </p>
                                 <DetailRow icon={MapPin} label="Full Address" value={selected?.address} />
@@ -825,14 +825,14 @@ export default function WarehousesPage() {
                                 <DetailRow icon={Hash} label="Pincode" value={selected?.pincode} />
                                 <DetailRow icon={Truck} label="Road Connectivity" value={selected?.road_connectivity} />
                                 {selected?.latitude && selected?.longitude && (
-                                    <div className="mt-4 bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center justify-between gap-4">
+                                    <div className="mt-4 bg-brand-teal/8 border border-brand-teal/25 rounded-xl p-4 flex items-center justify-between gap-4">
                                         <div>
-                                            <p className="text-[10.5px] font-bold text-blue-600 uppercase tracking-wider mb-1">Coordinates</p>
+                                            <p className="text-[10.5px] font-bold text-brand-teal-medium uppercase tracking-wider mb-1">Coordinates</p>
                                             <p className="text-[12.5px] font-mono font-bold text-gray-800">{selected.latitude}, {selected.longitude}</p>
                                         </div>
                                         <a href={`https://www.google.com/maps?q=${selected.latitude},${selected.longitude}`}
                                             target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg transition-colors flex-shrink-0">
+                                            className="flex items-center gap-1.5 text-[12px] font-bold text-white bg-brand-teal-deep hover:bg-brand-teal-dark px-3 py-2 rounded-lg transition-colors flex-shrink-0">
                                             Maps <ArrowUpRight className="w-3.5 h-3.5" />
                                         </a>
                                     </div>

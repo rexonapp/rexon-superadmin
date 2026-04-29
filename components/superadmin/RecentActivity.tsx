@@ -53,7 +53,7 @@ export default function RecentActivity({
           {pendingAgents > 0 && (
             <Link
               href="/superadmin/agents"
-              className="text-xs px-3 py-1 rounded-full bg-blue-500/20 text-blue-700 font-semibold hover:bg-blue-500/30 transition-colors"
+              className="text-xs px-3 py-1 rounded-full bg-brand-teal/20 text-brand-teal-dark font-semibold hover:bg-brand-teal/30 transition-colors"
             >
               {pendingAgents} pending agents
             </Link>
@@ -76,13 +76,13 @@ export default function RecentActivity({
                 className={`p-2 rounded-lg ${
                   activity.type === 'warehouse'
                     ? 'bg-purple-500/20'
-                    : 'bg-blue-500/20'
+                    : 'bg-brand-teal/20'
                 }`}
               >
                 {activity.type === 'warehouse' ? (
                   <Building2 className="w-5 h-5 text-purple-600" />
                 ) : (
-                  <UserCheck className="w-5 h-5 text-blue-600" />
+                  <UserCheck className="w-5 h-5 text-brand-teal-medium" />
                 )}
               </div>
               <div className="flex-1 min-w-0">

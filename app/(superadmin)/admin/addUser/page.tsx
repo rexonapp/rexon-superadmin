@@ -372,7 +372,7 @@ export default function AddUserPage() {
                 <div className="flex gap-3 pt-2">
                   <Button
                     type="submit"
-                    className="flex-1 h-10 text-sm font-semibold rounded-lg transition-all bg-blue-500  hover:bg-blue-600 duration-200 hover:shadow-md active:scale-95"
+                    className="flex-1 h-10 text-sm font-semibold rounded-lg transition-all bg-brand-teal  hover:bg-brand-teal-dark duration-200 hover:shadow-md active:scale-95"
                     style={{ color: 'white', border: 'none' }}
                     disabled={loading || usernameStatus === 'taken' || emailStatus === 'taken' || emailStatus === 'invalid'}
                   >

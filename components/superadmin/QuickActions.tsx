@@ -9,25 +9,25 @@ export default function QuickActions() {
       label: 'Review Properties',
       icon: Building2,
       href: '/superadmin/properties',
-      color: 'from-purple-500 to-pink-600',
+      color: 'from-brand-teal-deep to-brand-teal-medium',
     },
     {
       label: 'Manage Users',
       icon: UserPlus,
       href: '/superadmin/users',
-      color: 'from-blue-500 to-cyan-600',
+      color: 'from-brand-teal to-brand-orange-deep',
     },
     {
       label: 'Review Agents',
       icon: BarChart3,
       href: '/superadmin/agents',
-      color: 'from-emerald-500 to-teal-600',
+      color: 'from-brand-teal-medium to-brand-orange',
     },
     {
       label: 'System Settings',
       icon: Settings,
       href: '/superadmin/settings',
-      color: 'from-orange-500 to-red-600',
+      color: 'from-brand-orange to-brand-orange-deep',
     },
   ];
 

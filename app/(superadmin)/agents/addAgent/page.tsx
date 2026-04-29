@@ -479,8 +479,8 @@ export default function SuperadminAgentCreation() {
             <Card>
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <User className="h-4.5 w-4.5 text-blue-600" />
+                  <div className="w-9 h-9 bg-brand-teal/8 rounded-lg flex items-center justify-center">
+                    <User className="h-4.5 w-4.5 text-brand-teal-medium" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Personal Details</CardTitle>
@@ -565,8 +565,8 @@ export default function SuperadminAgentCreation() {
             <Card>
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <Phone className="h-4 w-4 text-blue-600" />
+                  <div className="w-9 h-9 bg-brand-teal/8 rounded-lg flex items-center justify-center">
+                    <Phone className="h-4 w-4 text-brand-teal-medium" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Contact Information</CardTitle>
@@ -613,7 +613,7 @@ export default function SuperadminAgentCreation() {
                       <Checkbox
                         checked={formData.sameAsPhone}
                         onCheckedChange={checked => handleSameAsPhone(!!checked)}
-                        className="h-3.5 w-3.5 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                        className="h-3.5 w-3.5 data-[state=checked]:bg-brand-teal-deep data-[state=checked]:border-brand-teal-deep"
                       />
                       Same as mobile
                     </label>
@@ -659,8 +659,8 @@ export default function SuperadminAgentCreation() {
             <Card>
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <MapPin className="h-4 w-4 text-blue-600" />
+                  <div className="w-9 h-9 bg-brand-teal/8 rounded-lg flex items-center justify-center">
+                    <MapPin className="h-4 w-4 text-brand-teal-medium" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Address Information</CardTitle>
@@ -731,8 +731,8 @@ export default function SuperadminAgentCreation() {
             <Card>
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <Briefcase className="h-4 w-4 text-blue-600" />
+                  <div className="w-9 h-9 bg-brand-teal/8 rounded-lg flex items-center justify-center">
+                    <Briefcase className="h-4 w-4 text-brand-teal-medium" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Professional Information</CardTitle>
@@ -832,9 +832,9 @@ export default function SuperadminAgentCreation() {
                   {formData.languagesSpoken.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {formData.languagesSpoken.map(l => (
-                        <Badge key={l} variant="secondary" className="bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 px-2.5 py-1 text-xs">
+                        <Badge key={l} variant="secondary" className="bg-brand-teal/8 text-brand-teal-dark border border-brand-teal/25 hover:bg-brand-teal/15 px-2.5 py-1 text-xs">
                           {l}
-                          <button type="button" onClick={() => toggleLanguage(l)} className="ml-1.5 hover:text-blue-900">
+                          <button type="button" onClick={() => toggleLanguage(l)} className="ml-1.5 hover:text-brand-teal-dark">
                             <X className="h-3 w-3" />
                           </button>
                         </Badge>
@@ -889,8 +889,8 @@ export default function SuperadminAgentCreation() {
             )}>
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
-                    <ScrollText className="h-4 w-4 text-blue-600" />
+                  <div className="w-9 h-9 bg-brand-teal/8 rounded-lg flex items-center justify-center">
+                    <ScrollText className="h-4 w-4 text-brand-teal-medium" />
                   </div>
                   <div>
                     <CardTitle className="text-base">Terms & Compliance</CardTitle>
@@ -902,7 +902,7 @@ export default function SuperadminAgentCreation() {
                 <button
                   type="button"
                   onClick={openTncDialog}
-                  className="inline-flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:underline underline-offset-2 transition-colors"
+                  className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-teal-medium hover:text-brand-orange-dark hover:underline underline-offset-2 transition-colors"
                 >
                   <ExternalLink className="h-3.5 w-3.5" />
                   Read Full Terms &amp; Conditions
@@ -921,13 +921,13 @@ export default function SuperadminAgentCreation() {
                       setFieldErrors(prev => ({ ...prev, termsAccepted: checked ? undefined : 'You must accept the Terms & Conditions.' }));
                     }}
                     className={cn(
-                      'mt-0.5 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600',
+                      'mt-0.5 data-[state=checked]:bg-brand-teal-deep data-[state=checked]:border-brand-teal-deep',
                       touchedFields.has('termsAccepted') && fieldErrors.termsAccepted ? 'border-red-400' : ''
                     )}
                   />
                   <Label htmlFor="termsAccepted" className="text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
                     I have read and agree to all the {' '}
-                    <button type="button" onClick={openTncDialog} className="font-semibold text-blue-600 hover:underline underline-offset-2">
+                    <button type="button" onClick={openTncDialog} className="font-semibold text-brand-teal-medium hover:underline underline-offset-2">
                       Terms &amp; Conditions
                     </button>
                     {' '} of Rexon. <span className="text-red-500 ml-1">*</span>
@@ -987,12 +987,12 @@ export default function SuperadminAgentCreation() {
                   ) : (
                     <Label htmlFor="profileImage" className="block cursor-pointer">
                       <div className={cn(
-                        'border-2 border-dashed rounded-lg p-6 text-center hover:border-blue-400 hover:bg-blue-50/60 transition-all',
+                        'border-2 border-dashed rounded-lg p-6 text-center hover:border-brand-teal hover:bg-brand-teal/10 transition-all',
                         touchedFields.has('profileImage') && fieldErrors.profileImage ? 'border-red-300 bg-red-50/30' : 'border-gray-200'
                       )}>
                         <input id="profileImage" type="file" accept="image/jpeg,image/jpg,image/png,image/webp" onChange={handleProfileImageChange} className="hidden" />
-                        <div className="w-11 h-11 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <User className="h-5 w-5 text-blue-600" />
+                        <div className="w-11 h-11 bg-brand-teal/12 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <User className="h-5 w-5 text-brand-teal-medium" />
                         </div>
                         <p className="text-sm font-medium text-gray-700 mb-0.5">Upload Photo</p>
                         <p className="text-xs text-gray-400">Clear, professional photo with face visible</p>
@@ -1014,12 +1014,12 @@ export default function SuperadminAgentCreation() {
                 <CardContent>
                   <Label htmlFor="documents" className="block cursor-pointer">
                     <div className={cn(
-                      'border-2 border-dashed rounded-lg p-5 text-center hover:border-blue-400 hover:bg-blue-50/60 transition-all',
+                      'border-2 border-dashed rounded-lg p-5 text-center hover:border-brand-teal hover:bg-brand-teal/10 transition-all',
                       touchedFields.has('documents') && fieldErrors.documents ? 'border-red-300' : 'border-gray-200'
                     )}>
                       <input id="documents" type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onChange={handleDocumentChange} className="hidden" />
-                      <div className="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <Upload className="h-4 w-4 text-blue-600" />
+                      <div className="w-9 h-9 bg-brand-teal/12 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <Upload className="h-4 w-4 text-brand-teal-medium" />
                       </div>
                       <p className="text-sm font-medium text-gray-700">Upload Document</p>
                       <p className="text-xs text-gray-400">PDF or image (Max. 5MB)</p>
@@ -1049,7 +1049,7 @@ export default function SuperadminAgentCreation() {
                 <Button
                   onClick={handleSubmit}
                   disabled={uploading}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white h-12 text-base font-bold shadow-sm hover:shadow-md transition-all"
+                  className="w-full bg-brand-teal-deep hover:bg-brand-teal-dark text-white h-12 text-base font-bold shadow-sm hover:shadow-md transition-all"
                 >
                   {uploading
                     ? <><Loader2 className="h-5 w-5 animate-spin mr-2" />Creating…</>
@@ -1091,8 +1091,8 @@ export default function SuperadminAgentCreation() {
           {/* Fixed header */}
           <DialogHeader className="px-6 pt-6 pb-4 border-b flex-shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center flex-shrink-0">
-                <ScrollText className="h-4 w-4 text-blue-600" />
+              <div className="w-9 h-9 bg-brand-teal/8 rounded-lg flex items-center justify-center flex-shrink-0">
+                <ScrollText className="h-4 w-4 text-brand-teal-medium" />
               </div>
               <div>
                 <DialogTitle className="text-base font-semibold">Terms and Conditions</DialogTitle>
@@ -1107,7 +1107,7 @@ export default function SuperadminAgentCreation() {
           <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5">
             {tncLoading && (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <Loader2 className="h-7 w-7 animate-spin text-blue-500" />
+                <Loader2 className="h-7 w-7 animate-spin text-brand-teal-medium" />
                 <p className="text-sm text-gray-400">Loading…</p>
               </div>
             )}
@@ -1138,7 +1138,7 @@ export default function SuperadminAgentCreation() {
               <div className="flex gap-2 w-full sm:w-auto">
                 <Button variant="outline" className="flex-1 sm:flex-none" onClick={() => setIsTncDialogOpen(false)}>Close</Button>
                 <Button
-                  className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white"
+                  className="flex-1 sm:flex-none bg-brand-teal-deep hover:bg-brand-teal-dark text-white"
                   onClick={() => {
                     setTermsAccepted(true);
                     setTouchedFields(prev => new Set(prev).add('termsAccepted'));

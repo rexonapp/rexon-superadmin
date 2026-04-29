@@ -44,8 +44,8 @@ interface User {
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const roleColors: Record<string, string> = {
-  superadmin: 'bg-blue-50 text-blue-700 border border-blue-200',
-  admin:      'bg-cyan-50 text-cyan-700 border border-cyan-200',
+  superadmin: 'bg-brand-teal/8 text-brand-teal-dark border border-brand-teal/25',
+  admin:      'bg-brand-teal/8 text-brand-teal-dark border border-brand-teal/25',
   user:       'bg-gray-100 text-gray-600 border border-gray-200',
 };
 
@@ -213,7 +213,7 @@ export default function UsersPage() {
         {/* Result count */}
         <div className="sm:ml-auto">
           <Link href={'/admin/addUser'}>
-         <Button  size="sm"  className="h-9 px-3 bg-blue-600 hover:bg-blue-500 text-sm">
+         <Button  size="sm"  className="h-9 px-3 bg-brand-teal-deep hover:bg-brand-teal text-sm">
             Add User
          </Button>
           </Link>
@@ -244,19 +244,19 @@ export default function UsersPage() {
                 <TableRow
                   key={user.id}
                   className={cn(
-                    'border-b border-gray-100 hover:bg-blue-100 transition-colors group',
+                    'border-b border-gray-100 hover:bg-brand-teal/15 transition-colors group',
                     i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white',
                   )}
                 >
                     <TableCell className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
                       <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
-                        <AvatarFallback className="bg-gradient-to-br from-blue-400 to-indigo-400 text-white text-xs font-bold">
+                        <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
                           {user.first_name[0]}{user.last_name[0]}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-[150px]">
+                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[150px]">
                           {user.username}
                         </p>
                       </div>
@@ -267,7 +267,7 @@ export default function UsersPage() {
                     <div className="flex items-center gap-2.5">
                     
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors truncate max-w-[150px]">
+                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[150px]">
                           {user.first_name} {user.last_name}
                         </p>
                       </div>
@@ -330,7 +330,7 @@ export default function UsersPage() {
                           className="cursor-pointer text-sm py-2"
                           onClick={() => openRoleModal(user)}
                         >
-                          <Shield className="w-4 h-4 mr-2 text-blue-500" /> Change Role
+                          <Shield className="w-4 h-4 mr-2 text-brand-teal-medium" /> Change Role
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="cursor-pointer text-sm py-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50"
@@ -389,16 +389,16 @@ export default function UsersPage() {
       >
         <DialogContent className="bg-white border-gray-200 sm:max-w-md p-0 gap-0 overflow-hidden rounded-2xl">
           {/* Gradient header */}
-          <div className="bg-gradient-to-r from-blue-700 via-blue-600 to-cyan-500 px-5 py-5">
+          <div className="bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange px-5 py-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-white">Change User Role</h3>
-                <p className="text-blue-200 text-xs mt-0.5">
+                <p className="text-white/85 text-xs mt-0.5">
                   {selectedUser?.first_name} {selectedUser?.last_name}{' '}
-                  <span className="text-blue-300">@{selectedUser?.username}</span>
+                  <span className="text-white/70">@{selectedUser?.username}</span>
                 </p>
               </div>
             </div>
@@ -414,18 +414,18 @@ export default function UsersPage() {
                 className={cn(
                   'w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all',
                   pendingRole === value
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300 hover:bg-blue-50/50',
+                    ? 'border-brand-teal bg-brand-teal/8 text-brand-teal-dark'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-brand-teal/40 hover:bg-brand-teal/8',
                 )}
               >
                 <div className="flex items-center gap-2">
-                  <Shield className={cn('w-4 h-4', pendingRole === value ? 'text-blue-600' : 'text-gray-400')} />
+                  <Shield className={cn('w-4 h-4', pendingRole === value ? 'text-brand-teal-medium' : 'text-gray-400')} />
                   {label}
                   {selectedUser?.role === value && (
                     <span className="text-xs text-gray-400 font-normal">(current)</span>
                   )}
                 </div>
-                {pendingRole === value && <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />}
+                {pendingRole === value && <CheckCircle2 className="w-4 h-4 text-brand-teal-medium shrink-0" />}
               </button>
             ))}
 
@@ -450,7 +450,7 @@ export default function UsersPage() {
               size="sm"
               onClick={updateUserRole}
               disabled={roleLoading || !pendingRole || pendingRole === selectedUser?.role}
-              className="flex-1 h-9 text-sm bg-blue-600 hover:bg-blue-700"
+              className="flex-1 h-9 text-sm bg-brand-teal-deep hover:bg-brand-teal-dark"
             >
               {roleLoading ? (
                 <span className="flex items-center gap-2">

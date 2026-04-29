@@ -184,18 +184,18 @@ export default function AgentActivityPage() {
                             <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Start Date</label>
                             <input type="date" value={fromVal} max={toVal || undefined}
                                 onChange={e => { setFromVal(e.target.value); setError(''); }}
-                                className="w-full h-10 rounded-lg border border-gray-200 px-3 text-[14px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50" />
+                                className="w-full h-10 rounded-lg border border-gray-200 px-3 text-[14px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-gray-50" />
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">End Date</label>
                             <input type="date" value={toVal} min={fromVal || undefined}
                                 onChange={e => { setToVal(e.target.value); setError(''); }}
-                                className="w-full h-10 rounded-lg border border-gray-200 px-3 text-[14px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50" />
+                                className="w-full h-10 rounded-lg border border-gray-200 px-3 text-[14px] text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-gray-50" />
                         </div>
                         {fromVal && toVal && (
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2.5 flex items-center gap-2">
-                                <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                                <p className="text-[13px] font-medium text-blue-700">
+                            <div className="bg-brand-teal/8 border border-brand-teal/25 rounded-lg px-3 py-2.5 flex items-center gap-2">
+                                <Calendar className="w-3.5 h-3.5 text-brand-teal-medium shrink-0" />
+                                <p className="text-[13px] font-medium text-brand-teal-dark">
                                     {format(new Date(fromVal + "T00:00:00"), 'MMM d, yyyy')} → {format(new Date(toVal + "T23:59:59"), 'MMM d, yyyy')}
                                 </p>
                             </div>
@@ -366,7 +366,7 @@ export default function AgentActivityPage() {
                                     isActive={currentPage === page}
                                     onClick={() => handlePageChange(page)}
                                     className={cn('h-8 w-8 text-sm cursor-pointer select-none rounded-lg font-medium',
-                                    currentPage === page ? 'bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:text-white' : 'hover:bg-gray-100')}
+                                    currentPage === page ? 'bg-brand-teal-deep text-white border-brand-teal-deep hover:bg-brand-teal-dark hover:text-white' : 'hover:bg-gray-100')}
                                 >
                                     {page}
                                 </PaginationLink>

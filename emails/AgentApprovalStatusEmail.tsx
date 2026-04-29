@@ -193,7 +193,7 @@ const main = {
   };
   
   const header = {
-    backgroundColor: '#1d4ed8',
+    backgroundColor: '#0b6f78',
     padding: '20px 32px',
   };
   
@@ -207,7 +207,7 @@ const main = {
   };
   
   const logoTagline = {
-    color: '#93c5fd',
+    color: '#7ec9cf',
     fontSize: '10px',
     letterSpacing: '2px',
     margin: '2px 0 0',
@@ -216,7 +216,7 @@ const main = {
   
   const headerBadge = {
     display: 'inline-block',
-    backgroundColor: '#f97316',
+    backgroundColor: '#d07648',
     color: '#ffffff',
     fontSize: '10px',
     fontWeight: '600',
@@ -227,20 +227,20 @@ const main = {
   };
   
   const accentBar = {
-    backgroundColor: '#f97316',
+    backgroundColor: '#d07648',
     height: '3px',
     padding: '0',
     margin: '0',
   };
   
   const heroSection = {
-    backgroundColor: '#eff6ff',
+    backgroundColor: '#ecf8f9',
     padding: '28px 40px 24px',
     textAlign: 'center' as const,
   };
   
   const welcomeLabel = {
-    color: '#3b82f6',
+    color: '#13a8b4',
     fontSize: '10px',
     fontWeight: '700',
     letterSpacing: '3px',
@@ -248,7 +248,7 @@ const main = {
   };
   
   const heroHeading = {
-    color: '#1e3a8a',
+    color: '#134c52',
     fontSize: '26px',
     fontWeight: '700',
     margin: '0 0 10px',
@@ -269,21 +269,21 @@ const main = {
   
   /* Credentials card */
   const credentialsCard = {
-    backgroundColor: '#f0f7ff',
+    backgroundColor: '#ecf8f9',
     borderRadius: '6px',
     padding: '20px 20px 16px',
     marginBottom: '16px',
-    border: '1px solid #bfdbfe',
+    border: '1px solid #a8dde3',
   };
   
   const cardAccentBarStyle = {
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#13a8b4',
     width: '4px',
     borderRadius: '4px',
   };
   
   const cardLabel = {
-    color: '#3b82f6',
+    color: '#13a8b4',
     fontSize: '10px',
     fontWeight: '700',
     letterSpacing: '2px',
@@ -291,7 +291,7 @@ const main = {
   };
   
   const cardHeading = {
-    color: '#1e3a8a',
+    color: '#134c52',
     fontSize: '16px',
     fontWeight: '600',
     margin: '0',
@@ -299,12 +299,12 @@ const main = {
   };
   
   const divider = {
-    borderColor: '#dbeafe',
+    borderColor: '#c5e8ec',
     margin: '14px 0 12px',
   };
   
   const thinDivider = {
-    borderColor: '#e8f0fe',
+    borderColor: '#d8f0f2',
     margin: '8px 0',
   };
   
@@ -320,14 +320,14 @@ const main = {
   };
   
   const detailValue = {
-    color: '#1e3a8a',
+    color: '#134c52',
     fontSize: '12px',
     fontWeight: '600',
   };
   
   const passwordBadge = {
     display: 'inline-block',
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#134c52',
     color: '#ffffff',
     fontSize: '14px',
     fontWeight: '700',
@@ -339,7 +339,7 @@ const main = {
   };
   
   const dashboardLinkInline = {
-    color: '#f97316',
+    color: '#d07648',
     fontSize: '12px',
     fontWeight: '600',
     textDecoration: 'underline',
@@ -380,11 +380,11 @@ const main = {
   
   /* Account summary card */
   const accountCard = {
-    backgroundColor: '#f8faff',
+    backgroundColor: '#f2fafb',
     borderRadius: '6px',
     padding: '18px 20px 14px',
     marginBottom: '20px',
-    border: '1px solid #dbeafe',
+    border: '1px solid #c5e8ec',
   };
   
   const statusBadge = {
@@ -407,7 +407,7 @@ const main = {
   };
   
   const ctaButton = {
-    backgroundColor: '#f97316',
+    backgroundColor: '#d07648',
     borderRadius: '6px',
     color: '#ffffff',
     fontSize: '14px',
@@ -435,23 +435,23 @@ const main = {
   };
   
   const helpLink = {
-    color: '#f97316',
+    color: '#d07648',
     textDecoration: 'underline',
   };
   
   /* Footer */
   const footer = {
     padding: '20px 36px 28px',
-    backgroundColor: '#1e3a8a',
+    backgroundColor: '#134c52',
   };
   
   const footerDivider = {
-    borderColor: '#2d4fa3',
+    borderColor: '#0f8a94',
     margin: '0 0 16px',
   };
   
   const footerText = {
-    color: '#93c5fd',
+    color: '#7ec9cf',
     fontSize: '11px',
     lineHeight: '1.6',
     margin: '0 0 4px',
@@ -459,13 +459,13 @@ const main = {
   };
   
   const footerUnsubscribe = {
-    color: '#60a5fa',
+    color: '#4db8c2',
     fontSize: '10px',
     margin: '10px 0 0',
     textAlign: 'center' as const,
   };
   
   const unsubLink = {
-    color: '#60a5fa',
+    color: '#4db8c2',
     textDecoration: 'none',
   };

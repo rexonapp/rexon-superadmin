@@ -40,9 +40,9 @@ export default function ForgotPasswordPage() {
 
       {/* Background blobs */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-blue-100 opacity-60 blur-3xl" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-brand-teal/12 opacity-60 blur-3xl" />
         <div className="absolute -bottom-24 -right-24 w-80 h-80 rounded-full bg-orange-100 opacity-50 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-50 opacity-40 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-brand-teal/8 opacity-40 blur-3xl" />
       </div>
 
       <div className="relative z-10 w-full max-w-sm sm:max-w-md">
@@ -50,8 +50,8 @@ export default function ForgotPasswordPage() {
         {/* Brand */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative mb-5">
-            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-blue-400 to-orange-300 opacity-20 blur-lg" />
-            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white border border-slate-100 shadow-2xl shadow-blue-200/50 flex items-center justify-center">
+            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-brand-teal to-brand-orange/80 opacity-20 blur-lg" />
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white border border-slate-100 shadow-2xl shadow-brand-teal/25 flex items-center justify-center">
               <img
                 src="/rexon-logo.png"
                 alt="Rexon"
@@ -63,17 +63,17 @@ export default function ForgotPasswordPage() {
           </div>
           <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Rexon</h1>
           <div className="flex items-center gap-2 mt-1.5">
-            <div className="w-8 h-px bg-gradient-to-r from-transparent to-blue-300" />
+            <div className="w-8 h-px bg-gradient-to-r from-transparent to-brand-teal/50" />
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Administration Portal</p>
-            <div className="w-8 h-px bg-gradient-to-l from-transparent to-blue-300" />
+            <div className="w-8 h-px bg-gradient-to-l from-transparent to-brand-teal/50" />
           </div>
         </div>
 
         {/* Card */}
-        <div className="bg-white/95 backdrop-blur-sm rounded-3xl border border-slate-200/80 shadow-2xl shadow-blue-100/30 overflow-hidden">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl border border-slate-200/80 shadow-2xl shadow-brand-teal/15 overflow-hidden">
 
           {/* Accent bar */}
-          <div className="h-1 bg-gradient-to-r from-blue-700 via-blue-400 to-orange-400" />
+          <div className="h-1 bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange" />
 
           {/* Header */}
           <div className="flex items-start justify-between px-6 sm:px-8 pt-6">
@@ -83,7 +83,7 @@ export default function ForgotPasswordPage() {
                 {submitted ? 'Check your inbox' : "We'll send you a secure reset link"}
               </p>
             </div>
-            <div className="flex items-center gap-1 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg px-2.5 py-1.5 shadow-md shadow-blue-300/40 whitespace-nowrap ml-3 mt-0.5">
+            <div className="flex items-center gap-1 bg-brand-teal-deep text-white text-[10px] font-bold uppercase tracking-widest rounded-lg px-2.5 py-1.5 shadow-md shadow-brand-teal/35 whitespace-nowrap ml-3 mt-0.5">
               <ShieldAlert size={10} strokeWidth={3} />
               Admin Portal
             </div>
@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
                   Didn&apos;t receive it? Check your spam folder or{' '}
                   <button
                     onClick={() => { setSubmitted(false); setIdentifier('') }}
-                    className="text-blue-500 font-semibold hover:underline"
+                    className="text-brand-teal-medium font-semibold hover:underline"
                   >
                     try again
                   </button>.
@@ -141,7 +141,7 @@ export default function ForgotPasswordPage() {
                       autoComplete="email"
                       autoFocus
                       required
-                      className="w-full h-11 pl-10 pr-4 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl outline-none transition-all duration-150 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-100 hover:border-slate-300 placeholder:text-slate-300"
+                      className="w-full h-11 pl-10 pr-4 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl outline-none transition-all duration-150 focus:border-brand-teal focus:bg-white focus:ring-4 focus:ring-brand-teal/20 hover:border-slate-300 placeholder:text-slate-300"
                     />
                   </div>
                 </div>
@@ -150,7 +150,7 @@ export default function ForgotPasswordPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full h-12 flex items-center justify-center gap-2.5 text-sm font-bold text-white bg-gradient-to-br from-blue-700 via-blue-600 to-blue-500 rounded-2xl shadow-lg shadow-blue-300/30 hover:shadow-xl hover:shadow-blue-300/40 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg"
+                    className="w-full h-12 flex items-center justify-center gap-2.5 text-sm font-bold text-white bg-gradient-to-br from-brand-teal-deep via-brand-teal to-brand-orange rounded-2xl shadow-lg shadow-brand-teal/30 hover:shadow-xl hover:shadow-brand-teal/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg"
                   >
                     {loading ? (
                       <>
@@ -186,7 +186,7 @@ export default function ForgotPasswordPage() {
         <div className="flex items-center justify-between mt-5 px-2">
           <Link
             href="/login"
-            className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-blue-500 transition-colors font-medium"
+            className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-brand-teal transition-colors font-medium"
           >
             <ArrowLeft size={11} />
             Back to Sign In
