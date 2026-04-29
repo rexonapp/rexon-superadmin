@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import {
-  Bell, Menu,X, Settings, LogOut, Clock, CheckCircle,
+  Bell, Menu, X, Settings, LogOut, Clock, CheckCircle,
   XCircle, UserCheck, Warehouse, Users, Check, Trash2,
 } from 'lucide-react';
 import Sidebar, { AdminUser } from '@/components/superadmin/sidebar';
@@ -22,7 +22,7 @@ import NotificationContext from '@/lib/context/NotificationContext';
 
 
 interface WarehouseStats { pending: number; active: number; rejected: number; }
-interface AgentStats     { pending: number; approved: number; rejected: number; invite: number; }
+interface AgentStats { pending: number; approved: number; rejected: number; invite: number; }
 
 export interface SuperAdminNotification {
   id: number;
@@ -38,8 +38,8 @@ export interface SuperAdminNotification {
 
 function timeAgo(dateStr: string): string {
   const diff = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
-  if (diff < 60)    return `${diff}s ago`;
-  if (diff < 3600)  return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
 }
@@ -199,9 +199,9 @@ function AllNotificationsModal({
 interface NotifDropdownProps {
   notifications: SuperAdminNotification[];
   unreadCount: number;
-  onMarkRead:    (id: number) => void;
+  onMarkRead: (id: number) => void;
   onMarkAllRead: () => void;
-  onDelete:      (id: number) => void;
+  onDelete: (id: number) => void;
 }
 
 // ─── Notification Dropdown ────────────────────────────────────────────────────
@@ -213,13 +213,13 @@ function NotifDropdown({
   onMarkAllRead,
   onDelete,
 }: NotifDropdownProps) {
-  const [open, setOpen]           = useState(false);
-  const [showAll, setShowAll]     = useState(false);
-  const ref                       = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [showAll, setShowAll] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
   const PREVIEW_COUNT = 4;
-  const preview       = notifications.slice(0, PREVIEW_COUNT);
-  const hasMore       = notifications.length > PREVIEW_COUNT;
+  const preview = notifications.slice(0, PREVIEW_COUNT);
+  const hasMore = notifications.length > PREVIEW_COUNT;
 
   useEffect(() => {
     if (!open) return;
@@ -363,33 +363,33 @@ function NotifDropdown({
 // ─── Main inner layout ────────────────────────────────────────────────────────
 
 function SuperAdminInner({ children }: { children: React.ReactNode }) {
-  const [sidebarOpen, setSidebarOpen]       = useState(false);
-  const [user, setUser]                     = useState<AdminUser | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<AdminUser | null>(null);
   const [warehouseStats, setWarehouseStats] = useState<WarehouseStats>({ pending: 0, active: 0, rejected: 0 });
-  const [agentStats, setAgentStats]         = useState<AgentStats>({ pending: 0, approved: 0, rejected: 0, invite: 0 });
+  const [agentStats, setAgentStats] = useState<AgentStats>({ pending: 0, approved: 0, rejected: 0, invite: 0 });
 
   // ── Notification state ──
-  const [notifications, setNotifications]   = useState<SuperAdminNotification[]>([]);
-  const pollRef                             = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [notifications, setNotifications] = useState<SuperAdminNotification[]>([]);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const pathname         = usePathname();
-  const router           = useRouter();
+  const pathname = usePathname();
+  const router = useRouter();
   const { companyName, logoUrl } = useBranding();
 
   const isWarehousesPage = pathname?.startsWith('/properties');
-  const isAgentsPage     = pathname?.startsWith('/agents');
+  const isAgentsPage = pathname?.startsWith('/agents');
 
   // const logoUrl: string | undefined = (user as any)?.avatar_url || undefined;
-  const userInitials  = user
+  const userInitials = user
     ? `${user.first_name?.[0] ?? ''}${user.last_name?.[0] ?? ''}`.toUpperCase()
     : '';
-  const userFullName  = user ? `${user.first_name} ${user.last_name}` : '';
-  const unreadCount   = notifications.filter(n => !n.is_read).length;
+  const userFullName = user ? `${user.first_name} ${user.last_name}` : '';
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   // ── Fetch all notifications ──
   const fetchNotifications = useCallback(async () => {
     try {
-      const res  = await fetch('/api/superadmin/notifications');
+      const res = await fetch('/api/superadmin/notifications');
       const data = await res.json();
       if (data.success && Array.isArray(data.notifications)) {
         setNotifications(data.notifications);
@@ -441,17 +441,17 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
-        const res  = await fetch('/api/auth/me');
+        const res = await fetch('/api/auth/me');
         const data = await res.json();
         if (data.user) {
           setUser({
-            id:         data.user.userId,
-            username:   data.user.username,
+            id: data.user.userId,
+            username: data.user.username,
             first_name: data.user.firstName,
-            last_name:  data.user.lastName,
-            email:      data.user.email,
-            role:       data.user.role ?? 'user',
-            is_active:  true,
+            last_name: data.user.lastName,
+            email: data.user.email,
+            role: data.user.role ?? 'user',
+            is_active: true,
             avatar_url: data.user.avatarUrl ?? null,
           } as AdminUser);
         } else {
@@ -466,8 +466,8 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
   // ── Start polling once user is loaded ──
   useEffect(() => {
     if (!user) return;
-    fetchNotifications();                               
-    pollRef.current = setInterval(fetchNotifications, 10_000); 
+    fetchNotifications();
+    pollRef.current = setInterval(fetchNotifications, 10_000);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
@@ -478,13 +478,13 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
     if (!isWarehousesPage) return;
     (async () => {
       try {
-        const res  = await fetch('/api/superadmin/warehouses');
+        const res = await fetch('/api/superadmin/warehouses');
         const data = await res.json();
         if (data.success && data.warehouses) {
           const ws = data.warehouses;
           setWarehouseStats({
-            pending:  ws.filter((w: { status: string }) => w.status === 'Pending').length,
-            active:   ws.filter((w: { status: string }) => w.status === 'Active').length,
+            pending: ws.filter((w: { status: string }) => w.status === 'Pending').length,
+            active: ws.filter((w: { status: string }) => w.status === 'Active').length,
             rejected: ws.filter((w: { status: string }) => w.status === 'rejected').length,
           });
         }
@@ -497,15 +497,15 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
     if (!isAgentsPage) return;
     (async () => {
       try {
-        const res  = await fetch('/api/superadmin/agents');
+        const res = await fetch('/api/superadmin/agents');
         const data = await res.json();
         if (data.success && data.agents) {
           const as_ = data.agents;
           setAgentStats({
-            pending:  as_.filter((a: { status: string }) => a.status === 'pending').length,
+            pending: as_.filter((a: { status: string }) => a.status === 'pending').length,
             approved: as_.filter((a: { status: string }) => a.status === 'approved').length,
             rejected: as_.filter((a: { status: string }) => a.status === 'rejected').length,
-            invite:   as_.filter((a: { status: string }) => a.status === 'invite').length,
+            invite: as_.filter((a: { status: string }) => a.status === 'invite').length,
           });
         }
       } catch { /* silent */ }
@@ -569,17 +569,17 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
               {/* Warehouse stat pills */}
               {isWarehousesPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 ">
-                    <Clock className="w-3.5 h-11.5 text-amber-500 shrink-0" />
+                  <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
+                    <Clock className="w-3.5 h-3.5 text-amber-500" />
                     <span className="text-sm font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 ">
-                    <CheckCircle className="w-3.5 h-11.5 text-emerald-500 shrink-0" />
-                    <span className="text-sm font-semibold text-emerald-700">{warehouseStats.active} Active</span>
+                  <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
+                    <CheckCircle className="w-2 h-2 bg-emerald-500 rounded-full" />
+                    <span className="text-sm font-semibold text-emerald-600">{warehouseStats.active} Active</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 ">
-                    <XCircle className="w-3.5 h-11.5 text-rose-500 shrink-0" />
-                    <span className="text-sm font-semibold text-rose-700">{warehouseStats.rejected} Rejected</span>
+                  <div className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full">
+                    <XCircle className="w-2 h-2 bg-rose-500 rounded-full" />
+                    <span className="text-sm font-semibold text-rose-600">{warehouseStats.rejected} Rejected</span>
                   </div>
                 </div>
               )}
@@ -587,17 +587,17 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
               {/* Agent stat pills */}
               {isAgentsPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                  <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 ">
-                    <Clock className="w-3.5 h-11.5 text-amber-500 shrink-0" />
+                   <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
+                    <Clock className="w-3.5 h-3.5 text-amber-500" />
                     <span className="text-sm font-semibold text-amber-700">{agentStats.pending} Pending</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1.5 ">
-                    <UserCheck className="w-3.5 h-11.5 text-emerald-500 shrink-0" />
-                    <span className="text-sm font-semibold text-emerald-700">{agentStats.approved} Approved</span>
+                  <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
+                    <UserCheck className="w-3.5 h-2 text-emerald-500 rounded-full" />
+                    <span className="text-sm font-semibold text-emerald-600">{agentStats.approved} Approved</span>
                   </div>
-                  <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 ">
-                    <XCircle className="w-3.5 h-11.5 text-rose-500 shrink-0" />
-                    <span className="text-sm font-semibold text-rose-700">{agentStats.rejected} Rejected</span>
+                  <div className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full">
+                    <XCircle className="w-2 h-2 bg-rose-500 rounded-full" />
+                    <span className="text-sm font-semibold text-rose-600">{agentStats.rejected} Rejected</span>
                   </div>
                 </div>
               )}
@@ -674,17 +674,17 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
           {/* ── Mobile stat pills: warehouses ── */}
           {isWarehousesPage && (
             <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1  shrink-0">
-                <Clock className="w-3 h-11 text-amber-500" />
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1  rounded-full">
+                <Clock className="w-3 h-2 text-amber-500 rounded-full" />
                 <span className="text-xs font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1  shrink-0">
-                <CheckCircle className="w-3 h-11 text-emerald-500" />
-                <span className="text-xs font-semibold text-emerald-700">{warehouseStats.active} Active</span>
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1  rounded-full">
+                <CheckCircle className="w-3 h-2 text-emerald-500 rounded-full" />
+                <span className="text-xs font-semibold text-emerald-600">{warehouseStats.active} Active</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1  shrink-0">
-                <XCircle className="w-3 h-11 text-rose-500" />
-                <span className="text-xs font-semibold text-rose-700">{warehouseStats.rejected} Rejected</span>
+              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1  rounded-full">
+                <XCircle className="w-3 h-2 text-rose-500 rounded-full" />
+                <span className="text-xs font-semibold text-rose-600">{warehouseStats.rejected} Rejected</span>
               </div>
             </div>
           )}
@@ -692,29 +692,29 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
           {/* ── Mobile stat pills: agents ── */}
           {isAgentsPage && (
             <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1  shrink-0">
-                <Clock className="w-3 h-11 text-amber-500" />
+              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1  rounded-full">
+                <Clock className="w-3 h-2 text-amber-500 rounded-full" />
                 <span className="text-xs font-semibold text-amber-700">{agentStats.pending} Pending</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1  shrink-0">
-                <UserCheck className="w-3 h-11 text-emerald-500" />
-                <span className="text-xs font-semibold text-emerald-700">{agentStats.approved} Approved</span>
+              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1  rounded-full">
+                <UserCheck className="w-3 h-2 text-emerald-500 rounded-full" />
+                <span className="text-xs font-semibold text-emerald-600">{agentStats.approved} Approved</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1  shrink-0">
-                <XCircle className="w-3 h-11 text-rose-500" />
-                <span className="text-xs font-semibold text-rose-700">{agentStats.rejected} Rejected</span>
+              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1  rounded-full">
+                <XCircle className="w-3 h-2 text-rose-400 rounded-full" />
+                <span className="text-xs font-semibold text-rose-600">{agentStats.rejected} Rejected</span>
               </div>
             </div>
           )}
         </header>
 
         {/* ── Page content ── */}
-       {/* ── Page content ── */}
-<div className="flex-1 min-h-0 overflow-hidden p-4 sm:p-5">
-  <NotificationContext.Provider value={{ refetchNotifications: fetchNotifications }}>
-    {children}
-  </NotificationContext.Provider>
-</div>
+        {/* ── Page content ── */}
+        <div className="flex-1 min-h-0 overflow-hidden p-4 sm:p-5">
+          <NotificationContext.Provider value={{ refetchNotifications: fetchNotifications }}>
+            {children}
+          </NotificationContext.Provider>
+        </div>
       </main>
     </div>
   );
