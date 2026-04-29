@@ -576,7 +576,7 @@ export default function WarehousesPage() {
                                             <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
                                                 <Building2 className="w-7 h-7 opacity-40" />
                                             </div>
-                                            <p className="font-semibold text-base text-gray-500">No warehouses found</p>
+                                            <p className="font-semibold text-base text-gray-500">No items or properties found</p>
                                             <p className="text-sm text-gray-400">Try adjusting your search or filters</p>
                                             {isAnyFilterActive && (
                                                 <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-1 text-sm">
