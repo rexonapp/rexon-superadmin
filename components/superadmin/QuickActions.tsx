@@ -9,25 +9,21 @@ export default function QuickActions() {
       label: 'Review Properties',
       icon: Building2,
       href: '/superadmin/properties',
-      color: 'from-brand-teal-deep to-brand-teal-medium',
     },
     {
       label: 'Manage Users',
       icon: UserPlus,
       href: '/superadmin/users',
-      color: 'from-brand-teal to-brand-orange-deep',
     },
     {
       label: 'Review Agents',
       icon: BarChart3,
       href: '/superadmin/agents',
-      color: 'from-brand-teal-medium to-brand-orange',
     },
     {
       label: 'System Settings',
       icon: Settings,
       href: '/superadmin/settings',
-      color: 'from-brand-orange to-brand-orange-deep',
     },
   ];
 
@@ -44,7 +40,7 @@ export default function QuickActions() {
             <Link
               key={idx}
               href={action.href}
-              className={`w-full p-4 rounded-xl bg-gradient-to-r ${action.color} text-white font-semibold hover:shadow-xl transition-all duration-300 hover:scale-105 group flex items-center justify-between`}
+              className="w-full p-4 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold hover:shadow-xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105 group flex items-center justify-between"
             >
               <span className="flex items-center gap-3">
                 <Icon className="w-5 h-5" />

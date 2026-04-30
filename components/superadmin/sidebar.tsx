@@ -45,11 +45,18 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
   const pathname = usePathname();
   const router   = useRouter();
   const { companyName, logoUrl } = useBranding();
+  const toTitleCase = (value: string) =>
+    value
+      .toLowerCase()
+      .split(' ')
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
 
   // Treat empty string / null / undefined all as "no image"
   const userImageUrl: string | undefined = user.avatar_url || undefined;
   const userInitials = `${user.first_name?.[0] ?? ''}${user.last_name?.[0] ?? ''}`.toUpperCase();
-  const userFullName = `${user.first_name} ${user.last_name}`;
+  const userFullName = toTitleCase(`${user.first_name ?? ''} ${user.last_name ?? ''}`.trim());
 
   const handleNav = (path: string) => {
     router.push(path);
@@ -79,7 +86,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
       >
         <div className="h-full relative">
           <div className="absolute inset-0 bg-gradient-to-b from-white/95 via-white/90 to-white/95 backdrop-blur-2xl border-r border-white/40 shadow-2xl" />
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-teal/8 via-brand-orange/5 to-brand-teal-deep/8 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-teal/8 via-brand-teal/5 to-brand-teal-deep/8 pointer-events-none" />
 
           <div className="relative h-full flex flex-col">
 
@@ -91,13 +98,13 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-brand-teal-deep via-brand-teal to-brand-orange flex items-center justify-center">
+                    <div className="w-full h-full bg-brand-teal-deep flex items-center justify-center">
                       <User2Icon className="w-6 h-6 text-white" />
                     </div>
                   )}
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${sidebarOpen ? 'opacity-100 max-w-xs' : 'lg:opacity-0 lg:max-w-0 opacity-100 max-w-xs'}`}>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal-medium to-brand-orange bg-clip-text text-transparent whitespace-nowrap">
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal-medium to-brand-teal bg-clip-text text-transparent whitespace-nowrap">
                     {companyName || 'Rexon'}
                   </h1>
                   <p className="text-xs font-medium text-brand-teal-medium whitespace-nowrap">Super Admin Panel</p>
@@ -132,8 +139,8 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                     className={`
                       w-full h-12 rounded-xl transition-all duration-300 group relative overflow-hidden
                       ${isActive
-                        ? 'bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange text-white shadow-lg shadow-brand-teal/30 hover:shadow-xl hover:shadow-brand-orange/25'
-                        : 'text-gray-700 hover:bg-gradient-to-r hover:from-brand-teal/10 hover:to-brand-orange/10 hover:text-brand-orange-dark'
+                        ? 'bg-brand-teal-deep text-white shadow-lg shadow-brand-teal/30 hover:bg-brand-teal-dark hover:shadow-xl hover:shadow-brand-teal/35'
+                        : 'text-gray-700 hover:bg-brand-teal/10 hover:text-brand-teal-dark'
                       }
                       justify-start gap-4 px-4
                       ${!sidebarOpen ? 'lg:justify-center lg:px-0' : ''}
@@ -160,7 +167,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                   <Button
                     variant="ghost"
                     className={`
-                      w-full h-auto p-3 rounded-xl hover:bg-gradient-to-r hover:from-brand-teal/10 hover:to-brand-orange/10
+                      w-full h-auto p-3 rounded-xl hover:bg-brand-teal/10
                       transition-all duration-300 group
                       justify-start gap-3
                       ${!sidebarOpen ? 'lg:justify-center lg:px-2' : ''}
@@ -171,7 +178,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                       • Has image  → show image only, no name/role text
                       • No image   → show initials + name/role text (hidden when collapsed)
                     */}
-                    <Avatar className="w-10 h-10 ring-2 ring-brand-teal/25 group-hover:ring-brand-orange-hover/50 transition-all shrink-0">
+                    <Avatar className="w-10 h-10 ring-2 ring-brand-teal/25 group-hover:ring-brand-teal/50 transition-all shrink-0">
                       {logoUrl ? (
                         <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
                       ) : (

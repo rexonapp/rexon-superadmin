@@ -70,7 +70,7 @@ export default function DashboardClient({ initialData }: Props) {
   const isRefreshing = dashValidating || agentValidating;
 
   const statCards = [
-    { label: 'Total Warehouses', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const },
+    { label: 'Total Active Properties', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const },
     { label: 'Pending Approvals', value: stats.pendingApprovals.toString(), icon: Clock, color: 'cyan' as const },
     { label: 'Leads', value: stats.totalUsers.toString(), icon: Users, color: 'blue' as const },
     { label: 'Agent Network', value: stats.totalAgents.toString(), icon: UserCheck, color: 'cyan' as const },
@@ -117,17 +117,16 @@ export default function DashboardClient({ initialData }: Props) {
         ))}
       </div>
 
-      {/* ── Main Content Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* ── Main content (full width; restore lg:grid-cols-3 + col-span when Quick Actions is back) ── */}
+      <div className="grid grid-cols-1 gap-6 w-full min-w-0">
 
-        {/* Recent Activity — 2 cols */}
-        <GlassCard className="lg:col-span-2 p-6" gradient="blue">
+        <GlassCard className="w-full min-w-0 p-4 sm:p-6" gradient="blue">
 
           {/* Card header */}
-          <div className="flex flex-row items-center justify-between mb-6">
+          <div className="flex flex-row items-center justify-between mb-6 bg-brand-teal-deep/10 border border-brand-teal/20 rounded-xl px-3 py-2.5 sm:px-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-brand-teal/10 ring-4 ring-brand-teal/10">
-                <Activity className="w-5 h-5 text-brand-teal-medium" />
+              <div className="p-2 rounded-lg bg-brand-teal-deep/15 ring-2 ring-brand-teal/20">
+                <Activity className="w-5 h-5 text-brand-teal-deep" />
               </div>
               <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
             </div>
@@ -136,7 +135,7 @@ export default function DashboardClient({ initialData }: Props) {
               onClick={() => router.push('/agentWarehouseActivity')}
               variant="ghost"
               size="sm"
-              className="text-brand-teal hover:text-brand-orange-dark hover:bg-brand-teal/10"
+              className="text-brand-orange hover:text-brand-orange-dark hover:bg-brand-orange/10"
             >
               View All
               <ArrowRight className="w-4 h-4 ml-1" />
@@ -147,148 +146,76 @@ export default function DashboardClient({ initialData }: Props) {
           <Separator className="bg-gradient-to-r from-transparent via-brand-teal/25 to-transparent mb-6" />
 
           {recentActivity.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+              className="w-full min-w-0 max-h-[460px] overflow-auto rounded-lg border border-gray-200"
+              style={{
+                scrollbarWidth: "thin",
+                scrollbarColor: "#CBD5E1 transparent",
+              }}
+            >
+              <table className="w-full min-w-[52rem] md:min-w-full border-collapse text-left text-sm">
+                <thead className="bg-gray-50 sticky top-0 z-[1] shadow-[0_1px_0_0_rgb(229_231_235)]">
+                  <tr>
+                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Property</th>
+                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Agent</th>
+                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">City</th>
+                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Type</th>
+                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Price</th>
+                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Status</th>
+                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Created</th>
+                  </tr>
+                </thead>
 
-              {/* ── Activity Table ── */}
-              <div className="col-span-1 md:col-span-2">
-                {recentActivity.length > 0 ? (
-                  <div
-                    className="overflow-x-auto"
-                    style={{
-                      maxHeight: "460px",
-                      overflowY: "auto",
-                      scrollbarWidth: "thin",
-                      scrollbarColor: "#CBD5E1 transparent",
-                    }}
-                  >
-                    <table className="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-                      <thead className="bg-gray-50 sticky top-0">
-                        <tr>
-                          <th className="p-3 text-left  text-gray-500 font-semibold">Property</th>
-                          <th className="p-3 text-left  text-gray-500 font-semibold">Agent</th>
-                          <th className="p-3 text-left  text-gray-500 font-semibold">City</th>
-                          <th className="p-3 text-left  text-gray-500 font-semibold">Type</th>
-                          <th className="p-3 text-left  text-gray-500 font-semibold">Price</th>
-                          <th className="p-3 text-left  text-gray-500 font-semibold">Status</th>
-                          <th className="p-3 text-left  text-gray-500 font-semibold">Created</th>
-                        </tr>
-                      </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {recentActivity.map((activity) => (
+                    <tr key={activity.id} className="hover:bg-white/60">
+                      <td className="p-2 sm:p-3 font-medium align-top break-words min-w-[8rem]">
+                        {activity.warehouse}
+                      </td>
 
-                      <tbody>
-                        {recentActivity.map((activity) => (
-                          <tr key={activity.id} className="border-t hover:bg-white/60">
-                            {/* Property */}
-                            <td className="p-3 font-medium">
-                              {activity.warehouse}
-                            </td>
-
-                            {/* Agent */}
-                            <td className="p-3">
-                              <div className="flex flex-col">
-                                <span className="font-medium">{activity.full_name}</span>
-                                <span className="text-xs text-gray-500">{activity.email}</span>
-                              </div>
-                            </td>
-
-                            {/* City */}
-                            <td className="p-3">
-                              {activity.city}
-                            </td>
-
-                            {/* Type */}
-                            <td className="p-3 capitalize">
-                              {activity.action.includes("warehouse") ? "Warehouse" : "-"}
-                            </td>
-
-                            {/* Price */}
-                            <td className="p-3">₹ {activity.price_per_sqft ?? "-"}</td>
-
-                            {/* Status */}
-                            <td className="p-3">
-                              <span
-                                className={`px-3 py-1 rounded-full text-xs font-semibold border
-                                  ${
-                                    activity.status === "success"
-                                      ? "bg-green-50 text-green-700 border-green-200"
-                                      : activity.status === "pending"
-                                      ? "bg-yellow-50 text-yellow-700 border-yellow-200"
-                                      : activity.status === "rejected"
-                                      ? "bg-red-50 text-red-700 border-red-200"
-                                      : "bg-gray-50 text-gray-600 border-gray-200"
-                                  }`}
-                              >
-                                {activity.status === "success"
-                                  ? "Active"
-                                  : activity.status === "pending"
-                                    ? "Pending"
-                                    : activity.status === "rejected"
-                                      ? "Rejected"
-                                      : activity.status}
-                              </span>
-                            </td>
-
-                            {/* Created */}
-                            <td className="p-3 text-gray-500">{activity.time}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-400 py-6 text-center">
-                    No recent activity found
-                  </p>
-                )}
-              </div>
-
-              {/* ── Agent Activity ── */}
-              {/* <div className="flex flex-col"> */}
-              {/* <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-semibold">Agent Activity</h3>
-                  <Button
-                    onClick={() => router.push('/agentActivity')}
-                    variant="ghost"
-                    size="sm"
-                    className="text-brand-teal-medium hover:text-brand-orange-dark hover:bg-brand-teal/10"
-                  >
-                    View All
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </div> */}
-
-              {/* {agentActivities.length > 0 ? (
-                  <div
-                    className="activity-scroll space-y-3 pr-2"
-                    style={{
-                      maxHeight: '460px',
-                      overflowY: 'auto',
-                      scrollbarWidth: 'thin',
-                      scrollbarColor: '#CBD5E1 transparent',
-                    }}
-                  >
-                    {agentActivities.map((activity: any) => (
-                      <div
-                        key={activity.id}
-                        className="flex justify-between items-center p-3 border rounded-lg hover:bg-white/60 transition-colors"
-                      >
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium truncate">{activity.action}</p>
-                          <p className="text-xs text-gray-500 truncate">
-                            {activity.user}
-                            {activity.email ? ` (${activity.email})` : ''}
-                          </p>
+                      <td className="p-2 sm:p-3 align-top min-w-[10rem] max-w-[14rem]">
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <span className="font-medium break-words">{activity.full_name}</span>
+                          <span className="text-xs text-gray-500 break-all">{activity.email}</span>
                         </div>
-                        <span className="text-xs text-gray-400 ml-2 shrink-0">
-                          {new Date(activity.time).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-sm text-gray-400 py-6 text-center">No agent activity</p>
-                )} */}
-              {/* </div> */}
+                      </td>
 
+                      <td className="p-2 sm:p-3 align-top whitespace-nowrap">{activity.city}</td>
+
+                      <td className="p-2 sm:p-3 capitalize align-top whitespace-nowrap">
+                        {activity.action.includes("warehouse") ? "Warehouse" : "-"}
+                      </td>
+
+                      <td className="p-2 sm:p-3 align-top whitespace-nowrap">₹ {activity.price_per_sqft ?? "-"}</td>
+
+                      <td className="p-2 sm:p-3 align-top">
+                        <span
+                          className={`inline-flex px-2 sm:px-3 py-1 rounded-full text-xs font-semibold border
+                            ${
+                              activity.status === "success"
+                                ? "bg-green-50 text-green-700 border-green-200"
+                                : activity.status === "pending"
+                                ? "bg-yellow-50 text-yellow-700 border-yellow-200"
+                                : activity.status === "rejected"
+                                ? "bg-red-50 text-red-700 border-red-200"
+                                : "bg-gray-50 text-gray-600 border-gray-200"
+                            }`}
+                        >
+                          {activity.status === "success"
+                            ? "Active"
+                            : activity.status === "pending"
+                              ? "Pending"
+                              : activity.status === "rejected"
+                                ? "Rejected"
+                                : activity.status}
+                        </span>
+                      </td>
+
+                      <td className="p-2 sm:p-3 text-gray-500 align-top whitespace-nowrap">{activity.time}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : (
             <div className="text-center py-16 text-gray-500">

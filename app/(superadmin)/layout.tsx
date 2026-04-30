@@ -554,14 +554,14 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
 
               {/* Mobile logo */}
               <div className="flex items-center gap-2 lg:hidden">
-                <div className="w-7 h-7 rounded-lg overflow-hidden shadow-sm shrink-0 bg-gradient-to-br from-brand-teal-deep to-brand-orange flex items-center justify-center">
+                <div className="w-7 h-7 rounded-lg overflow-hidden shadow-sm shrink-0 bg-brand-teal-deep flex items-center justify-center">
                   {logoUrl
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                     : <span className="text-white text-[10px] font-bold">{(companyName || 'R')[0].toUpperCase()}</span>
                   }
                 </div>
-                <span className="text-sm font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal to-brand-orange bg-clip-text text-transparent truncate max-w-[120px]">
+                <span className="text-sm font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal-medium to-brand-teal bg-clip-text text-transparent truncate max-w-[120px]">
                   {companyName || 'Rexon'}
                 </span>
               </div>
@@ -574,11 +574,11 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                     <span className="text-sm font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
-                    <CheckCircle className="w-2 h-2 bg-emerald-500 rounded-full" />
+                    <CheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
                     <span className="text-sm font-semibold text-emerald-600">{warehouseStats.active} Active</span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full">
-                    <XCircle className="w-2 h-2 bg-rose-500 rounded-full" />
+                    <XCircle className="w-3.5 h-3.5 shrink-0 text-rose-500" />
                     <span className="text-sm font-semibold text-rose-600">{warehouseStats.rejected} Rejected</span>
                   </div>
                 </div>
@@ -592,11 +592,11 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                     <span className="text-sm font-semibold text-amber-700">{agentStats.pending} Pending</span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
-                    <UserCheck className="w-3.5 h-2 text-emerald-500 rounded-full" />
+                    <UserCheck className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
                     <span className="text-sm font-semibold text-emerald-600">{agentStats.approved} Approved</span>
                   </div>
                   <div className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full">
-                    <XCircle className="w-2 h-2 bg-rose-500 rounded-full" />
+                    <XCircle className="w-3.5 h-3.5 shrink-0 text-rose-500" />
                     <span className="text-sm font-semibold text-rose-600">{agentStats.rejected} Rejected</span>
                   </div>
                 </div>
@@ -623,7 +623,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                       {logoUrl
                         ? <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
                         : (
-                          <AvatarFallback className="bg-gradient-to-br from-brand-teal-deep via-brand-teal to-brand-orange text-white text-xs font-bold">
+                          <AvatarFallback className="bg-brand-teal-deep text-white text-xs font-bold">
                             {userInitials}
                           </AvatarFallback>
                         )
@@ -640,7 +640,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                         {logoUrl
                           ? <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
                           : (
-                            <AvatarFallback className="bg-gradient-to-br from-brand-teal-deep via-brand-teal to-brand-orange text-white font-bold text-sm">
+                            <AvatarFallback className="bg-brand-teal-deep text-white font-bold text-sm">
                               {userInitials}
                             </AvatarFallback>
                           )

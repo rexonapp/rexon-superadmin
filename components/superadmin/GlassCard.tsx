@@ -13,7 +13,7 @@ interface GlassCardProps {
 
 const gradients = {
   violet: 'from-violet-500/10 via-transparent to-indigo-500/10',
-  blue: 'from-brand-teal/10 via-transparent to-brand-orange/10',
+  blue: 'from-brand-teal/10 via-transparent to-brand-teal-deep/10',
   emerald: 'from-emerald-500/10 via-transparent to-teal-500/10',
   amber: 'from-amber-500/10 via-transparent to-orange-500/10',
   rose: 'from-rose-500/10 via-transparent to-pink-500/10',
