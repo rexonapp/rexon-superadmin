@@ -526,7 +526,7 @@ export default function SettingsPage() {
                   onClick={handleSave}
                   disabled={saving || !isDirty}
                   size="sm"
-                  className="flex items-center gap-2 bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep shadow-lg shadow-brand-teal/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 bg-brand-teal-deep text-white hover:bg-brand-teal-dark shadow-lg shadow-brand-teal/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                   {saving ? 'Saving...' : 'Save Changes'}
