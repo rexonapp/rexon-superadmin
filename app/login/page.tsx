@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Eye, EyeOff, AlertCircle, LogIn, ShieldAlert, Lock, User } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, LogIn, ShieldAlert, Lock, User, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 export default function SuperAdminLogin() {
@@ -49,26 +49,19 @@ export default function SuperAdminLogin() {
         <div className="flex flex-col items-center mb-8">
           {/* Logo */}
           <div className="relative mb-5">
-            <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-brand-teal to-brand-orange/80 opacity-20 blur-lg" />
-            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white border border-slate-100 shadow-2xl shadow-brand-teal/25 flex items-center justify-center">
+            <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-brand-teal to-brand-orange/80 opacity-20 blur-lg" />
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white border border-slate-100 shadow-2xl shadow-brand-teal/25 flex items-center justify-center overflow-hidden">
               <img
                 src="/rexon-logo.png"
                 alt="Rexon"
                 width={102}
                 height={102}
-                className="w-30 h-30 sm:w-[102px] sm:h-[102px] object-contain"
+                className="w-[72%] h-[72%] sm:w-[76%] sm:h-[76%] object-contain"
               />
             </div>
           </div>
 
           <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Rexon</h1>
-
-          {/* Decorated subtitle */}
-          <div className="flex items-center gap-2 mt-1.5">
-            <div className="w-8 h-px bg-gradient-to-r from-transparent to-brand-teal/50" />
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Administration Portal</p>
-            <div className="w-8 h-px bg-gradient-to-l from-transparent to-brand-teal/50" />
-          </div>
         </div>
 
         {/* ── Card ── */}
@@ -78,13 +71,13 @@ export default function SuperAdminLogin() {
           <div className="h-1 bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange" />
 
           {/* Header */}
-          <div className="flex items-start justify-between px-6 sm:px-8 pt-6">
-            <div>
+          <div className="flex items-center justify-between gap-3 px-6 sm:px-8 pt-6">
+            <div className="min-w-0">
               <p className="text-base font-extrabold text-slate-800 tracking-tight">Welcome back</p>
               <p className="text-xs text-slate-400 mt-0.5">Sign in to access the admin dashboard</p>
             </div>
-            <div className="flex items-center gap-1 bg-brand-teal-deep text-white text-[10px] font-bold uppercase tracking-widest rounded-lg px-2.5 py-1.5 shadow-md shadow-brand-teal/35 whitespace-nowrap ml-3 mt-0.5">
-              <ShieldAlert size={10} strokeWidth={3} />
+            <div className="flex items-center gap-1.5 shrink-0 bg-brand-teal-deep text-white text-[10px] font-bold uppercase tracking-widest rounded-lg px-2.5 py-2 shadow-md shadow-brand-teal/35 whitespace-nowrap">
+              <Shield className="w-3.5 h-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
               Admin Portal
             </div>
           </div>
@@ -166,7 +159,7 @@ export default function SuperAdminLogin() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full h-12 flex items-center justify-center gap-2.5 text-sm font-bold text-white bg-gradient-to-br from-brand-teal-deep via-brand-teal to-brand-orange rounded-2xl shadow-lg shadow-brand-teal/30 hover:shadow-xl hover:shadow-brand-teal/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg"
+                  className="w-full h-12 flex items-center justify-center gap-2.5 text-sm font-bold text-white bg-brand-teal-deep rounded-2xl shadow-lg shadow-brand-teal/30 hover:bg-brand-teal-dark hover:shadow-xl hover:shadow-brand-teal/35 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-lg"
                 >
                   {loading ? (
                     <>
