@@ -38,6 +38,7 @@ const menuItems = [
   { id: 'admin',      label: 'Admin',      icon: Users,     path: '/admin'      },
   { id: 'agents',     label: 'Agents',     icon: UserCheck, path: '/agents'     },
   { id: 'properties', label: 'Properties', icon: Building2, path: '/properties' },
+  { id: 'leads',      label: 'leads',      icon: Users, path: '/leads' },
   { id: 'settings',   label: 'Settings',   icon: Settings,  path: '/settings'   },
 ];
 

@@ -42,12 +42,12 @@ interface Warehouse {
   contact_person_relation: string; contact_person_alternate: string;
   amenities: string | string[] | Record<string, string>;
   road_connectivity: string; latitude: string; longitude: string;
-  images_count: number; images?: WarehouseImage[];
+  images_count: number; images?: WarehouseImage[]; total_price: string;
 }
 
 type DateFilterType = 'all' | 'today' | 'week' | 'month' | 'last7' | 'last30' | 'custom';
 interface DateRange { from: Date | undefined; to: Date | undefined; }
-type SortKey = 'title' | 'city' | 'property_type' | 'price_per_sqft' | 'space_available' | 'status' | 'created_at' | 'images_count' | 'contact_person_name';
+type SortKey = 'title' | 'city' | 'property_type' | 'total_price' | 'space_available' | 'status' | 'created_at' | 'images_count' | 'contact_person_name';
 type SortDir = 'asc' | 'desc';
 
 const ITEMS_PER_PAGE = 10;
@@ -434,7 +434,7 @@ export default function WarehousesPage() {
       case 'title':               aVal = a.title ?? '';               bVal = b.title ?? '';               break;
       case 'city':                aVal = a.city ?? '';                bVal = b.city ?? '';                break;
       case 'property_type':       aVal = a.property_type ?? '';       bVal = b.property_type ?? '';       break;
-      case 'price_per_sqft':      aVal = parseFloat(a.price_per_sqft) || 0; bVal = parseFloat(b.price_per_sqft) || 0; break;
+      case 'total_price':      aVal = parseFloat(a.total_price) || 0; bVal = parseFloat(b.total_price) || 0; break;
       case 'space_available':     aVal = parseFloat(a.space_available) || 0; bVal = parseFloat(b.space_available) || 0; break;
       case 'status':              aVal = a.status ?? '';               bVal = b.status ?? '';               break;
       case 'created_at':          aVal = new Date(a.created_at).getTime() || 0; bVal = new Date(b.created_at).getTime() || 0; break;
@@ -475,9 +475,9 @@ export default function WarehousesPage() {
     { key: 'title',               label: 'Property',    className: 'min-w-[220px]' },
     { key: 'city',                label: 'Location',    className: 'min-w-[130px]' },
     { key: 'property_type',       label: 'Type & Size', className: 'min-w-[130px]' },
-    { key: 'price_per_sqft',      label: 'Price',       className: 'min-w-[100px]' },
+    { key: 'total_price',      label: 'Price',       className: 'min-w-[100px]' },
     { key: 'contact_person_name', label: 'Contact',     className: 'min-w-[140px]' },
-    { key: 'images_count',        label: 'Images',      className: 'min-w-[80px]'  },
+    // { key: 'images_count',        label: 'Images',      className: 'min-w-[80px]'  },
     { key: 'status',              label: 'Status',      className: 'min-w-[110px]' },
     { key: 'created_at',          label: 'Added',       className: 'min-w-[120px]' },
   ];
@@ -628,8 +628,8 @@ export default function WarehousesPage() {
                   </TableCell>
 
                   <TableCell className="px-4 py-3.5">
-                    <p className="text-sm font-bold text-gray-900">₹{w.price_per_sqft}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">/ sqft</p>
+                    <p className="text-sm font-bold text-gray-900">₹{w.total_price}</p>
+                    <p className="text-xs text-gray-400 mt-0.5"></p>
                   </TableCell>
 
                   <TableCell className="px-4 py-3.5">
@@ -637,14 +637,14 @@ export default function WarehousesPage() {
                     <p className="text-xs text-gray-400 mt-0.5">{w.contact_person_phone}</p>
                   </TableCell>
 
-                  <TableCell className="px-4 py-3.5">
+                  {/* <TableCell className="px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
                       <ImageIcon className="w-3.5 h-3.5 text-gray-400" />
                       <span className="text-sm text-gray-700 font-semibold">{w.images_count ?? 0}</span>
                     </div>
-                  </TableCell>
+                  </TableCell> */}
 
-                  <TableCell className="px-4 py-3.5">
+                  <TableCell className="px-1 py-3.5">
                     <StatusBadge status={w.status} />
                   </TableCell>
 
@@ -769,7 +769,7 @@ export default function WarehousesPage() {
 
             <div className="grid grid-cols-3 gap-2 mb-3">
               {[
-                { label: 'Price / sqft', value: `₹${selected?.price_per_sqft}` },
+                { label: 'Price', value: `₹${selected?.total_price}` },
                 { label: 'Space',        value: `${selected?.space_available} ${selected?.space_unit}` },
                 { label: 'City',         value: selected?.city },
               ].map(item => (
@@ -813,7 +813,7 @@ export default function WarehousesPage() {
                   <DetailRow icon={Building2}  label="Property Type"   value={selected?.property_type} />
                   <DetailRow icon={Ruler}      label="Warehouse Size"  value={selected?.warehouse_size} />
                   <DetailRow icon={Package}    label="Space Available" value={selected ? `${selected.space_available} ${selected.space_unit}` : null} />
-                  <DetailRow icon={DollarSign} label="Price / sqft"    value={selected ? `₹${selected.price_per_sqft}` : null} />
+                  <DetailRow icon={DollarSign} label="Price"    value={selected ? `₹${selected.total_price}` : null} />
                   <DetailRow icon={Hash}       label="Price Type"      value={selected?.price_type} />
                   <DetailRow icon={Calendar}   label="Available From"  value={selected?.available_from ? fmt(selected.available_from) : null} />
                   <DetailRow icon={Calendar}   label="Expiry Date"     value={selected?.expiry_date ? fmt(selected.expiry_date) : null} />

@@ -29,6 +29,7 @@ export default function SuperAdminSidebar({ session }: SuperAdminSidebarProps) {
     { id: 'users', label: 'Users', icon: Users, href: '/superadmin/users' },
     { id: 'properties', label: 'Properties', icon: Building2, href: '/superadmin/properties' },
     { id: 'agents', label: 'Agents', icon: UserCheck, href: '/superadmin/agents' },
+    { id: 'leads',      label: 'leads',      icon: Users, href: '/superadmin/leads' },
     { id: 'settings', label: 'Settings', icon: Settings, href: '/superadmin/settings' },
   ];
 

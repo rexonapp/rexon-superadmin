@@ -70,10 +70,10 @@ export default function DashboardClient({ initialData }: Props) {
   const isRefreshing = dashValidating || agentValidating;
 
   const statCards = [
-    { label: 'Total Active Properties', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const },
-    { label: 'Pending Approvals', value: stats.pendingApprovals.toString(), icon: Clock, color: 'cyan' as const },
+    { label: 'Total Properties', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const },
+    // { label: 'Pending Approvals', value: stats.pendingApprovals.toString(), icon: Clock, color: 'cyan' as const },
     { label: 'Leads', value: stats.totalUsers.toString(), icon: Users, color: 'blue' as const },
-    { label: 'Agent Network', value: stats.totalAgents.toString(), icon: UserCheck, color: 'cyan' as const },
+    { label: 'Agents', value: stats.totalAgents.toString(), icon: UserCheck, color: 'cyan' as const },
   ];
 
   return (
@@ -117,10 +117,11 @@ export default function DashboardClient({ initialData }: Props) {
         ))}
       </div>
 
-      {/* ── Main content (full width; restore lg:grid-cols-3 + col-span when Quick Actions is back) ── */}
-      <div className="grid grid-cols-1 gap-6 w-full min-w-0">
+      {/* ── Main Content Grid ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
 
-        <GlassCard className="w-full min-w-0 p-4 sm:p-6" gradient="blue">
+        {/* Recent Activity — 2 cols */}
+        <GlassCard className="lg:col-span-3 p-6" gradient="blue">
 
           {/* Card header */}
           <div className="flex flex-row items-center justify-between mb-6 bg-brand-teal-deep/10 border border-brand-teal/20 rounded-xl px-3 py-2.5 sm:px-4">

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Get total warehouses
+    // Get total Properties
     const warehousesResult = await query('SELECT COUNT(*) as count FROM warehouses');
     const totalWarehouses = parseInt(warehousesResult.rows[0].count);
 
