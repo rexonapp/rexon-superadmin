@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, JSX } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -54,8 +54,8 @@ const ITEMS_PER_PAGE = 10;
 
 const statusConfig: Record<string, { badge: string; dot: string; label: string }> = {
   Pending:  { badge: 'bg-amber-50 text-amber-700 border border-amber-200',        dot: 'bg-amber-400 animate-pulse', label: 'Pending'  },
-  Active:   { badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200',  dot: 'bg-emerald-500',             label: 'Active'   },
-  rejected: { badge: 'bg-rose-50 text-rose-700 border border-rose-200',           dot: 'bg-rose-500',                label: 'Rejected' },
+  Active:   { badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200',  dot: 'bg-emerald-700',             label: 'Active'   },
+  rejected: { badge: 'bg-rose-50 text-rose-700 border border-rose-200',           dot: 'bg-rose-700',                label: 'Rejected' },
 };
 
 const fmt = (ds: string) =>
@@ -97,7 +97,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
       className={cn(
         'text-l font-bold tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer',
         'hover:bg-gray-100 transition-colors',
-        active ? 'text-brand-teal-medium bg-brand-teal/10' : 'text-gray-500',
+        active ? 'text-brand-teal-medium bg-brand-teal/10' : 'text-gray-700',
         className
       )}
     >
@@ -147,17 +147,17 @@ function CustomDateModal({ open, onClose, dateRange, onApply }: {
         <VisuallyHidden><DialogTitle>Custom Date Range</DialogTitle></VisuallyHidden>
         <div className="px-5 py-4 border-b border-gray-100">
           <h3 className="text-sm font-semibold text-gray-900">Custom Date Range</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Filter warehouses by created date</p>
+          <p className="text-xs text-gray-700 mt-0.5">Filter warehouses by created date</p>
         </div>
         <div className="px-5 py-5 space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Start Date</label>
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">Start Date</label>
             <input type="date" value={fromVal} max={toVal || undefined}
               onChange={e => { setFromVal(e.target.value); setError(''); }}
               className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-gray-50" />
           </div>
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">End Date</label>
+            <label className="text-xs font-bold text-gray-700 uppercase tracking-wider">End Date</label>
             <input type="date" value={toVal} min={fromVal || undefined}
               onChange={e => { setToVal(e.target.value); setError(''); }}
               className="w-full h-10 rounded-lg border border-gray-200 px-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-brand-teal focus:border-transparent bg-gray-50" />
@@ -213,7 +213,7 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
           <img
             src={img.s3_url}
             alt={img.file_name || `Image ${current + 1}`}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             onError={() => setImgError(p => ({ ...p, [current]: true }))}
           />
         )}
@@ -222,7 +222,7 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
           {current + 1} / {images.length}
         </div>
         {img.is_primary && (
-          <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+          <div className="absolute top-2 left-2 bg-orange-700 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
             <Star className="w-3 h-3 fill-current" /> Primary
           </div>
         )}
@@ -280,7 +280,7 @@ function RowThumb({ warehouse }: { warehouse: Warehouse }) {
 }
 
 function DetailRow({ icon: Icon, label, value, accent = 'blue' }: {
-  icon: React.ElementType; label: string; value?: string | null; accent?: 'blue' | 'amber';
+  icon: React.ElementType; label: JSX.Element | string; value?: string | null; accent?: 'blue' | 'amber';
 }) {
   if (!value) return null;
   return (
@@ -561,7 +561,7 @@ export default function WarehousesPage() {
 
           {isAnyFilterActive && (
             <Button variant="ghost" size="sm" onClick={clearAllFilters}
-              className="h-9 px-3 text-sm text-gray-500 hover:text-rose-600 hover:bg-rose-50 shrink-0">
+              className="h-9 px-3 text-sm text-gray-700 hover:text-rose-600 hover:bg-rose-50 shrink-0">
               <X className="w-3.5 h-3.5 mr-1" /> Clear
             </Button>
           )}
@@ -588,7 +588,7 @@ export default function WarehousesPage() {
                     sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
                     className={cn(c.className, 'bg-gray-50 sticky top-0 z-10')} />
                 ))}
-                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">
+                <TableHead className="text-l font-bold tracking-wide text-gray-700 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">
                   Actions
                 </TableHead>
               </TableRow>
@@ -685,7 +685,7 @@ export default function WarehousesPage() {
                       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
                         <Building2 className="w-7 h-7 opacity-40" />
                       </div>
-                      <p className="font-semibold text-base text-gray-500">No items or properties found</p>
+                      <p className="font-semibold text-base text-gray-700">No items or properties found</p>
                       <p className="text-sm text-gray-400">Try adjusting your search or filters</p>
                       {isAnyFilterActive && (
                         <Button variant="outline" size="sm" onClick={clearAllFilters} className="mt-1 text-sm">
@@ -753,13 +753,13 @@ export default function WarehousesPage() {
                     {selected?.property_type ?? '—'}
                   </span>
                   {selected?.is_featured && (
-                    <span className="bg-orange-500 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span className="bg-orange-700 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                       <Star className="w-3 h-3 fill-current" /> Featured
                     </span>
                   )}
                 </div>
                 <h2 className="text-lg font-bold text-white leading-snug">{selected?.title}</h2>
-                <p className="text-white/85 text-sm mt-0.5 truncate">{selected?.property_name}</p>
+                {/* <p className="text-white/85 text-sm mt-0.5 truncate">{selected?.property_name}</p> */}
               </div>
               <div className="flex flex-col items-end gap-1.5 py-4 flex-shrink-0">
                 {selected && <StatusBadge status={selected.status} />}
@@ -767,7 +767,7 @@ export default function WarehousesPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-2 mb-3">
+            {/* <div className="grid grid-cols-3 gap-2 mb-3">
               {[
                 { label: 'Price', value: `₹${selected?.total_price}` },
                 { label: 'Space',        value: `${selected?.space_available} ${selected?.space_unit}` },
@@ -778,7 +778,7 @@ export default function WarehousesPage() {
                   <p className="text-white font-bold text-sm truncate">{item.value ?? '—'}</p>
                 </div>
               ))}
-            </div>
+            </div> */}
 
             <div className="flex border-b border-white/30">
               {(['overview', 'contact', 'location', 'amenities'] as const).map(tab => (
@@ -807,19 +807,19 @@ export default function WarehousesPage() {
                   <ImageGallery images={selected?.images ?? []} loading={loadingImages} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-brand-teal-medium uppercase tracking-widest mb-3 flex items-center gap-1.5">
+                  <p className="text-xs text-gray-700 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5">
                     <Building2 className="w-3.5 h-3.5" /> Property Details
                   </p>
-                  <DetailRow icon={Building2}  label="Property Type"   value={selected?.property_type} />
-                  <DetailRow icon={Ruler}      label="Warehouse Size"  value={selected?.warehouse_size} />
-                  <DetailRow icon={Package}    label="Space Available" value={selected ? `${selected.space_available} ${selected.space_unit}` : null} />
-                  <DetailRow icon={DollarSign} label="Price"    value={selected ? `₹${selected.total_price}` : null} />
-                  <DetailRow icon={Hash}       label="Price Type"      value={selected?.price_type} />
-                  <DetailRow icon={Calendar}   label="Available From"  value={selected?.available_from ? fmt(selected.available_from) : null} />
-                  <DetailRow icon={Calendar}   label="Expiry Date"     value={selected?.expiry_date ? fmt(selected.expiry_date) : null} />
+                  <DetailRow icon={Building2}    label={<span className="text-[#13a8b4]">Property Type</span>}   value={selected?.property_type} />
+                  <DetailRow icon={Ruler}     label={<span className="text-[#13a8b4]">Warehouse Size</span>}  value={selected?.warehouse_size} />
+                  <DetailRow icon={Package} label={<span className="text-[#13a8b4]">Space Available</span>} value={selected ? `${selected.space_available} ${selected.space_unit}` : null} />
+                  <DetailRow icon={DollarSign} label={<span className="text-[#13a8b4]">Price Size</span>}    value={selected ? `₹${selected.total_price}` : null} />
+                  <DetailRow icon={Hash}      label={<span className="text-[#13a8b4]">Price Type Size</span>}  value={selected?.price_type} />
+                  <DetailRow icon={Calendar}  label={<span className="text-[#13a8b4]">Available From Size</span>}  value={selected?.available_from ? fmt(selected.available_from) : null} />
+                  <DetailRow icon={Calendar}   label={<span className="text-[#13a8b4]">Expiry Date Size</span>}   value={selected?.expiry_date ? fmt(selected.expiry_date) : null} />
                   {selected?.description && (
                     <div className="mt-4">
-                      <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">Description</p>
+                      <p className="text-xs font-bold text-gray-700 uppercase tracking-widest mb-2">Description</p>
                       <p className="text-sm text-gray-600 leading-relaxed bg-amber-50 rounded-xl p-3.5 border border-amber-100">{selected.description}</p>
                     </div>
                   )}
@@ -841,7 +841,7 @@ export default function WarehousesPage() {
             )}
 
             {activeTab === 'contact' && (
-              <div className="max-w-md mx-auto">
+              <div className="max-w-md mx-1">
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-teal to-brand-orange flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
@@ -849,7 +849,7 @@ export default function WarehousesPage() {
                     </div>
                     <div>
                       <p className="font-bold text-gray-900 text-base">{selected?.contact_person_name}</p>
-                      {selected?.contact_person_designation && <p className="text-sm text-gray-500 mt-0.5">{selected.contact_person_designation}</p>}
+                      {selected?.contact_person_designation && <p className="text-sm text-gray-700 mt-0.5">{selected.contact_person_designation}</p>}
                       {selected?.contact_person_relation && (
                         <span className="text-xs bg-brand-teal/12 text-brand-teal-dark px-2 py-0.5 rounded-full font-semibold mt-1 inline-block">{selected.contact_person_relation}</span>
                       )}
@@ -915,7 +915,7 @@ export default function WarehousesPage() {
                       ))}
                     </div>
                   ) : (
-                    <p className="text-sm text-gray-500 ">
+                    <p className="text-sm text-gray-700 ">
                       No amenities are provided
                     </p>
                   )}
