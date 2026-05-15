@@ -754,7 +754,7 @@ export default function AgentsPage() {
             </div>
 
             {/* Quick stats row */}
-            <div className="grid grid-cols-3 gap-2 mb-3">
+            {/* <div className="grid grid-cols-3 gap-2 mb-3">
               {[
                 { label: 'City',    value: selectedAgent?.city ?? '—' },
                 { label: 'Domains', value: `${selectedAgent?.domains?.length ?? 0} domain(s)` },
@@ -765,7 +765,7 @@ export default function AgentsPage() {
                   <p className="text-white font-bold text-sm truncate">{item.value}</p>
                 </div>
               ))}
-            </div>
+            </div> */}
 
             {/* Tabs */}
             <div className="flex border-b border-white/30">

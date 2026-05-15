@@ -35,7 +35,7 @@ interface SidebarProps {
 
 const menuItems = [
   { id: 'home',       label: 'Dashboard',  icon: Home,      path: '/'           },
-  { id: 'admin',      label: 'Admin',      icon: Users,     path: '/admin'      },
+  { id: 'admin',      label: 'Admin Users',      icon: Users,     path: '/admin'      },
   { id: 'agents',     label: 'Agents',     icon: UserCheck, path: '/agents'     },
   { id: 'properties', label: 'Properties', icon: Building2, path: '/properties' },
   { id: 'leads',      label: 'leads',      icon: Users, path: '/leads' },
