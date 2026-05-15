@@ -1056,7 +1056,7 @@ export default function SuperadminAgentCreation() {
                     : 'Create Agent'
                   }
                 </Button>
-                <Button type="button" variant="outline" onClick={() => router.back()} className="w-full h-11 text-sm font-medium text-gray-600">
+                <Button type="button" variant="outline" onClick={() => router.back()} className="w-full h-11  bg-[#da7948] hover:bg-[#da7948] text-sm font-medium text-white">
                   Cancel
                 </Button>
               </div>

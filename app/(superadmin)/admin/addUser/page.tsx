@@ -394,7 +394,7 @@ export default function AddUserPage() {
                     type="button"
                     variant="outline"
                     className="flex-1 h-10 text-sm font-semibold rounded-lg transition-all"
-                    style={{ borderColor: '#d0e0ff', color: '#0f4c75' }}
+                    style={{ borderColor:  '#da7948', color: '#da7948' }}
                     onClick={handleCancel}
                   >
                     Cancel

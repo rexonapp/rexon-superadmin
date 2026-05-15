@@ -437,7 +437,7 @@ export default function UsersPage() {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-gray-100 bg-gray-50 px-5 py-4 flex gap-2">
+          <div className="border-t bg-[#da7948] hover:bg-[#da7948] px-5 py-4 flex gap-2">
             <Button
               variant="outline" size="sm"
               onClick={() => { setShowRoleModal(false); setSelectedUser(null); setErrorMsg(''); }}
@@ -494,7 +494,7 @@ export default function UsersPage() {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-gray-100 bg-gray-50 px-5 py-4 flex gap-2">
+          <div className="border-tbg-[#da7948] hover:bg-[#da7948] px-5 py-4 flex gap-2">
             <AlertDialogCancel
               onClick={() => setSelectedUser(null)}
               disabled={deleteLoading}

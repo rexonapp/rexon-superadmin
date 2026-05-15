@@ -881,7 +881,7 @@ export default function EditAgentPage() {
                     <span>Save Changes</span>
                   )}
                 </Button>
-                <Button type="button" variant="outline" onClick={() => router.back()} className="w-full py-6 text-base font-medium">
+                <Button type="button" variant="outline" onClick={() => router.back()} className="w-full  bg-[#da7948] hover:bg-[#da7948] py-6 text-base font-medium">
                   Cancel
                 </Button>
               </div>
