@@ -2,16 +2,13 @@
 
 import useSWR from 'swr';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import {
   Building2,
   UserCheck,
   Users,
   Clock,
-  ArrowUpRight,
   ArrowRight,
   Activity,
-  Sparkles,
   RefreshCw,
 } from 'lucide-react';
 import StatCard from '@/components/superadmin/StatCard';
@@ -48,26 +45,10 @@ export default function DashboardClient({ initialData }: Props) {
     }
   );
 
-  const { data: agentData, isValidating: agentValidating } = useSWR(
-    '/api/agents/recent-activity',
-    fetcher,
-    {
-      fallbackData: {
-        success: true,
-        data: { activities: initialData.agentActivities },
-      },
-      refreshInterval: 30_000,
-      revalidateOnFocus: true,
-      revalidateOnReconnect: true,
-      dedupingInterval: 5_000,
-    }
-  );
-
   const stats: Stats = dashData?.stats ?? initialData.stats;
   const recentActivity: ActivityItem[] = dashData?.recentActivity ?? initialData.recentActivity;
-  const agentActivities: any[] = agentData?.data?.activities ?? initialData.agentActivities;
 
-  const isRefreshing = dashValidating || agentValidating;
+  const isRefreshing = dashValidating;
 
   const statCards = [
     { label: 'Total Properties', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const },
@@ -124,19 +105,19 @@ export default function DashboardClient({ initialData }: Props) {
         <GlassCard className="lg:col-span-3 p-6" gradient="blue">
 
           {/* Card header */}
-          <div className="flex flex-row items-center justify-between mb-6 bg-brand-teal-deep/10 border border-brand-teal/20 rounded-xl px-3 py-2.5 sm:px-4">
+          <div className="flex flex-row items-center justify-between mb-4 bg-brand-teal rounded-xl px-3 py-2.5 sm:px-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-brand-teal-deep/15 ring-2 ring-brand-teal/20">
-                <Activity className="w-5 h-5 text-brand-teal-deep" />
+              <div className="p-2 rounded-lg bg-white/20 ring-2 ring-white/30">
+                <Activity className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Recent Activity</h3>
+              <h3 className="text-lg font-bold text-white">Recent Activity</h3>
             </div>
             <div className="ml-auto">
             <Button
               onClick={() => router.push('/agentWarehouseActivity')}
               variant="ghost"
               size="sm"
-              className="text-brand-orange hover:text-brand-orange-dark hover:bg-brand-orange/10"
+              className="text-white hover:text-white hover:bg-white/20"
             >
               View All
               <ArrowRight className="w-4 h-4 ml-1" />
@@ -144,32 +125,30 @@ export default function DashboardClient({ initialData }: Props) {
             </div>
           </div>
 
-          <Separator className="bg-gradient-to-r from-transparent via-brand-teal/25 to-transparent mb-6" />
-
           {recentActivity.length > 0 ? (
             <div
-              className="w-full min-w-0 max-h-[460px] overflow-auto rounded-lg border border-gray-200"
+              className="w-full min-w-0 overflow-auto rounded-lg border border-gray-200"
               style={{
                 scrollbarWidth: "thin",
                 scrollbarColor: "#CBD5E1 transparent",
               }}
             >
               <table className="w-full min-w-[52rem] md:min-w-full border-collapse text-left text-sm">
-                <thead className="bg-gray-50 sticky top-0 z-[1] shadow-[0_1px_0_0_rgb(229_231_235)]">
+                <thead className="bg-brand-teal/15 sticky top-0 z-[1] shadow-[0_1px_0_0_rgb(20_184_166_/_0.2)]">
                   <tr>
-                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Property</th>
-                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Agent</th>
-                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">City</th>
-                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Type</th>
-                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Price</th>
-                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Status</th>
-                    <th className="p-2 sm:p-3 text-gray-500 font-semibold whitespace-nowrap">Created</th>
+                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Property</th>
+                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Agent</th>
+                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">City</th>
+                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Type</th>
+                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Price</th>
+                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Status</th>
+                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Created</th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-gray-200">
-                  {recentActivity.map((activity) => (
-                    <tr key={activity.id} className="hover:bg-white/60">
+                <tbody className="divide-y divide-gray-100">
+                  {recentActivity.map((activity, idx) => (
+                    <tr key={activity.id} className={idx % 2 === 0 ? "bg-white hover:bg-brand-teal/5" : "bg-gray-50/60 hover:bg-brand-teal/5"}>
                       <td className="p-2 sm:p-3 font-medium align-top break-words min-w-[8rem]">
                         {activity.warehouse}
                       </td>

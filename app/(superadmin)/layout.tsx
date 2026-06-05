@@ -371,6 +371,9 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
   // ── Notification state ──
   const [notifications, setNotifications] = useState<SuperAdminNotification[]>([]);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Track IDs the user has read/deleted locally so polls don't bounce the count back
+  const localReadIds = useRef<Set<number>>(new Set());
+  const localDeletedIds = useRef<Set<number>>(new Set());
 
   const pathname = usePathname();
   const router = useRouter();
@@ -387,45 +390,59 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   // ── Fetch all notifications ──
+  // Merges server data with local read/deleted state so the count never bounces
+  // back up after the user marks notifications as read between polls.
   const fetchNotifications = useCallback(async () => {
     try {
       const res = await fetch('/api/superadmin/notifications');
       const data = await res.json();
       if (data.success && Array.isArray(data.notifications)) {
-        setNotifications(data.notifications);
+        setNotifications(
+          (data.notifications as SuperAdminNotification[])
+            .filter(n => !localDeletedIds.current.has(n.id))
+            .map(n => ({
+              ...n,
+              is_read: localReadIds.current.has(n.id) || n.is_read,
+            }))
+        );
       }
     } catch { /* silent */ }
   }, []);
 
   // ── Mark single as read ──
   const handleMarkRead = useCallback(async (id: number) => {
-    // Optimistic update first so UI feels instant
+    localReadIds.current.add(id);
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
     try {
       await fetch(`/api/superadmin/notifications/${id}/read`, { method: 'PATCH' });
     } catch {
-      // Roll back on failure
+      localReadIds.current.delete(id);
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: false } : n));
     }
   }, []);
 
   // ── Mark all as read ──
   const handleMarkAllRead = useCallback(async () => {
-    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    setNotifications(prev => {
+      prev.forEach(n => localReadIds.current.add(n.id));
+      return prev.map(n => ({ ...n, is_read: true }));
+    });
     try {
       await fetch('/api/superadmin/notifications/read-all', { method: 'PATCH' });
     } catch {
-      fetchNotifications(); // re-fetch to restore true state on failure
+      fetchNotifications();
     }
   }, [fetchNotifications]);
 
   // ── Delete a notification ──
   const handleDelete = useCallback(async (id: number) => {
+    localDeletedIds.current.add(id);
     setNotifications(prev => prev.filter(n => n.id !== id));
     try {
       await fetch(`/api/superadmin/notifications/${id}`, { method: 'DELETE' });
     } catch {
-      fetchNotifications(); // restore if delete failed
+      localDeletedIds.current.delete(id);
+      fetchNotifications();
     }
   }, [fetchNotifications]);
 
@@ -710,7 +727,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
 
         {/* ── Page content ── */}
         {/* ── Page content ── */}
-        <div className="flex-1 min-h-0 overflow-hidden p-4 sm:p-5">
+        <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-5">
           <NotificationContext.Provider value={{ refetchNotifications: fetchNotifications }}>
             {children}
           </NotificationContext.Provider>
