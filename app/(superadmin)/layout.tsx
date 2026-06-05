@@ -11,7 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import {
   Bell, Menu, X, Settings, LogOut, Clock, CheckCircle,
-  XCircle, UserCheck, Warehouse, Users, Check, Trash2,
+  XCircle, UserCheck, Warehouse, Users, Check, Trash2, Ban,
 } from 'lucide-react';
 import Sidebar, { AdminUser } from '@/components/superadmin/sidebar';
 import Loading from './loading';
@@ -22,7 +22,7 @@ import NotificationContext from '@/lib/context/NotificationContext';
 
 
 interface WarehouseStats { pending: number; active: number; rejected: number; }
-interface AgentStats { pending: number; approved: number; rejected: number; invite: number; }
+interface AgentStats { pending: number; approved: number; rejected: number; invite: number; deactivated: number; }
 
 export interface SuperAdminNotification {
   id: number;
@@ -366,7 +366,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<AdminUser | null>(null);
   const [warehouseStats, setWarehouseStats] = useState<WarehouseStats>({ pending: 0, active: 0, rejected: 0 });
-  const [agentStats, setAgentStats] = useState<AgentStats>({ pending: 0, approved: 0, rejected: 0, invite: 0 });
+  const [agentStats, setAgentStats] = useState<AgentStats>({ pending: 0, approved: 0, rejected: 0, invite: 0, deactivated: 0 });
 
   // ── Notification state ──
   const [notifications, setNotifications] = useState<SuperAdminNotification[]>([]);
@@ -519,10 +519,11 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
         if (data.success && data.agents) {
           const as_ = data.agents;
           setAgentStats({
-            pending: as_.filter((a: { status: string }) => a.status === 'pending').length,
-            approved: as_.filter((a: { status: string }) => a.status === 'approved').length,
-            rejected: as_.filter((a: { status: string }) => a.status === 'rejected').length,
-            invite: as_.filter((a: { status: string }) => a.status === 'invite').length,
+            pending:     as_.filter((a: { status: string }) => a.status === 'pending').length,
+            approved:    as_.filter((a: { status: string }) => a.status === 'approved').length,
+            rejected:    as_.filter((a: { status: string }) => a.status === 'rejected').length,
+            invite:      as_.filter((a: { status: string }) => a.status === 'invite').length,
+            deactivated: as_.filter((a: { status: string }) => a.status === 'deactivated').length,
           });
         }
       } catch { /* silent */ }
@@ -604,18 +605,26 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
               {/* Agent stat pills */}
               {isAgentsPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                   <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
+                  <button onClick={() => router.push('/agents?status=pending')}
+                    className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full hover:bg-amber-100 transition-colors cursor-pointer">
                     <Clock className="w-3.5 h-3.5 text-amber-500" />
                     <span className="text-sm font-semibold text-amber-700">{agentStats.pending} Pending</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
+                  </button>
+                  <button onClick={() => router.push('/agents?status=approved')}
+                    className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors cursor-pointer">
                     <UserCheck className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
                     <span className="text-sm font-semibold text-emerald-600">{agentStats.approved} Approved</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full">
+                  </button>
+                  <button onClick={() => router.push('/agents?status=rejected')}
+                    className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors cursor-pointer">
                     <XCircle className="w-3.5 h-3.5 shrink-0 text-rose-500" />
                     <span className="text-sm font-semibold text-rose-600">{agentStats.rejected} Rejected</span>
-                  </div>
+                  </button>
+                  <button onClick={() => router.push('/agents?status=deactivated')}
+                    className="inline-flex items-center gap-1.5 bg-gray-100 border border-gray-300 px-3 py-1 rounded-full hover:bg-gray-200 transition-colors cursor-pointer">
+                    <Ban className="w-3.5 h-3.5 shrink-0 text-gray-500" />
+                    <span className="text-sm font-semibold text-gray-600">{agentStats.deactivated} Deactivated</span>
+                  </button>
                 </div>
               )}
             </div>
@@ -709,18 +718,26 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
           {/* ── Mobile stat pills: agents ── */}
           {isAgentsPage && (
             <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1  rounded-full">
-                <Clock className="w-3 h-2 text-amber-500 rounded-full" />
+              <button onClick={() => router.push('/agents?status=pending')}
+                className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full shrink-0 hover:bg-amber-100 transition-colors">
+                <Clock className="w-3 h-3 text-amber-500" />
                 <span className="text-xs font-semibold text-amber-700">{agentStats.pending} Pending</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1  rounded-full">
-                <UserCheck className="w-3 h-2 text-emerald-500 rounded-full" />
+              </button>
+              <button onClick={() => router.push('/agents?status=approved')}
+                className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shrink-0 hover:bg-emerald-100 transition-colors">
+                <UserCheck className="w-3 h-3 text-emerald-500" />
                 <span className="text-xs font-semibold text-emerald-600">{agentStats.approved} Approved</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1  rounded-full">
-                <XCircle className="w-3 h-2 text-rose-400 rounded-full" />
+              </button>
+              <button onClick={() => router.push('/agents?status=rejected')}
+                className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full shrink-0 hover:bg-rose-100 transition-colors">
+                <XCircle className="w-3 h-3 text-rose-400" />
                 <span className="text-xs font-semibold text-rose-600">{agentStats.rejected} Rejected</span>
-              </div>
+              </button>
+              <button onClick={() => router.push('/agents?status=deactivated')}
+                className="flex items-center gap-1.5 bg-gray-100 border border-gray-300 px-3 py-1 rounded-full shrink-0 hover:bg-gray-200 transition-colors">
+                <Ban className="w-3 h-3 text-gray-500" />
+                <span className="text-xs font-semibold text-gray-600">{agentStats.deactivated} Deactivated</span>
+              </button>
             </div>
           )}
         </header>

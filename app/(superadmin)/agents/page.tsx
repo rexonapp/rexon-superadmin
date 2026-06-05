@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import Loading from '../loading';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { useNotifications } from '@/lib/context/NotificationContext';
@@ -225,11 +226,17 @@ function DetailRow({ icon: Icon, label, value, accent = 'blue' }: {
 
 // ── Page ─────────────────────────────────────────────────────────────────────
 
-export default function AgentsPage() {
+const VALID_STATUSES = ['pending', 'approved', 'rejected', 'deactivated', 'invite'];
+
+function AgentsPageInner() {
+  const searchParams = useSearchParams();
   const [agents,           setAgents]           = useState<Agent[]>([]);
   const [loading,          setLoading]          = useState(true);
   const [searchTerm,       setSearchTerm]       = useState('');
-  const [filterStatus,     setFilterStatus]     = useState('all');
+  const [filterStatus,     setFilterStatus]     = useState(() => {
+    const s = searchParams.get('status') ?? 'all';
+    return VALID_STATUSES.includes(s) ? s : 'all';
+  });
   const [dateFilter,       setDateFilter]       = useState<DateFilterType>('all');
   const [dateRange,        setDateRange]        = useState<DateRange>({ from: undefined, to: undefined });
   const [showCustomDate,   setShowCustomDate]   = useState(false);
@@ -472,7 +479,7 @@ export default function AgentsPage() {
             <TableHeader>
               <TableRow className="hover:bg-gray-50 border-b border-gray-200">
                 <SortableHead col="full_name"   label="Agent"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[200px] sticky top-0 z-10" />
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">E-mail</TableHead>
+                <SortableHead col="city"        label="City"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[130px] sticky top-0 z-10" />
                 <SortableHead col="agency_name" label="Agency"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[150px] sticky top-0 z-10" />
                 <SortableHead col="created_at"  label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[140px] sticky top-0 z-10" />
                 <SortableHead col="domains"     label="Domain"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[160px] sticky top-0 z-10" />
@@ -507,20 +514,20 @@ export default function AgentsPage() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[150px]">
+                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[160px]">
                           {agent.full_name}
                         </p>
-                        <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[150px] flex items-center gap-1">
-                          <MapPin className="w-3 h-3 shrink-0" />{agent.city}
-                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[160px]">{agent.email}</p>
+                        <p className="text-xs text-gray-400 truncate max-w-[160px]">{agent.mobile_number}</p>
                       </div>
                     </div>
                   </TableCell>
 
-                  {/* Contact */}
+                  {/* City */}
                   <TableCell className="px-4 py-3.5">
-                    <p className="text-sm text-gray-800 truncate max-w-[220px]">{agent.email}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{agent.mobile_number}</p>
+                    <p className="text-sm text-gray-800 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-gray-400 shrink-0" />{agent.city || '—'}
+                    </p>
                   </TableCell>
 
                   {/* Agency */}
@@ -1003,5 +1010,13 @@ export default function AgentsPage() {
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+export default function AgentsPage() {
+  return (
+    <Suspense>
+      <AgentsPageInner />
+    </Suspense>
   );
 }
