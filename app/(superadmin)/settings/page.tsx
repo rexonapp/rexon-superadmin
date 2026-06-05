@@ -69,7 +69,7 @@ function UnsavedChangesModal({ onStay, onLeave, onSaveAndLeave }: UnsavedChanges
       {/* Modal */}
       <div className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         {/* Top accent bar */}
-        <div className="h-1 w-full bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400" />
+        <div className="h-1 w-full bg-brand-teal" />
 
         <div className="p-6 space-y-5">
           {/* Icon + Title */}
@@ -109,7 +109,7 @@ function UnsavedChangesModal({ onStay, onLeave, onSaveAndLeave }: UnsavedChanges
             <Button
               onClick={handleSaveAndLeave}
               disabled={saving}
-              className="flex-1 h-10 bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep text-white font-semibold shadow-md shadow-brand-teal/20 transition-all text-sm gap-2"
+              className="flex-1 h-10 bg-brand-teal hover:bg-brand-teal-dark text-white font-semibold shadow-md shadow-brand-teal/20 transition-all text-sm gap-2"
             >
               {saving
                 ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...</>
@@ -216,7 +216,7 @@ function LogoCropModal({ imageSrc, onConfirm, onCancel }: CropModalProps) {
           <Button variant="outline" size="sm" onClick={() => { setScale(1); setPosition({ x: 0, y: 0 }); }} className="flex-1 gap-1.5 text-gray-600">
             <RotateCcw className="w-3.5 h-3.5" /> Reset
           </Button>
-          <Button size="sm" onClick={handleConfirm} className="flex-1 gap-1.5 bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep text-white">
+          <Button size="sm" onClick={handleConfirm} className="flex-1 gap-1.5 bg-brand-teal hover:bg-brand-teal-dark text-white">
             <Check className="w-3.5 h-3.5" /> Apply
           </Button>
         </div>
@@ -498,14 +498,13 @@ export default function SettingsPage() {
         />
       )}
 
-      <div className="h-full">
-        <div className="space-y-4 pb-6">
+      <div className="space-y-4 pb-6">
 
           {/* Header */}
           <GlassCard className="px-5 py-4" gradient="blue">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold bg-gradient-to-r from-brand-teal-deep to-brand-orange bg-clip-text text-transparent">
+                <h2 className="text-xl font-bold text-brand-teal-dark">
                   System Settings
                 </h2>
                 <p className="text-xs text-gray-500 mt-0.5 font-medium">
@@ -621,7 +620,7 @@ export default function SettingsPage() {
                   <Switch
                     checked={settings[setting.id as keyof typeof settings] as boolean}
                     onCheckedChange={checked => setSettings({ ...settings, [setting.id]: checked })}
-                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-brand-teal-deep data-[state=checked]:to-brand-orange ml-4"
+                    className="data-[state=checked]:bg-brand-teal ml-4"
                   />
                 </div>
               ))}
@@ -666,7 +665,6 @@ export default function SettingsPage() {
             </div>
           </GlassCard>
 
-        </div>
       </div>
     </>
   );
