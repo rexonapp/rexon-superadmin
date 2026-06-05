@@ -741,7 +741,7 @@ function AgentsPageInner() {
           <VisuallyHidden><DialogTitle>{selectedAgent?.full_name ?? 'Agent Details'}</DialogTitle></VisuallyHidden>
 
           {/* Modal header */}
-          <div className="bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange px-5 pt-5 pb-0 flex-shrink-0">
+          <div className="bg-brand-teal px-5 pt-5 pb-0 flex-shrink-0">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
                 <Avatar className="w-12 h-12 ring-2 ring-white/30 shrink-0">
@@ -781,7 +781,7 @@ function AgentsPageInner() {
                   className={cn('px-5 py-2.5 text-sm font-semibold capitalize transition-all relative',
                     activeTab === tab ? 'text-white' : 'text-white/70 hover:text-white')}>
                   {tab}
-                  {activeTab === tab && <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-t bg-orange-400" />}
+                  {activeTab === tab && <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-t bg-white" />}
                 </button>
               ))}
             </div>
@@ -800,12 +800,12 @@ function AgentsPageInner() {
                 <DetailRow icon={Users}     label="Full Name"  value={selectedAgent?.full_name} />
                 <DetailRow icon={Building2} label="Agency"     value={selectedAgent?.agency_name} />
                 <DetailRow icon={MapPin}    label="City"       value={selectedAgent?.city} />
-                <DetailRow icon={Calendar}  label="Registered" value={fmtDate(selectedAgent?.created_at ?? null)} accent="amber" />
-                <DetailRow icon={Clock}     label="Status"     value={selectedAgent?.status ? statusCfg[selectedAgent.status]?.label : '—'} accent="amber" />
+                <DetailRow icon={Calendar}  label="Registered" value={fmtDate(selectedAgent?.created_at ?? null)} />
+                <DetailRow icon={Clock}     label="Status"     value={selectedAgent?.status ? statusCfg[selectedAgent.status]?.label : '—'} />
 
                 {selectedAgent?.kyc_document_s3_url && (
                   <div className="mt-5">
-                    <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">KYC Document</p>
+                    <p className="text-xs font-bold text-brand-teal-medium uppercase tracking-widest mb-2">KYC Document</p>
                     <Button variant="outline" className="w-full justify-between rounded-xl h-10 text-sm"
                       onClick={() => selectedAgent.kyc_document_s3_url && window.open(selectedAgent.kyc_document_s3_url, '_blank')}>
                       <span className="flex items-center gap-2"><FileText className="w-4 h-4" /> View KYC Document</span>
@@ -824,7 +824,7 @@ function AgentsPageInner() {
                 </p>
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-teal to-brand-orange flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-brand-teal flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
                       {selectedAgent?.full_name?.charAt(0)?.toUpperCase() ?? '?'}
                     </div>
                     <div>
@@ -864,11 +864,12 @@ function AgentsPageInner() {
                                 domainStatusCfg[dom.status] ?? domainStatusCfg.deactivate)}>
                                 {dom.status}
                               </span>
-                              <p className="text-xs text-gray-400">
-                                {dom.status === 'active'
-                                  ? `Activated ${fmtDate(dom.activated_at)}`
-                                  : `Released ${fmtDate(dom.released_at)}`}
-                              </p>
+                              {dom.status === 'active' && dom.activated_at && (
+                                <p className="text-xs text-gray-400">Activated {fmtDate(dom.activated_at)}</p>
+                              )}
+                              {dom.status !== 'active' && dom.released_at && (
+                                <p className="text-xs text-gray-400">Released {fmtDate(dom.released_at)}</p>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -981,9 +982,12 @@ function AgentsPageInner() {
                       <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full border', domainStatusCfg[dom.status] ?? domainStatusCfg.deactivate)}>
                         {dom.status}
                       </span>
-                      <p className="text-xs text-gray-400">
-                        {dom.status === 'active' ? `Activated ${fmtDate(dom.activated_at)}` : `Released ${fmtDate(dom.released_at)}`}
-                      </p>
+                      {dom.status === 'active' && dom.activated_at && (
+                        <p className="text-xs text-gray-400">Activated {fmtDate(dom.activated_at)}</p>
+                      )}
+                      {dom.status !== 'active' && dom.released_at && (
+                        <p className="text-xs text-gray-400">Released {fmtDate(dom.released_at)}</p>
+                      )}
                     </div>
                   </div>
                 </div>
