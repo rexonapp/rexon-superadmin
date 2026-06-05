@@ -5,7 +5,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent,
@@ -40,6 +40,7 @@ interface User {
   is_active: boolean;
   created_at: string;
   last_login_at: string | null;
+  avatar_url?: string | null;
 }
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -49,10 +50,22 @@ const roleColors: Record<string, string> = {
   user:       'bg-gray-100 text-gray-600 border border-gray-200',
 };
 
-const roleOptions: { value: User['role']; label: string }[] = [
-  { value: 'superadmin', label: 'Super Admin' },
-  { value: 'admin',      label: 'Admin'       },
-  { value: 'user',       label: 'User'        },
+const roleOptions: { value: User['role']; label: string; description: string }[] = [
+  {
+    value: 'superadmin',
+    label: 'Super Admin',
+    description: 'Full platform access — manage users, agents, properties, settings and billing.',
+  },
+  {
+    value: 'admin',
+    label: 'Admin',
+    description: 'Manage agents and properties. Cannot modify system settings or user roles.',
+  },
+  {
+    value: 'user',
+    label: 'User',
+    description: 'Read-only access to reports and basic dashboard views.',
+  },
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -251,6 +264,9 @@ export default function UsersPage() {
                     <TableCell className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
                       <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
+                        {user.avatar_url && (
+                          <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} className="object-cover" />
+                        )}
                         <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
                           {user.first_name[0]}{user.last_name[0]}
                         </AvatarFallback>
@@ -388,17 +404,17 @@ export default function UsersPage() {
         }}
       >
         <DialogContent className="bg-white border-gray-200 sm:max-w-md p-0 gap-0 overflow-hidden rounded-2xl">
-          {/* Gradient header */}
-          <div className="bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange px-5 py-5">
+          {/* Header */}
+          <div className="bg-brand-teal px-5 py-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-white">Change User Role</h3>
-                <p className="text-white/85 text-xs mt-0.5">
+                <p className="text-white/80 text-xs mt-0.5">
                   {selectedUser?.first_name} {selectedUser?.last_name}{' '}
-                  <span className="text-white/70">@{selectedUser?.username}</span>
+                  <span className="text-white/60">@{selectedUser?.username}</span>
                 </p>
               </div>
             </div>
@@ -406,26 +422,31 @@ export default function UsersPage() {
 
           {/* Role options */}
           <div className="px-5 py-5 space-y-2">
-            {roleOptions.map(({ value, label }) => (
+            {roleOptions.map(({ value, label, description }) => (
               <button
                 key={value}
                 type="button"
                 onClick={() => setPendingRole(value)}
                 className={cn(
-                  'w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all',
+                  'w-full flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all text-left',
                   pendingRole === value
                     ? 'border-brand-teal bg-brand-teal/8 text-brand-teal-dark'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-brand-teal/40 hover:bg-brand-teal/8',
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-brand-teal/40 hover:bg-brand-teal/5',
                 )}
               >
-                <div className="flex items-center gap-2">
-                  <Shield className={cn('w-4 h-4', pendingRole === value ? 'text-brand-teal-medium' : 'text-gray-400')} />
-                  {label}
-                  {selectedUser?.role === value && (
-                    <span className="text-xs text-gray-400 font-normal">(current)</span>
-                  )}
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <Shield className={cn('w-4 h-4 mt-0.5 shrink-0', pendingRole === value ? 'text-brand-teal-medium' : 'text-gray-400')} />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span>{label}</span>
+                      {selectedUser?.role === value && (
+                        <span className="text-[10px] text-gray-400 font-normal bg-gray-100 px-1.5 py-0.5 rounded-full">current</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-400 font-normal mt-0.5 leading-relaxed">{description}</p>
+                  </div>
                 </div>
-                {pendingRole === value && <CheckCircle2 className="w-4 h-4 text-brand-teal-medium shrink-0" />}
+                {pendingRole === value && <CheckCircle2 className="w-4 h-4 text-brand-teal-medium shrink-0 ml-2" />}
               </button>
             ))}
 
@@ -437,7 +458,7 @@ export default function UsersPage() {
           </div>
 
           {/* Footer */}
-          <div className="border-t bg-[#da7948] hover:bg-[#da7948] px-5 py-4 flex gap-2">
+          <div className="border-t border-gray-100 bg-gray-50/60 px-5 py-4 flex gap-2">
             <Button
               variant="outline" size="sm"
               onClick={() => { setShowRoleModal(false); setSelectedUser(null); setErrorMsg(''); }}
@@ -494,7 +515,7 @@ export default function UsersPage() {
           </div>
 
           {/* Footer */}
-          <div className="border-tbg-[#da7948] hover:bg-[#da7948] px-5 py-4 flex gap-2">
+          <div className="border-t border-gray-100 bg-gray-50/60 px-5 py-4 flex gap-2">
             <AlertDialogCancel
               onClick={() => setSelectedUser(null)}
               disabled={deleteLoading}
