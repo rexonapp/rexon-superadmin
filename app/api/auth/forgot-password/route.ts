@@ -2,9 +2,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
 import { query } from '@/lib/db'
-import sgMail from '@sendgrid/mail'
+// import sgMail from '@sendgrid/mail'
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY!)
+// sgMail.setApiKey(process.env.SENDGRID_API_KEY!)
+
+import { BrevoClient } from '@getbrevo/brevo';
+const brevo = new BrevoClient({
+  apiKey: process.env.BREVO_KEY!,
+});
 
 const secret = new TextEncoder().encode(process.env.RESET_TOKEN_SECRET!)
 
@@ -51,18 +56,64 @@ export async function POST(request: NextRequest) {
 
     const resetUrl = `${process.env.NEXT_PUBLIC_URL}/reset-password?token=${token}`
 
-    const msg = {
-      to: user.email,
-      from: {
-        email: 'admin@rexonproperties.in',
-        name: process.env.SENDGRID_FROM_NAME ?? 'Rexon Administration',
-      },
-      subject: 'Reset your Rexon admin password',
-      html: buildEmailHtml({ firstName: user.first_name, resetUrl }),
-      text: buildEmailText({ firstName: user.first_name, resetUrl }),
-    }
+    // const msg = {
+    //   to: user.email,
+    //   from: {
+    //     email: 'admin@rexonproperties.in',
+    //     name: process.env.SENDGRID_FROM_NAME ?? 'Rexon Administration',
+    //   },
+    //   subject: 'Reset your Rexon admin password',
+    //   html: buildEmailHtml({ firstName: user.first_name, resetUrl }),
+    //   text: buildEmailText({ firstName: user.first_name, resetUrl }),
+    // }
 
-    await sgMail.send(msg)
+    // await sgMail.send(msg)
+
+    // Send email via Brevo
+    const emailResult =
+      await brevo.transactionalEmails.sendTransacEmail({
+        subject: 'Reset your Rexon admin password',
+
+        sender: {
+          email: 'admin@rexonproperties.in',
+          name:
+            process.env.BREVO_FROM_NAME ??
+            'Rexon Administration',
+        },
+
+        to: [
+          {
+            email: user.email,
+            name: user.first_name,
+          },
+        ],
+
+        htmlContent: buildEmailHtml({
+          firstName: user.first_name,
+          resetUrl,
+        }),
+
+        textContent: buildEmailText({
+          firstName: user.first_name,
+          resetUrl,
+        }),
+
+        replyTo: {
+          email: 'support@rexonproperties.in',
+          name: 'Rexon Support',
+        },
+
+        headers: {
+          'X-Entity-Ref-ID': `admin-password-reset-${user.id}-${Date.now()}`,
+        },
+      });
+
+    console.log('[Admin Password Reset Email Sent]', {
+      userId: user.id,
+      email: user.email,
+      messageId: emailResult.messageId,
+      timestamp: new Date().toISOString(),
+    });
 
     return NextResponse.json({
       message: 'A password reset link has been sent to your email address.',
