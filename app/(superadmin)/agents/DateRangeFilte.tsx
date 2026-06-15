@@ -127,7 +127,7 @@ export function DateRangeFilter({ onApply, onClear, isActive }: DateFilterProps)
           variant={isActive ? "default" : "outline"}
           className={`w-full md:w-auto gap-2 ${
             isActive 
-              ? 'bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep text-white' 
+              ? 'bg-brand-teal-deep hover:bg-brand-teal-dark text-white'
               : 'bg-white/50 border-white/60 hover:bg-white hover:border-brand-teal-medium'
           }`}
         >
@@ -222,7 +222,7 @@ export function DateRangeFilter({ onApply, onClear, isActive }: DateFilterProps)
               <Button
                 onClick={handleApply}
                 disabled={!isValid}
-                className="flex-1 bg-gradient-to-r from-brand-teal-deep to-brand-orange hover:from-brand-teal-dark hover:to-brand-orange-deep text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-brand-teal-deep hover:bg-brand-teal-dark text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Apply Filter
               </Button>

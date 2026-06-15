@@ -379,7 +379,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { companyName, logoUrl } = useBranding();
-  const { statusFilter, setStatusFilter } = useAgentFilter();
+  const { statusFilter, setStatusFilter, warehouseFilter, setWarehouseFilter } = useAgentFilter();
 
   // Navigate to the agents page (if not already there) and apply a status filter.
   // The context drives the live filter; the URL is kept in sync for shareability.
@@ -392,6 +392,17 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
     setStatusFilter('all');
     router.push('/agents');
   }, [setStatusFilter, router]);
+
+  // Same pattern for the properties (warehouses) status pills.
+  const applyWarehouseFilter = useCallback((status: string) => {
+    setWarehouseFilter(status);
+    router.push(`/properties?status=${status}`);
+  }, [setWarehouseFilter, router]);
+
+  const clearWarehouseFilter = useCallback(() => {
+    setWarehouseFilter('all');
+    router.push('/properties');
+  }, [setWarehouseFilter, router]);
 
   const isWarehousesPage = pathname?.startsWith('/properties');
   const isAgentsPage = pathname?.startsWith('/agents');
@@ -601,18 +612,31 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
               {/* Warehouse stat pills */}
               {isWarehousesPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                  <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
+                  <button onClick={() => applyWarehouseFilter('Pending')}
+                    className={cn('inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full hover:bg-amber-100 transition-colors cursor-pointer',
+                      warehouseFilter === 'Pending' && 'ring-2 ring-amber-400 ring-offset-1')}>
                     <Clock className="w-3.5 h-3.5 text-amber-500" />
                     <span className="text-sm font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full">
+                  </button>
+                  <button onClick={() => applyWarehouseFilter('Active')}
+                    className={cn('inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors cursor-pointer',
+                      warehouseFilter === 'Active' && 'ring-2 ring-emerald-400 ring-offset-1')}>
                     <CheckCircle className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
                     <span className="text-sm font-semibold text-emerald-600">{warehouseStats.active} Active</span>
-                  </div>
-                  <div className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full">
+                  </button>
+                  <button onClick={() => applyWarehouseFilter('rejected')}
+                    className={cn('inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors cursor-pointer',
+                      warehouseFilter === 'rejected' && 'ring-2 ring-rose-400 ring-offset-1')}>
                     <XCircle className="w-3.5 h-3.5 shrink-0 text-rose-500" />
                     <span className="text-sm font-semibold text-rose-600">{warehouseStats.rejected} Rejected</span>
-                  </div>
+                  </button>
+                  {warehouseFilter !== 'all' && (
+                    <button onClick={clearWarehouseFilter} title="Clear filter"
+                      className="inline-flex items-center gap-1 text-gray-500 hover:text-rose-600 hover:bg-rose-50 border border-gray-200 px-2 py-1 rounded-full transition-colors cursor-pointer">
+                      <X className="w-3.5 h-3.5" />
+                      <span className="text-xs font-semibold">Clear</span>
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -725,18 +749,31 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
           {/* ── Mobile stat pills: warehouses ── */}
           {isWarehousesPage && (
             <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              <div className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1  rounded-full">
+              <button onClick={() => applyWarehouseFilter('Pending')}
+                className={cn('flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full shrink-0 hover:bg-amber-100 transition-colors',
+                  warehouseFilter === 'Pending' && 'ring-2 ring-amber-400')}>
                 <Clock className="w-3 h-2 text-amber-500 rounded-full" />
                 <span className="text-xs font-semibold text-amber-700">{warehouseStats.pending} Pending</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1  rounded-full">
+              </button>
+              <button onClick={() => applyWarehouseFilter('Active')}
+                className={cn('flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shrink-0 hover:bg-emerald-100 transition-colors',
+                  warehouseFilter === 'Active' && 'ring-2 ring-emerald-400')}>
                 <CheckCircle className="w-3 h-2 text-emerald-500 rounded-full" />
                 <span className="text-xs font-semibold text-emerald-600">{warehouseStats.active} Active</span>
-              </div>
-              <div className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1  rounded-full">
+              </button>
+              <button onClick={() => applyWarehouseFilter('rejected')}
+                className={cn('flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full shrink-0 hover:bg-rose-100 transition-colors',
+                  warehouseFilter === 'rejected' && 'ring-2 ring-rose-400')}>
                 <XCircle className="w-3 h-2 text-rose-500 rounded-full" />
                 <span className="text-xs font-semibold text-rose-600">{warehouseStats.rejected} Rejected</span>
-              </div>
+              </button>
+              {warehouseFilter !== 'all' && (
+                <button onClick={clearWarehouseFilter} title="Clear filter"
+                  className="flex items-center gap-1 text-gray-500 hover:text-rose-600 border border-gray-200 px-2.5 py-1 rounded-full shrink-0 transition-colors">
+                  <X className="w-3 h-3" />
+                  <span className="text-xs font-semibold">Clear</span>
+                </button>
+              )}
             </div>
           )}
 

@@ -24,6 +24,9 @@ import Loading from '../loading';
 import { cn } from '@/lib/utils';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { useNotifications } from '@/lib/context/NotificationContext';
+import { useAgentFilter } from '@/lib/context/AgentFilterContext';
+
+const VALID_WAREHOUSE_STATUSES = ['Pending', 'Active', 'rejected'];
 
 interface WarehouseImage {
   id: string; s3_url: string; file_name: string; is_primary: boolean; image_order: number;
@@ -222,7 +225,7 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
           {current + 1} / {images.length}
         </div>
         {img.is_primary && (
-          <div className="absolute top-2 left-2 bg-orange-700 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+          <div className="absolute top-2 left-2 bg-brand-teal text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
             <Star className="w-3 h-3 fill-current" /> Primary
           </div>
         )}
@@ -301,7 +304,8 @@ export default function WarehousesPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  // Status filter lives in shared context so the stat pills in the layout filter the table live.
+  const { warehouseFilter: filterStatus, setWarehouseFilter: setFilterStatus } = useAgentFilter();
   const [selected, setSelected] = useState<Warehouse | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [loadingImages, setLoadingImages] = useState(false);
@@ -317,6 +321,16 @@ export default function WarehousesPage() {
   const { refetchNotifications } = useNotifications();
 
   useEffect(() => { fetchWarehouses(); }, []);
+
+  // Seed the status filter from the URL (?status=) on direct load / deep link.
+  useEffect(() => {
+    const s = new URLSearchParams(window.location.search).get('status') ?? 'all';
+    setFilterStatus(VALID_WAREHOUSE_STATUSES.includes(s) ? s : 'all');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reset to the first page whenever the status filter changes.
+  useEffect(() => { setCurrentPage(1); }, [filterStatus]);
 
   async function fetchWarehouses() {
     try {
@@ -745,7 +759,7 @@ export default function WarehousesPage() {
         <DialogContent className="bg-white border border-gray-200 shadow-2xl w-full sm:max-w-3xl max-h-[90dvh] overflow-hidden flex flex-col p-0 gap-0 rounded-2xl">
           <VisuallyHidden><DialogTitle>{selected?.title ?? 'Warehouse Details'}</DialogTitle></VisuallyHidden>
 
-          <div className="bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange px-5 pt-5 pb-0 flex-shrink-0">
+          <div className="bg-brand-teal px-5 pt-5 pb-0 flex-shrink-0">
             <div className="flex items-start justify-between gap-4 mb-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -753,7 +767,7 @@ export default function WarehousesPage() {
                     {selected?.property_type ?? '—'}
                   </span>
                   {selected?.is_featured && (
-                    <span className="bg-orange-700 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <span className="bg-white/20 text-white text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
                       <Star className="w-3 h-3 fill-current" /> Featured
                     </span>
                   )}
@@ -786,7 +800,7 @@ export default function WarehousesPage() {
                   className={cn('px-5 py-2.5 text-sm font-semibold capitalize transition-all relative',
                     activeTab === tab ? 'text-white' : 'text-white/70 hover:text-white')}>
                   {tab}
-                  {activeTab === tab && <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-t bg-orange-400" />}
+                  {activeTab === tab && <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-t bg-white" />}
                 </button>
               ))}
             </div>
@@ -813,14 +827,14 @@ export default function WarehousesPage() {
                   <DetailRow icon={Building2}    label={<span className="text-[#13a8b4]">Property Type</span>}   value={selected?.property_type} />
                   <DetailRow icon={Ruler}     label={<span className="text-[#13a8b4]">Warehouse Size</span>}  value={selected?.warehouse_size} />
                   <DetailRow icon={Package} label={<span className="text-[#13a8b4]">Space Available</span>} value={selected ? `${selected.space_available} ${selected.space_unit}` : null} />
-                  <DetailRow icon={DollarSign} label={<span className="text-[#13a8b4]">Price Size</span>}    value={selected ? `₹${selected.total_price}` : null} />
-                  <DetailRow icon={Hash}      label={<span className="text-[#13a8b4]">Price Type Size</span>}  value={selected?.price_type} />
-                  <DetailRow icon={Calendar}  label={<span className="text-[#13a8b4]">Available From Size</span>}  value={selected?.available_from ? fmt(selected.available_from) : null} />
-                  <DetailRow icon={Calendar}   label={<span className="text-[#13a8b4]">Expiry Date Size</span>}   value={selected?.expiry_date ? fmt(selected.expiry_date) : null} />
+                  <DetailRow icon={DollarSign} label={<span className="text-[#13a8b4]">Price </span>}    value={selected ? `₹${selected.total_price}` : null} />
+                  <DetailRow icon={Hash}      label={<span className="text-[#13a8b4]">Price Type </span>}  value={selected?.price_type} />
+                  <DetailRow icon={Calendar}  label={<span className="text-[#13a8b4]">Available From </span>}  value={selected?.available_from ? fmt(selected.available_from) : null} />
+                  <DetailRow icon={Calendar}   label={<span className="text-[#13a8b4]">Expiry Date </span>}   value={selected?.expiry_date ? fmt(selected.expiry_date) : null} />
                   {selected?.description && (
                     <div className="mt-4">
                       <p className="text-xs font-bold text-gray-700 uppercase tracking-widest mb-2">Description</p>
-                      <p className="text-sm text-gray-600 leading-relaxed bg-amber-50 rounded-xl p-3.5 border border-amber-100">{selected.description}</p>
+                      <p className="text-sm text-gray-600 leading-relaxed  rounded-xl p-3.5 border border-brand-teal/15">{selected.description}</p>
                     </div>
                   )}
                   {/* {(() => {
@@ -844,7 +858,7 @@ export default function WarehousesPage() {
               <div className="max-w-md mx-1">
                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-5">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-teal to-brand-orange flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                    <div className="w-12 h-12 rounded-xl bg-brand-teal flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
                       {selected?.contact_person_name?.charAt(0)?.toUpperCase() ?? '?'}
                     </div>
                     <div>
@@ -861,9 +875,9 @@ export default function WarehousesPage() {
                 <DetailRow icon={Mail}      label="Email"         value={selected?.contact_person_email} />
                 <DetailRow icon={UserCheck} label="Listed By"     value={selected?.user_name} />
                 <div className="mt-5">
-                  <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-2">Timeline</p>
-                  <DetailRow icon={Calendar} label="Listed On"    value={selected ? fmt(selected.created_at) : null} accent="amber" />
-                  <DetailRow icon={Clock}    label="Last Updated" value={selected?.updated_at ? fmt(selected.updated_at) : null} accent="amber" />
+                  <p className="text-xs font-bold text-brand-teal-medium uppercase tracking-widest mb-2">Timeline</p>
+                  <DetailRow icon={Calendar} label="Listed On"    value={selected ? fmt(selected.created_at) : null} />
+                  <DetailRow icon={Clock}    label="Last Updated" value={selected?.updated_at ? fmt(selected.updated_at) : null} />
                 </div>
               </div>
             )}
@@ -899,7 +913,7 @@ export default function WarehousesPage() {
 
               return (
                 <div className="max-w-lg">
-                  <p className="text-xs font-bold text-amber-600 uppercase tracking-widest mb-3">
+                  <p className="text-xs font-bold text-brand-teal-medium uppercase tracking-widest mb-3">
                     Amenities
                   </p>
 
@@ -908,7 +922,7 @@ export default function WarehousesPage() {
                       {list.map((a, idx) => (
                         <span
                           key={idx}
-                          className="bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold px-3 py-1 rounded-full"
+                          className="bg-brand-teal/8 border border-brand-teal/20 text-brand-teal-dark text-xs font-semibold px-3 py-1 rounded-full"
                         >
                           {a}
                         </span>

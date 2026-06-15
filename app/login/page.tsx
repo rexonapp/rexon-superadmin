@@ -61,7 +61,7 @@ export default function SuperAdminLogin() {
             </div>
           </div>
 
-          <h1 className="text-xl font-extrabold text-slate-800 tracking-tight">Rexon</h1>
+         
         </div>
 
         {/* ── Card ── */}

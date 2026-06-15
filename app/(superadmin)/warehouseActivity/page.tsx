@@ -220,7 +220,7 @@ function ImageGallery({ images, loading }: { images: WarehouseImage[]; loading: 
                     {current + 1} / {images.length}
                 </div>
                 {img.is_primary && (
-                    <div className="absolute top-2 left-2 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <div className="absolute top-2 left-2 bg-brand-teal text-white text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                         <Star className="w-3 h-3 fill-current" /> Primary
                     </div>
                 )}
@@ -688,7 +688,7 @@ export default function WarehousesPage() {
                     <VisuallyHidden><DialogTitle>{selected?.title ?? 'Warehouse Details'}</DialogTitle></VisuallyHidden>
 
                     {/* Modal header */}
-                    <div className="bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange px-4 sm:px-5 pt-4 pb-0 flex-shrink-0">
+                    <div className="bg-brand-teal px-4 sm:px-5 pt-4 pb-0 flex-shrink-0">
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -696,7 +696,7 @@ export default function WarehousesPage() {
                                         {selected?.property_type ?? '—'}
                                     </span>
                                     {selected?.is_featured && (
-                                        <span className="bg-orange-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                                        <span className="bg-white/20 text-white text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                                             <Star className="w-3 h-3 fill-current" /> Featured
                                         </span>
                                     )}
@@ -730,7 +730,7 @@ export default function WarehousesPage() {
                                     className={cn('px-3 sm:px-4 py-2.5 text-[12px] font-bold capitalize transition-all relative',
                                         activeTab === tab ? 'text-white' : 'text-white/70 hover:text-white')}>
                                     {tab}
-                                    {activeTab === tab && <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-t bg-orange-400" />}
+                                    {activeTab === tab && <span className="absolute bottom-0 left-2 right-2 h-0.5 rounded-t bg-white" />}
                                 </button>
                             ))}
                         </div>
@@ -763,18 +763,18 @@ export default function WarehousesPage() {
                                     <DetailRow icon={Calendar} label="Expiry Date" value={selected?.expiry_date ? fmt(selected.expiry_date) : null} />
                                     {selected?.description && (
                                         <div className="mt-3">
-                                            <p className="text-[10.5px] font-bold text-amber-600 uppercase tracking-widest mb-1.5">Description</p>
-                                            <p className="text-[12.5px] text-gray-600 leading-relaxed bg-amber-50 rounded-lg p-3 border border-amber-100">{selected.description}</p>
+                                            <p className="text-[10.5px] font-bold text-brand-teal-medium uppercase tracking-widest mb-1.5">Description</p>
+                                            <p className="text-[12.5px] text-gray-600 leading-relaxed bg-brand-teal/5 rounded-lg p-3 border border-brand-teal/15">{selected.description}</p>
                                         </div>
                                     )}
                                     {(() => {
                                         const list = selected?.amenities ? parseAmenities(selected.amenities) : [];
                                         return list.length > 0 ? (
                                             <div className="mt-3">
-                                                <p className="text-[10.5px] font-bold text-amber-600 uppercase tracking-widest mb-1.5">Amenities</p>
+                                                <p className="text-[10.5px] font-bold text-brand-teal-medium uppercase tracking-widest mb-1.5">Amenities</p>
                                                 <div className="flex flex-wrap gap-1.5">
                                                     {list.map((a, idx) => (
-                                                        <span key={idx} className="bg-amber-50 border border-amber-200 text-amber-700 text-[11.5px] font-semibold px-2 py-0.5 rounded-full">{a}</span>
+                                                        <span key={idx} className="bg-brand-teal/8 border border-brand-teal/20 text-brand-teal-dark text-[11.5px] font-semibold px-2 py-0.5 rounded-full">{a}</span>
                                                     ))}
                                                 </div>
                                             </div>
@@ -788,7 +788,7 @@ export default function WarehousesPage() {
                             <div className="max-w-md">
                                 <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
                                     <div className="flex items-center gap-3.5">
-                                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-teal to-brand-orange flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                        <div className="w-11 h-11 rounded-xl bg-brand-teal flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                                             {selected?.contact_person_name?.charAt(0)?.toUpperCase() ?? '?'}
                                         </div>
                                         <div>
@@ -807,9 +807,9 @@ export default function WarehousesPage() {
                                 <DetailRow icon={Mail} label="Email" value={selected?.contact_person_email} />
                                 <DetailRow icon={UserCheck} label="Listed By" value={selected?.user_name} />
                                 <div className="mt-4">
-                                    <p className="text-[10.5px] font-bold text-amber-600 uppercase tracking-widest mb-1.5">Timeline</p>
-                                    <DetailRow icon={Calendar} label="Listed On" value={selected ? fmt(selected.created_at) : null} accent="amber" />
-                                    <DetailRow icon={Clock} label="Last Updated" value={selected?.updated_at ? fmt(selected.updated_at) : null} accent="amber" />
+                                    <p className="text-[10.5px] font-bold text-brand-teal-medium uppercase tracking-widest mb-1.5">Timeline</p>
+                                    <DetailRow icon={Calendar} label="Listed On" value={selected ? fmt(selected.created_at) : null} />
+                                    <DetailRow icon={Clock} label="Last Updated" value={selected?.updated_at ? fmt(selected.updated_at) : null} />
                                 </div>
                             </div>
                         )}
