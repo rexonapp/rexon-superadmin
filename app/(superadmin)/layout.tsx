@@ -16,6 +16,7 @@ import {
 import Sidebar, { AdminUser } from '@/components/superadmin/sidebar';
 import Loading from './loading';
 import { BrandingProvider, useBranding } from '@/lib/context/BrandingContext';
+import { AgentFilterProvider, useAgentFilter } from '@/lib/context/AgentFilterContext';
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from '@/lib/utils';
 import NotificationContext from '@/lib/context/NotificationContext';
@@ -378,6 +379,19 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { companyName, logoUrl } = useBranding();
+  const { statusFilter, setStatusFilter } = useAgentFilter();
+
+  // Navigate to the agents page (if not already there) and apply a status filter.
+  // The context drives the live filter; the URL is kept in sync for shareability.
+  const applyAgentFilter = useCallback((status: string) => {
+    setStatusFilter(status);
+    router.push(`/agents?status=${status}`);
+  }, [setStatusFilter, router]);
+
+  const clearAgentFilter = useCallback(() => {
+    setStatusFilter('all');
+    router.push('/agents');
+  }, [setStatusFilter, router]);
 
   const isWarehousesPage = pathname?.startsWith('/properties');
   const isAgentsPage = pathname?.startsWith('/agents');
@@ -605,26 +619,37 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
               {/* Agent stat pills */}
               {isAgentsPage && (
                 <div className="hidden md:flex items-center gap-2 ml-2">
-                  <button onClick={() => router.push('/agents?status=pending')}
-                    className="inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full hover:bg-amber-100 transition-colors cursor-pointer">
+                  <button onClick={() => applyAgentFilter('pending')}
+                    className={cn('inline-flex items-center gap-1.5 bg-amber-50 border border-amber-300 px-3 py-1 rounded-full hover:bg-amber-100 transition-colors cursor-pointer',
+                      statusFilter === 'pending' && 'ring-2 ring-amber-400 ring-offset-1')}>
                     <Clock className="w-3.5 h-3.5 text-amber-500" />
                     <span className="text-sm font-semibold text-amber-700">{agentStats.pending} Pending</span>
                   </button>
-                  <button onClick={() => router.push('/agents?status=approved')}
-                    className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors cursor-pointer">
+                  <button onClick={() => applyAgentFilter('approved')}
+                    className={cn('inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-300 px-3 py-1 rounded-full hover:bg-emerald-100 transition-colors cursor-pointer',
+                      statusFilter === 'approved' && 'ring-2 ring-emerald-400 ring-offset-1')}>
                     <UserCheck className="w-3.5 h-3.5 shrink-0 text-emerald-500" />
                     <span className="text-sm font-semibold text-emerald-600">{agentStats.approved} Approved</span>
                   </button>
-                  <button onClick={() => router.push('/agents?status=rejected')}
-                    className="inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors cursor-pointer">
+                  <button onClick={() => applyAgentFilter('rejected')}
+                    className={cn('inline-flex items-center gap-1.5 bg-rose-50 border border-rose-300 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors cursor-pointer',
+                      statusFilter === 'rejected' && 'ring-2 ring-rose-400 ring-offset-1')}>
                     <XCircle className="w-3.5 h-3.5 shrink-0 text-rose-500" />
                     <span className="text-sm font-semibold text-rose-600">{agentStats.rejected} Rejected</span>
                   </button>
-                  <button onClick={() => router.push('/agents?status=deactivated')}
-                    className="inline-flex items-center gap-1.5 bg-gray-100 border border-gray-300 px-3 py-1 rounded-full hover:bg-gray-200 transition-colors cursor-pointer">
+                  <button onClick={() => applyAgentFilter('deactivated')}
+                    className={cn('inline-flex items-center gap-1.5 bg-gray-100 border border-gray-300 px-3 py-1 rounded-full hover:bg-gray-200 transition-colors cursor-pointer',
+                      statusFilter === 'deactivated' && 'ring-2 ring-gray-400 ring-offset-1')}>
                     <Ban className="w-3.5 h-3.5 shrink-0 text-gray-500" />
                     <span className="text-sm font-semibold text-gray-600">{agentStats.deactivated} Deactivated</span>
                   </button>
+                  {statusFilter !== 'all' && (
+                    <button onClick={clearAgentFilter} title="Clear filter"
+                      className="inline-flex items-center gap-1 text-gray-500 hover:text-rose-600 hover:bg-rose-50 border border-gray-200 px-2 py-1 rounded-full transition-colors cursor-pointer">
+                      <X className="w-3.5 h-3.5" />
+                      <span className="text-xs font-semibold">Clear</span>
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -718,26 +743,37 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
           {/* ── Mobile stat pills: agents ── */}
           {isAgentsPage && (
             <div className="md:hidden flex items-center gap-2 px-4 pb-2.5 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-              <button onClick={() => router.push('/agents?status=pending')}
-                className="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full shrink-0 hover:bg-amber-100 transition-colors">
+              <button onClick={() => applyAgentFilter('pending')}
+                className={cn('flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full shrink-0 hover:bg-amber-100 transition-colors',
+                  statusFilter === 'pending' && 'ring-2 ring-amber-400')}>
                 <Clock className="w-3 h-3 text-amber-500" />
                 <span className="text-xs font-semibold text-amber-700">{agentStats.pending} Pending</span>
               </button>
-              <button onClick={() => router.push('/agents?status=approved')}
-                className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shrink-0 hover:bg-emerald-100 transition-colors">
+              <button onClick={() => applyAgentFilter('approved')}
+                className={cn('flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full shrink-0 hover:bg-emerald-100 transition-colors',
+                  statusFilter === 'approved' && 'ring-2 ring-emerald-400')}>
                 <UserCheck className="w-3 h-3 text-emerald-500" />
                 <span className="text-xs font-semibold text-emerald-600">{agentStats.approved} Approved</span>
               </button>
-              <button onClick={() => router.push('/agents?status=rejected')}
-                className="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full shrink-0 hover:bg-rose-100 transition-colors">
+              <button onClick={() => applyAgentFilter('rejected')}
+                className={cn('flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full shrink-0 hover:bg-rose-100 transition-colors',
+                  statusFilter === 'rejected' && 'ring-2 ring-rose-400')}>
                 <XCircle className="w-3 h-3 text-rose-400" />
                 <span className="text-xs font-semibold text-rose-600">{agentStats.rejected} Rejected</span>
               </button>
-              <button onClick={() => router.push('/agents?status=deactivated')}
-                className="flex items-center gap-1.5 bg-gray-100 border border-gray-300 px-3 py-1 rounded-full shrink-0 hover:bg-gray-200 transition-colors">
+              <button onClick={() => applyAgentFilter('deactivated')}
+                className={cn('flex items-center gap-1.5 bg-gray-100 border border-gray-300 px-3 py-1 rounded-full shrink-0 hover:bg-gray-200 transition-colors',
+                  statusFilter === 'deactivated' && 'ring-2 ring-gray-400')}>
                 <Ban className="w-3 h-3 text-gray-500" />
                 <span className="text-xs font-semibold text-gray-600">{agentStats.deactivated} Deactivated</span>
               </button>
+              {statusFilter !== 'all' && (
+                <button onClick={clearAgentFilter} title="Clear filter"
+                  className="flex items-center gap-1 text-gray-500 hover:text-rose-600 border border-gray-200 px-2.5 py-1 rounded-full shrink-0 transition-colors">
+                  <X className="w-3 h-3" />
+                  <span className="text-xs font-semibold">Clear</span>
+                </button>
+              )}
             </div>
           )}
         </header>
@@ -759,10 +795,12 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <BrandingProvider>
-      <SuperAdminInner>
-        {children}
-        <Toaster />
-      </SuperAdminInner>
+      <AgentFilterProvider>
+        <SuperAdminInner>
+          {children}
+          <Toaster />
+        </SuperAdminInner>
+      </AgentFilterProvider>
     </BrandingProvider>
   );
 }

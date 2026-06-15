@@ -25,6 +25,7 @@ import { useSearchParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { useNotifications } from '@/lib/context/NotificationContext';
+import { useAgentFilter } from '@/lib/context/AgentFilterContext';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -230,13 +231,12 @@ const VALID_STATUSES = ['pending', 'approved', 'rejected', 'deactivated', 'invit
 
 function AgentsPageInner() {
   const searchParams = useSearchParams();
+  // Status filter lives in a shared context (set by the stat pills in the layout
+  // and by the dropdown below) so a pill click filters the table live.
+  const { statusFilter: filterStatus, setStatusFilter: setFilterStatus } = useAgentFilter();
   const [agents,           setAgents]           = useState<Agent[]>([]);
   const [loading,          setLoading]          = useState(true);
   const [searchTerm,       setSearchTerm]       = useState('');
-  const [filterStatus,     setFilterStatus]     = useState(() => {
-    const s = searchParams.get('status') ?? 'all';
-    return VALID_STATUSES.includes(s) ? s : 'all';
-  });
   const [dateFilter,       setDateFilter]       = useState<DateFilterType>('all');
   const [dateRange,        setDateRange]        = useState<DateRange>({ from: undefined, to: undefined });
   const [showCustomDate,   setShowCustomDate]   = useState(false);
@@ -251,8 +251,19 @@ function AgentsPageInner() {
 
   const anyFilter = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
 
-  const { refetchNotifications } = useNotifications(); 
-  
+  const { refetchNotifications } = useNotifications();
+
+  // On first load / direct navigation, seed the shared filter from the URL
+  // (?status=) so a deep link like /agents?status=pending still works.
+  useEffect(() => {
+    const s = searchParams.get('status') ?? 'all';
+    setFilterStatus(VALID_STATUSES.includes(s) ? s : 'all');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Reset to the first page whenever the status filter changes.
+  useEffect(() => { setCurrentPage(1); }, [filterStatus]);
+
   useEffect(() => {
     (async () => {
       try {
