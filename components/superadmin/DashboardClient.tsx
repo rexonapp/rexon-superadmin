@@ -51,10 +51,10 @@ export default function DashboardClient({ initialData }: Props) {
   const isRefreshing = dashValidating;
 
   const statCards = [
-    { label: 'Total Properties', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const },
+    { label: 'Total Properties', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const, route: '/properties'  },
     // { label: 'Pending Approvals', value: stats.pendingApprovals.toString(), icon: Clock, color: 'cyan' as const },
-    { label: 'Leads', value: stats.totalUsers.toString(), icon: Users, color: 'blue' as const },
-    { label: 'Agents', value: stats.totalAgents.toString(), icon: UserCheck, color: 'cyan' as const },
+    { label: 'Leads', value: stats.totalUsers.toString(), icon: Users, color: 'blue' as const,     route: '/leads'  },
+    { label: 'Agents', value: stats.totalAgents.toString(), icon: UserCheck, color: 'cyan' as const, route: '/agents'},
   ];
 
   return (
@@ -85,7 +85,7 @@ export default function DashboardClient({ initialData }: Props) {
       )}
 
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-2">
         {statCards.map((stat, idx) => (
           <StatCard
             key={idx}
@@ -94,6 +94,7 @@ export default function DashboardClient({ initialData }: Props) {
             icon={stat.icon}
             color={stat.color}
             index={idx}
+            onClick={() => router.push(stat.route)}
           />
         ))}
       </div>

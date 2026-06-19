@@ -11,6 +11,7 @@ interface StatCardProps {
   change?: string;
   color: 'blue' | 'purple' | 'orange' | 'emerald' | 'violet' | 'rose' | 'cyan' | 'amber';
   index: number;
+  onClick?: () => void;
 }
 
 const colorClasses = {
@@ -80,6 +81,7 @@ export default function StatCard({
   change,
   color,
   index,
+  onClick,
 }: StatCardProps) {
   const colors = colorClasses[color];
 
@@ -87,7 +89,8 @@ export default function StatCard({
 
   return (
     <div
-      className="group relative overflow-hidden rounded-2xl bg-white/40 backdrop-blur-xl border border-white/60 p-6 hover:bg-white/60 transition-all duration-500 hover:shadow-2xl hover:border-white/80"
+      onClick={onClick}
+      className="group relative overflow-hidden rounded-xl bg-white/40 backdrop-blur-xl border border-white/60 p-3 hover:bg-white/60 transition-all duration-500 hover:shadow-2xl hover:border-white/80"
       style={{
         animation: `slideUp 0.6s ease-out ${index * 0.1}s backwards`,
       }}
