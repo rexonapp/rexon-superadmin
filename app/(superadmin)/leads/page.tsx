@@ -4,6 +4,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -119,7 +123,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
       className={cn(
         'text-l font-bold  tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer transition-colors',
         'hover:bg-gray-100',
-        col === sortKey ? 'text-brand-teal-medium bg-brand-teal/10' : 'text-gray-500 bg-gray-50',
+        col === sortKey ? 'text-brand-teal-deep bg-brand-teal/25' : 'text-brand-teal-dark bg-brand-teal/15',
         className,
       )}
     >
@@ -407,13 +411,13 @@ const clearAllFilters = () => {
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="hover:bg-gray-50 border-b border-gray-200">
+              <TableRow className="bg-brand-teal/15 border-b border-brand-teal/20">
                 <SortableHead col="full_name" label="Name"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[160px] sticky top-0 z-10" />
-                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[160px] sticky top-0 z-10">E-mail</TableHead>
-                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[90px] sticky top-0 z-10">Status</TableHead>
+                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-brand-teal-dark bg-brand-teal/15 font-semibold h-11 px-4 min-w-[160px] sticky top-0 z-10">E-mail</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark bg-brand-teal/15 font-semibold h-11 px-4 min-w-[90px] sticky top-0 z-10">Status</TableHead>
                 <SortableHead col="last_login" label="Last Login" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden sm:table-cell min-w-[120px] sticky top-0 z-10" />
                 <SortableHead col="created_at" label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden md:table-cell min-w-[130px] sticky top-0 z-10" />
-                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-14 sticky top-0 z-10">Actions</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark bg-brand-teal/15 font-semibold h-11 px-4 text-right w-14 sticky top-0 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -433,7 +437,7 @@ const clearAllFilters = () => {
                   <TableCell className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
                       <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
-                        <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
+                        <AvatarFallback className="bg-brand-teal-dark text-white text-xs font-bold">
                           {lead.first_name[0]}{lead.last_name[0]}
                         </AvatarFallback>
                       </Avatar>
@@ -493,7 +497,7 @@ const clearAllFilters = () => {
                           className="cursor-pointer text-sm py-2 text-rose-600 focus:text-rose-600 focus:bg-rose-50"
                           onClick={() => { setSelectedLead(lead); setShowDeleteModal(true); }}
                         >
-                          <Trash2 className="w-4 h-4 mr-2" /> Delete User
+                          <Trash2 className="w-4 h-4 mr-2" /> Delete Lead
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -560,6 +564,38 @@ const clearAllFilters = () => {
           </div>
         )}
       </div>
+
+      {/* ── Delete Lead Confirmation ── */}
+      <AlertDialog open={showDeleteModal} onOpenChange={open => { if (!open) { setShowDeleteModal(false); setSelectedLead(null); } }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Lead</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{' '}
+              <span className="font-semibold text-gray-900">
+                {selectedlead ? `${selectedlead.first_name ?? ''} ${selectedlead.last_name ?? ''}`.trim() || selectedlead.email : ''}
+              </span>
+              ? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <button
+              type="button"
+              onClick={() => { setShowDeleteModal(false); setSelectedLead(null); }}
+              className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium bg-[#da7948] hover:bg-[#c4693e] text-white transition-colors"
+            >
+              Cancel
+            </button>
+            <AlertDialogAction
+              onClick={deleteUser}
+              disabled={deleteLoading}
+              className="bg-brand-teal-deep hover:bg-brand-teal-dark text-white"
+            >
+              {deleteLoading ? 'Deleting…' : 'Delete Lead'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* ── Custom Date Modal ── */}
 

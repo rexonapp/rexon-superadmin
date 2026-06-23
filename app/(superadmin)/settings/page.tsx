@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,50 +132,120 @@ interface CropModalProps {
 }
 
 function LogoCropModal({ imageSrc, onConfirm, onCancel }: CropModalProps) {
-  const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const dragStart = useRef({ x: 0, y: 0 });
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imageRef = useRef<HTMLImageElement | null>(null);
+  const DISPLAY = 240;
+  const OUTPUT  = 400;
 
-  const imgLoaded = useCallback((src: string) => {
+  const previewRef = useRef<HTMLCanvasElement>(null);
+  const imgRef     = useRef<HTMLImageElement | null>(null);
+  const scaleRef   = useRef(1);
+  const offsetRef  = useRef({ x: 0, y: 0 });
+  const lastPtrRef = useRef<{ x: number; y: number } | null>(null);
+  const [scaleDisplay, setScaleDisplay] = useState(1);
+
+  useEffect(() => {
     const img = new Image();
-    img.onload = () => { imageRef.current = img; };
-    img.src = src;
-  }, []);
+    img.onload = () => {
+      imgRef.current    = img;
+      scaleRef.current  = 1;
+      offsetRef.current = { x: 0, y: 0 };
+      setScaleDisplay(1);
+      requestAnimationFrame(draw);
+    };
+    img.src = imageSrc;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [imageSrc]);
 
-  useEffect(() => { imgLoaded(imageSrc); }, [imageSrc, imgLoaded]);
+  function paint(
+    ctx: CanvasRenderingContext2D,
+    img: HTMLImageElement,
+    S: number,
+    scale: number,
+    offset: { x: number; y: number },
+  ) {
+    const ar    = img.naturalWidth / img.naturalHeight;
+    const baseW = ar >= 1 ? S * ar : S;
+    const baseH = ar >= 1 ? S : S / ar;
+    const drawW = baseW * scale;
+    const drawH = baseH * scale;
+    const ratio = S / DISPLAY;
+    ctx.drawImage(
+      img,
+      S / 2 + offset.x * ratio - drawW / 2,
+      S / 2 + offset.y * ratio - drawH / 2,
+      drawW,
+      drawH,
+    );
+  }
 
-  const handleMouseDown  = (e: React.MouseEvent) => { setDragging(true); dragStart.current = { x: e.clientX - position.x, y: e.clientY - position.y }; };
-  const handleMouseMove  = (e: React.MouseEvent) => { if (!dragging) return; setPosition({ x: e.clientX - dragStart.current.x, y: e.clientY - dragStart.current.y }); };
-  const handleMouseUp    = () => setDragging(false);
-  const handleTouchStart = (e: React.TouchEvent) => { const t = e.touches[0]; setDragging(true); dragStart.current = { x: t.clientX - position.x, y: t.clientY - position.y }; };
-  const handleTouchMove  = (e: React.TouchEvent) => { if (!dragging) return; const t = e.touches[0]; setPosition({ x: t.clientX - dragStart.current.x, y: t.clientY - dragStart.current.y }); };
-
-  const handleConfirm = () => {
-    const canvas = canvasRef.current;
-    const img    = imageRef.current;
+  function draw() {
+    const canvas = previewRef.current;
+    const img    = imgRef.current;
     if (!canvas || !img) return;
-    const SIZE = 200;
-    canvas.width = SIZE; canvas.height = SIZE;
+    const S   = DISPLAY;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    ctx.beginPath(); ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2, 0, Math.PI * 2); ctx.clip();
-    const PREVIEW = 192;
-    const nat = img.naturalWidth / img.naturalHeight;
-    const baseW = nat >= 1 ? PREVIEW : PREVIEW * nat;
-    const baseH = nat >= 1 ? PREVIEW / nat : PREVIEW;
-    const drawW = baseW * scale; const drawH = baseH * scale;
-    const ratio = SIZE / PREVIEW;
-    ctx.drawImage(img, (PREVIEW / 2 + position.x - drawW / 2) * ratio, (PREVIEW / 2 + position.y - drawH / 2) * ratio, drawW * ratio, drawH * ratio);
-    onConfirm(canvas.toDataURL('image/png'));
+    ctx.clearRect(0, 0, S, S);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(S / 2, S / 2, S / 2, 0, Math.PI * 2);
+    ctx.clip();
+    paint(ctx, img, S, scaleRef.current, offsetRef.current);
+    ctx.restore();
+    ctx.beginPath();
+    ctx.arc(S / 2, S / 2, S / 2 - 2, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(13,148,136,0.35)';
+    ctx.lineWidth   = 3;
+    ctx.stroke();
+  }
+
+  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    lastPtrRef.current = { x: e.clientX, y: e.clientY };
   };
 
-  const PREVIEW = 192;
-  const nat   = imageRef.current ? imageRef.current.naturalWidth / imageRef.current.naturalHeight : 1;
-  const baseW = nat >= 1 ? PREVIEW : PREVIEW * nat;
-  const baseH = nat >= 1 ? PREVIEW / nat : PREVIEW;
+  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!lastPtrRef.current) return;
+    offsetRef.current = {
+      x: offsetRef.current.x + (e.clientX - lastPtrRef.current.x),
+      y: offsetRef.current.y + (e.clientY - lastPtrRef.current.y),
+    };
+    lastPtrRef.current = { x: e.clientX, y: e.clientY };
+    draw();
+  };
+
+  const onPointerUp = () => { lastPtrRef.current = null; };
+
+  const applyScale = (raw: number) => {
+    const next  = Math.min(3, Math.max(0.5, raw));
+    const ratio = next / scaleRef.current;
+    offsetRef.current = { x: offsetRef.current.x * ratio, y: offsetRef.current.y * ratio };
+    scaleRef.current  = next;
+    setScaleDisplay(next);
+    draw();
+  };
+
+  const handleReset = () => {
+    scaleRef.current  = 1;
+    offsetRef.current = { x: 0, y: 0 };
+    setScaleDisplay(1);
+    draw();
+  };
+
+  const handleConfirm = () => {
+    const img = imgRef.current;
+    if (!img) return;
+    const S   = OUTPUT;
+    const out = document.createElement('canvas');
+    out.width = out.height = S;
+    const ctx = out.getContext('2d');
+    if (!ctx) return;
+    ctx.beginPath();
+    ctx.arc(S / 2, S / 2, S / 2, 0, Math.PI * 2);
+    ctx.clip();
+    paint(ctx, img, S, scaleRef.current, offsetRef.current);
+    onConfirm(out.toDataURL('image/png'));
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -185,42 +255,54 @@ function LogoCropModal({ imageSrc, onConfirm, onCancel }: CropModalProps) {
             <h4 className="text-base font-bold text-gray-900">Adjust Logo</h4>
             <p className="text-xs text-gray-500 mt-0.5">Drag to reposition · slider to zoom</p>
           </div>
-          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 transition-colors"><X className="w-5 h-5" /></button>
+          <button onClick={onCancel} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         <div className="flex justify-center">
-          <div
-            className="relative rounded-full border-4 border-brand-teal/25 shadow-lg cursor-grab active:cursor-grabbing select-none"
-            style={{ width: PREVIEW, height: PREVIEW }}
-            onMouseDown={handleMouseDown} onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseLeave={handleMouseUp}
-            onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleMouseUp}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageSrc} alt="crop preview" draggable={false} style={{ position: 'absolute', width: baseW * scale, height: baseH * scale, left: PREVIEW / 2 + position.x - (baseW * scale) / 2, top: PREVIEW / 2 + position.y - (baseH * scale) / 2, pointerEvents: 'none', userSelect: 'none' }} />
-            <div className="absolute inset-0 rounded-full ring-2 ring-brand-teal-medium/40 pointer-events-none" />
-          </div>
+          <canvas
+            ref={previewRef}
+            width={DISPLAY}
+            height={DISPLAY}
+            className="rounded-full touch-none shadow-lg"
+            style={{ width: DISPLAY, height: DISPLAY, cursor: 'grab' }}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerCancel={onPointerUp}
+          />
         </div>
 
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs text-gray-500 font-medium">
-            <span>Zoom</span><span>{Math.round(scale * 100)}%</span>
+            <span>Zoom</span>
+            <span>{Math.round(scaleDisplay * 100)}%</span>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={() => setScale(s => Math.max(0.3, s - 0.1))} className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"><ZoomOut className="w-4 h-4 text-gray-600" /></button>
-            <input type="range" min="30" max="300" step="5" value={Math.round(scale * 100)} onChange={e => setScale(Number(e.target.value) / 100)} className="flex-1 accent-brand-teal" />
-            <button onClick={() => setScale(s => Math.min(3, s + 0.1))} className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"><ZoomIn className="w-4 h-4 text-gray-600" /></button>
+            <button onClick={() => applyScale(scaleRef.current - 0.1)} className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+              <ZoomOut className="w-4 h-4 text-gray-600" />
+            </button>
+            <input
+              type="range" min="50" max="300" step="5"
+              value={Math.round(scaleDisplay * 100)}
+              onChange={e => applyScale(Number(e.target.value) / 100)}
+              className="flex-1 accent-brand-teal"
+            />
+            <button onClick={() => applyScale(scaleRef.current + 0.1)} className="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors">
+              <ZoomIn className="w-4 h-4 text-gray-600" />
+            </button>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <Button variant="outline" size="sm" onClick={() => { setScale(1); setPosition({ x: 0, y: 0 }); }} className="flex-1 gap-1.5 text-gray-600">
+          <Button variant="outline" size="sm" onClick={handleReset} className="flex-1 gap-1.5 text-gray-600">
             <RotateCcw className="w-3.5 h-3.5" /> Reset
           </Button>
           <Button size="sm" onClick={handleConfirm} className="flex-1 gap-1.5 bg-brand-teal hover:bg-brand-teal-dark text-white">
             <Check className="w-3.5 h-3.5" /> Apply
           </Button>
         </div>
-        <canvas ref={canvasRef} className="hidden" />
       </div>
     </div>
   );
@@ -484,7 +566,7 @@ export default function SettingsPage() {
 
   return (
     <>
-      {/* Crop modal */}
+      {/* Logo crop modal */}
       {cropSrc && (
         <LogoCropModal imageSrc={cropSrc} onConfirm={handleCropConfirm} onCancel={() => setCropSrc(null)} />
       )}

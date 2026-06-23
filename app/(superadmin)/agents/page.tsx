@@ -125,7 +125,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
       className={cn(
         'text-l font-bold  tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer transition-colors',
         'hover:bg-gray-100',
-        col === sortKey ? 'text-brand-teal-medium bg-brand-teal/10' : 'text-gray-500 bg-gray-50',
+        col === sortKey ? 'text-brand-teal-deep bg-brand-teal/25' : 'text-brand-teal-dark bg-brand-teal/15',
         className,
       )}
     >
@@ -497,14 +497,14 @@ function AgentsPageInner() {
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="hover:bg-gray-50 border-b border-gray-200">
+              <TableRow className="bg-brand-teal/15 border-b border-brand-teal/20">
                 <SortableHead col="full_name"   label="Agent"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[180px] sticky top-0 z-10" />
                 <SortableHead col="city"        label="City"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden sm:table-cell min-w-[110px] sticky top-0 z-10" />
                 <SortableHead col="agency_name" label="Agency"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden sm:table-cell min-w-[130px] sticky top-0 z-10" />
                 <SortableHead col="created_at"  label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden md:table-cell min-w-[130px] sticky top-0 z-10" />
                 <SortableHead col="domains"     label="Domain"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden md:table-cell min-w-[150px] sticky top-0 z-10" />
                 <SortableHead col="status"      label="Status"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[90px] sticky top-0 z-10" />
-                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-14 sticky top-0 z-10">Actions</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark bg-brand-teal/15 font-semibold h-11 px-4 text-right w-14 sticky top-0 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -528,7 +528,7 @@ function AgentsPageInner() {
                           'text-white text-xs font-bold',
                           agent.status === 'deactivated'
                             ? 'bg-gray-400'
-                            : 'bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark'
+                            : 'bg-brand-teal-dark'
                         )}>
                           {agent.full_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                         </AvatarFallback>
@@ -555,7 +555,7 @@ function AgentsPageInner() {
 
                   {/* Agency */}
                   <TableCell className="hidden sm:table-cell px-4 py-3.5">
-                    <p className="text-sm font-medium text-gray-800 truncate max-w-[140px]">{agent.agency_name}</p>
+                    <p className="text-sm text-gray-800 truncate max-w-[140px]">{agent.agency_name}</p>
                   </TableCell>
 
                   {/* Registered */}
@@ -568,11 +568,11 @@ function AgentsPageInner() {
                   <TableCell className="hidden md:table-cell px-4 py-3.5">
                     {agent.domains?.length > 0 ? (
                       <div className="space-y-1">
-                        <p className="text-sm text-gray-800 font-medium truncate max-w-[250px]">
+                        <p className="text-sm text-gray-800 truncate max-w-[250px]">
                           {agent.domains[0].full_domain}
                         </p>
                         {agent.domains.length > 1 && (
-                          <p className="text-xs text-brand-teal-medium font-medium">+{agent.domains.length - 1} more</p>
+                          <p className="text-xs text-brand-teal-medium">+{agent.domains.length - 1} more</p>
                         )}
                       </div>
                     ) : (
@@ -778,9 +778,7 @@ function AgentsPageInner() {
                   <p className="text-white/85 text-sm mt-0.5 truncate">{selectedAgent?.agency_name}</p>
                 </div>
               </div>
-              <div className="flex mt-4 flex-col items-end gap-1.5 flex-shrink-0">
-                {selectedAgent && <StatusBadge status={selectedAgent.status} />}
-              </div>
+             
             </div>
 
             {/* Quick stats row */}
@@ -973,9 +971,9 @@ function AgentsPageInner() {
                   <Pencil className="w-3.5 h-3.5 mr-1.5" /> Edit
                 </Button>
               </Link>
-              <Button variant="ghost" size="sm"
+              <Button size="sm"
                 onClick={() => { setShowDetailsModal(false); setTimeout(() => setSelectedAgent(null), 300); }}
-                className="h-9 px-4 text-sm text-gray-500 hover:text-gray-700 bg-gray-200 hover:bg-gray-300 font-medium">
+                className="h-9 px-4 text-sm bg-[#da7948] hover:bg-[#c4693e] text-white font-medium">
                 Close
               </Button>
             </div>
@@ -1032,7 +1030,7 @@ function AgentsPageInner() {
             )}
           </div>
           <div className="flex-none border-t border-gray-100 bg-gray-50 px-5 py-4">
-            <Button variant="outline" onClick={() => setShowDomainModal(false)} className="w-full h-9 text-sm">Close</Button>
+            <Button onClick={() => setShowDomainModal(false)} className="w-full h-9 text-sm bg-[#da7948] hover:bg-[#c4693e] text-white">Close</Button>
           </div>
         </DialogContent>
       </Dialog>

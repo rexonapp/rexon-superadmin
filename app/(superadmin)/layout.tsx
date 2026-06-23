@@ -604,7 +604,7 @@ function SuperAdminInner({ children }: { children: React.ReactNode }) {
                     : <span className="text-white text-[10px] font-bold">{(companyName || 'R')[0].toUpperCase()}</span>
                   }
                 </div>
-                <span className="text-sm font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal-medium to-brand-teal bg-clip-text text-transparent truncate max-w-[120px]">
+                <span className="text-sm font-bold text-brand-teal-dark truncate max-w-[120px]">
                   {companyName || 'Rexon'}
                 </span>
               </div>

@@ -49,7 +49,7 @@ export default function SuperAdminLogin() {
         <div className="flex flex-col items-center mb-8">
           {/* Logo */}
           <div className="relative mb-5">
-            <div className="absolute -inset-2 rounded-full bg-gradient-to-br from-brand-teal to-brand-orange/80 opacity-20 blur-lg" />
+            <div className="absolute -inset-2 rounded-full bg-brand-teal/20 blur-lg" />
             <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-white border border-slate-100 shadow-2xl shadow-brand-teal/25 flex items-center justify-center overflow-hidden">
               <img
                 src="/rexon-logo.png"
@@ -68,7 +68,7 @@ export default function SuperAdminLogin() {
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl border border-slate-200/80 shadow-2xl shadow-brand-teal/15 overflow-hidden">
 
           {/* Accent bar */}
-          <div className="h-1 bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange" />
+          <div className="h-1 bg-brand-teal-deep" />
 
           {/* Header */}
           <div className="flex items-center justify-between gap-3 px-6 sm:px-8 pt-6">

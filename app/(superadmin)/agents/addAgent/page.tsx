@@ -925,13 +925,9 @@ export default function SuperadminAgentCreation() {
                       touchedFields.has('termsAccepted') && fieldErrors.termsAccepted ? 'border-red-400' : ''
                     )}
                   />
-                  <Label htmlFor="termsAccepted" className="text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
-                    I have read and agree to all the {' '}
-                    <button type="button" onClick={openTncDialog} className="font-semibold text-brand-teal-medium hover:underline underline-offset-2">
-                      Terms &amp; Conditions
-                    </button>
-                    {' '} of Rexon. <span className="text-red-500 ml-1">*</span>
-                  </Label>
+                  <label htmlFor="termsAccepted" className="text-sm text-gray-700 leading-relaxed cursor-pointer select-none">
+                    I agree to the <button type="button" onClick={openTncDialog} className="inline font-semibold text-brand-teal-medium hover:underline underline-offset-2">Terms &amp; Conditions</button> of Rexon.<span className="text-red-500 ml-0.5">*</span>
+                  </label>
                 </div>
                 {touchedFields.has('termsAccepted') && fieldErrors.termsAccepted && (
                   <p className="text-sm text-red-500 flex items-center gap-1 -mt-2 ml-7">

@@ -40,7 +40,7 @@ export default function QuickActions() {
             <Link
               key={idx}
               href={action.href}
-              className="w-full p-4 rounded-xl bg-gradient-to-r from-emerald-700 to-emerald-500 text-white font-semibold hover:shadow-xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105 group flex items-center justify-between"
+              className="w-full p-4 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 hover:shadow-xl hover:shadow-emerald-500/25 transition-all duration-300 hover:scale-105 group flex items-center justify-between"
             >
               <span className="flex items-center gap-3">
                 <Icon className="w-5 h-5" />

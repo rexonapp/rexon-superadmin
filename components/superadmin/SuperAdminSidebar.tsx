@@ -63,7 +63,7 @@ export default function SuperAdminSidebar({ session }: SuperAdminSidebarProps) {
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal-medium to-brand-teal bg-clip-text text-transparent">
+                  <h1 className="text-xl font-bold text-brand-teal-dark">
                     WarehouseOS
                   </h1>
                   <p className="text-xs text-gray-600">Super Admin</p>

@@ -246,15 +246,15 @@ export default function UsersPage() {
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="hover:bg-gray-50 border-b border-gray-200">
-                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">Username</TableHead>
-                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[160px] sticky top-0 z-10">Name</TableHead>
-                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">E-mail</TableHead>
-                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[90px] sticky top-0 z-10">Role</TableHead>
-                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[90px] sticky top-0 z-10">Status</TableHead>
-                <TableHead className="hidden lg:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[120px] sticky top-0 z-10">Last Login</TableHead>
-                <TableHead className="hidden lg:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[110px] sticky top-0 z-10">Joined</TableHead>
-                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-14 sticky top-0 z-10">Actions</TableHead>
+              <TableRow className="bg-brand-teal/15 border-b border-brand-teal/20">
+                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-brand-teal-dark font-semibold h-11 px-4 bg-brand-teal/15 min-w-[180px] sticky top-0 z-10">Username</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark font-semibold h-11 px-4 bg-brand-teal/15 min-w-[160px] sticky top-0 z-10">Name</TableHead>
+                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-brand-teal-dark font-semibold h-11 px-4 bg-brand-teal/15 min-w-[180px] sticky top-0 z-10">E-mail</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark font-semibold h-11 px-4 bg-brand-teal/15 min-w-[90px] sticky top-0 z-10">Role</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark font-semibold h-11 px-4 bg-brand-teal/15 min-w-[90px] sticky top-0 z-10">Status</TableHead>
+                <TableHead className="hidden lg:table-cell text-l font-bold tracking-wide text-brand-teal-dark font-semibold h-11 px-4 bg-brand-teal/15 min-w-[120px] sticky top-0 z-10">Last Login</TableHead>
+                <TableHead className="hidden lg:table-cell text-l font-bold tracking-wide text-brand-teal-dark font-semibold h-11 px-4 bg-brand-teal/15 min-w-[110px] sticky top-0 z-10">Joined</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark font-semibold h-11 px-4 text-right bg-brand-teal/15 w-14 sticky top-0 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -274,7 +274,7 @@ export default function UsersPage() {
                           {user.avatar_url && (
                             <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} className="object-cover" />
                           )}
-                          <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
+                          <AvatarFallback className="bg-brand-teal-dark text-white text-xs font-bold">
                             {user.first_name[0]}{user.last_name[0]}
                           </AvatarFallback>
                         </Avatar>
@@ -292,7 +292,7 @@ export default function UsersPage() {
                           {user.avatar_url && (
                             <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} className="object-cover" />
                           )}
-                          <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
+                          <AvatarFallback className="bg-brand-teal-dark text-white text-xs font-bold">
                             {user.first_name[0]}{user.last_name[0]}
                           </AvatarFallback>
                         </Avatar>
@@ -478,10 +478,10 @@ export default function UsersPage() {
           {/* Footer */}
           <div className="border-t border-gray-100 bg-gray-50/60 px-5 py-4 flex gap-2">
             <Button
-              variant="outline" size="sm"
+              size="sm"
               onClick={() => { setShowRoleModal(false); setSelectedUser(null); setErrorMsg(''); }}
               disabled={roleLoading}
-              className="flex-1 h-9 text-sm"
+              className="flex-1 h-9 text-sm bg-[#da7948] hover:bg-[#c4693e] text-white"
             >
               Cancel
             </Button>
@@ -508,15 +508,15 @@ export default function UsersPage() {
       {/* ── Delete Confirmation ────────────────────────────────────────────── */}
       <AlertDialog open={showDeleteModal} onOpenChange={setShowDeleteModal}>
         <AlertDialogContent className="bg-white border-gray-200 rounded-2xl p-0 gap-0 overflow-hidden sm:max-w-sm">
-          {/* Gradient header */}
-          <div className="bg-gradient-to-r from-rose-600 to-rose-500 px-5 py-5">
+          {/* Header */}
+          <div className="bg-brand-teal px-5 py-5">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
                 <Trash2 className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h3 className="text-base font-bold text-white">Delete User</h3>
-                <p className="text-rose-200 text-xs mt-0.5">This action cannot be undone</p>
+                <p className="text-white/70 text-xs mt-0.5">This action cannot be undone</p>
               </div>
             </div>
           </div>
@@ -537,14 +537,14 @@ export default function UsersPage() {
             <AlertDialogCancel
               onClick={() => setSelectedUser(null)}
               disabled={deleteLoading}
-              className="flex-1 h-9 text-sm"
+              className="flex-1 h-9 text-sm bg-[#da7948] hover:bg-[#c4693e] text-white border-0"
             >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={deleteUser}
               disabled={deleteLoading}
-              className="flex-1 h-9 text-sm bg-rose-600 hover:bg-rose-700 text-white border-0"
+              className="flex-1 h-9 text-sm bg-brand-teal-deep hover:bg-brand-teal-dark text-white border-0"
             >
               {deleteLoading ? (
                 <svg className="animate-spin h-3.5 w-3.5 mx-auto" viewBox="0 0 24 24" fill="none">

@@ -392,9 +392,7 @@ export default function AddUserPage() {
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
-                    className="flex-1 h-10 text-sm font-semibold rounded-lg transition-all"
-                    style={{ borderColor:  '#da7948', color: '#da7948' }}
+                    className="flex-1 h-10 text-sm font-semibold rounded-lg transition-all bg-[#da7948] hover:bg-[#c4693e] text-white"
                     onClick={handleCancel}
                   >
                     Cancel

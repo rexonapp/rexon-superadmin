@@ -64,9 +64,9 @@ type SortDir = 'asc' | 'desc';
 const ITEMS_PER_PAGE = 10;
 
 const statusConfig: Record<string, { badge: string; dot: string; label: string }> = {
-    Pending: { badge: 'bg-amber-50 text-amber-700 border border-amber-200', dot: 'bg-amber-400 animate-pulse', label: 'Pending' },
-    Active: { badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500', label: 'Active' },
-    rejected: { badge: 'bg-rose-50 text-rose-700 border border-rose-200', dot: 'bg-rose-500', label: 'Rejected' },
+    pending:  { badge: 'bg-amber-50 text-amber-700 border border-amber-200',       dot: 'bg-amber-400 animate-pulse', label: 'Pending'  },
+    success:  { badge: 'bg-emerald-50 text-emerald-700 border border-emerald-200', dot: 'bg-emerald-500',             label: 'Active'   },
+    rejected: { badge: 'bg-rose-50 text-rose-700 border border-rose-200',          dot: 'bg-rose-500',                label: 'Rejected' },
 };
 
 const fmt = (ds: string) =>
@@ -81,7 +81,7 @@ function parseAmenities(raw: string | string[] | Record<string, string>): string
 }
 
 function StatusBadge({ status }: { status: string }) {
-    const cfg = statusConfig[status] ?? statusConfig['Pending'];
+    const cfg = statusConfig[status] ?? statusConfig['pending'];
     return (
         <span className={cn('inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold leading-none whitespace-nowrap', cfg.badge)}>
             <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', cfg.dot)} />
@@ -108,7 +108,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
             className={cn(
                 'text-xs font-bold tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer',
                 'hover:bg-gray-100 transition-colors',
-                active ? 'text-brand-teal-medium bg-brand-teal/10' : 'text-gray-500',
+                active ? 'text-brand-teal-deep bg-brand-teal/25' : 'text-brand-teal-dark bg-brand-teal/15',
                 className
             )}
         >
@@ -319,7 +319,7 @@ export default function WarehousesPage() {
             w.agency_name?.toLowerCase().includes(q);
 
         const matchesStatus =
-            filterStatus === 'all' || w.status === filterStatus.toLowerCase();
+            filterStatus === 'all' || w.status === filterStatus;
 
         const range = getDateRangeForFilter(dateFilter);
         const matchesDate =
@@ -457,8 +457,8 @@ export default function WarehousesPage() {
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Status</SelectItem>
-                            <SelectItem value="Pending">Pending</SelectItem>
-                            <SelectItem value="Active">Active</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="success">Active</SelectItem>
                             <SelectItem value="rejected">Rejected</SelectItem>
                         </SelectContent>
                     </Select>
@@ -510,12 +510,12 @@ export default function WarehousesPage() {
                 <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
                     <Table className="min-w-[960px] w-full">
                         <TableHeader>
-                            <TableRow className="bg-gray-50 hover:bg-gray-50 border-b border-gray-200">
+                            <TableRow className="bg-brand-teal/15 border-b border-brand-teal/20">
 
                                 {cols.map(c => (
                                     <SortableHead key={c.key} col={c.key} label={c.label}
                                         sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
-                                        className={cn(c.className, 'bg-gray-50 sticky top-0 z-10')} />
+                                        className={cn(c.className, 'bg-brand-teal/15 sticky top-0 z-10')} />
                                 ))}
                             </TableRow>
                         </TableHeader>
@@ -540,23 +540,23 @@ export default function WarehousesPage() {
                                     </TableCell>
 
                                     <TableCell className="px-4 py-3.5">
-                                        <p className="text-sm font-semibold text-gray-800">{w.full_name}</p>
+                                        <p className="text-sm text-gray-800">{w.full_name}</p>
                                         <p className="text-xs text-gray-500">{w.email}</p>
                                     </TableCell>
 
                                     <TableCell className="px-4 py-3.5">
-                                        <p className="text-sm text-gray-900 font-medium">{w.city}</p>
+                                        <p className="text-sm text-gray-900">{w.city}</p>
                                         <p className="text-xs text-gray-400">{w.state}</p>
                                     </TableCell>
 
                                     <TableCell className="px-4 py-3.5">
-                                        <span className="capitalize text-sm font-medium">
+                                        <span className="capitalize text-sm text-gray-800">
                                             {w.property_type}
                                         </span>
                                     </TableCell>
 
                                     <TableCell className="px-4 py-3.5">
-                                        <p className="text-sm font-bold text-gray-900">₹{w.price_per_sqft}</p>
+                                        <p className="text-sm text-gray-900">₹{w.price_per_sqft}</p>
                                         <p className="text-xs text-gray-400">/ sqft</p>
                                     </TableCell>
 

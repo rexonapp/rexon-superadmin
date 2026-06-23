@@ -50,11 +50,10 @@ export default function DashboardClient({ initialData }: Props) {
 
   const isRefreshing = dashValidating;
 
-  const statCards = [
-    { label: 'Total Properties', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue' as const, route: '/properties'  },
-    // { label: 'Pending Approvals', value: stats.pendingApprovals.toString(), icon: Clock, color: 'cyan' as const },
-    { label: 'Leads', value: stats.totalUsers.toString(), icon: Users, color: 'blue' as const,     route: '/leads'  },
-    { label: 'Agents', value: stats.totalAgents.toString(), icon: UserCheck, color: 'cyan' as const, route: '/agents'},
+  const statCards: { label: string; mobileLabel?: string; value: string; icon: typeof Building2; color: 'blue' | 'cyan'; route: string }[] = [
+    { label: 'Total Properties', mobileLabel: 'Properties', value: stats.totalWarehouses.toString(), icon: Building2, color: 'blue', route: '/properties' },
+    { label: 'Leads',            value: stats.totalUsers.toString(),   icon: Users,     color: 'blue', route: '/leads'      },
+    { label: 'Agents',           value: stats.totalAgents.toString(),  icon: UserCheck, color: 'cyan', route: '/agents'     },
   ];
 
   return (
@@ -90,6 +89,7 @@ export default function DashboardClient({ initialData }: Props) {
           <StatCard
             key={idx}
             label={stat.label}
+            mobileLabel={stat.mobileLabel}
             value={stat.value}
             icon={stat.icon}
             color={stat.color}
@@ -224,7 +224,7 @@ export default function DashboardClient({ initialData }: Props) {
           <div className="space-y-3">
             <Button
               onClick={() => router.push('/warehouses')}
-              className="w-full justify-between h-12 rounded-xl bg-gradient-to-r from-brand-teal-deep via-brand-teal to-brand-orange hover:from-brand-teal-dark hover:via-brand-teal-medium hover:to-brand-orange-deep text-white shadow-lg shadow-brand-teal/30 hover:shadow-xl hover:shadow-brand-orange/25 transition-all group"
+              className="w-full justify-between h-12 rounded-xl bg-brand-teal-deep hover:bg-brand-teal-dark text-white shadow-lg shadow-brand-teal/30 hover:shadow-xl hover:shadow-brand-teal/25 transition-all group"
             >
               <span className="flex items-center gap-2 font-semibold">
                 <Building2 className="w-4 h-4" />

@@ -100,7 +100,7 @@ function SortableHead({ col, label, sortKey, sortDir, onSort, className }: {
       className={cn(
         'text-l font-bold tracking-wide h-11 px-4 whitespace-nowrap select-none cursor-pointer',
         'hover:bg-gray-100 transition-colors',
-        active ? 'text-brand-teal-medium bg-brand-teal/10' : 'text-gray-700',
+        active ? 'text-brand-teal-deep bg-brand-teal/25' : 'text-brand-teal-dark bg-brand-teal/15',
         className
       )}
     >
@@ -577,14 +577,14 @@ export default function WarehousesPage() {
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
           <Table className="w-full">
             <TableHeader>
-              <TableRow className="bg-gray-50 hover:bg-gray-50 border-b border-gray-200">
+              <TableRow className="bg-brand-teal/15 border-b border-brand-teal/20">
                
                 {cols.map(c => (
                   <SortableHead key={c.key} col={c.key} label={c.label}
                     sortKey={sortKey} sortDir={sortDir} onSort={handleSort}
-                    className={cn(c.className, 'bg-gray-50 sticky top-0 z-10')} />
+                    className={cn(c.className, 'bg-brand-teal/15 sticky top-0 z-10')} />
                 ))}
-                <TableHead className="text-l font-bold tracking-wide text-gray-700 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">
+                <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark bg-brand-teal/15 font-semibold h-11 px-4 text-right w-16 sticky top-0 z-10">
                   Actions
                 </TableHead>
               </TableRow>
@@ -618,25 +618,25 @@ export default function WarehousesPage() {
                   <TableCell className="hidden sm:table-cell px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-800 font-medium">{w.city}</span>
+                      <span className="text-sm text-gray-800">{w.city}</span>
                     </div>
                     <p className="text-xs text-gray-400 ml-5 mt-0.5">{w.state}</p>
                   </TableCell>
 
                   {/* Type & Size — hidden on mobile */}
                   <TableCell className="hidden sm:table-cell px-4 py-3.5">
-                    <p className="text-sm text-gray-800 font-medium">{w.property_type}</p>
+                    <p className="text-sm text-gray-800">{w.property_type}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{w.space_available} {w.space_unit}</p>
                   </TableCell>
 
                   {/* Price — always visible */}
                   <TableCell className="px-4 py-3.5">
-                    <p className="text-sm font-bold text-gray-900">₹{w.total_price}</p>
+                    <p className="text-sm text-gray-900">₹{w.total_price}</p>
                   </TableCell>
 
                   {/* Contact — hidden on mobile */}
                   <TableCell className="hidden md:table-cell px-4 py-3.5">
-                    <p className="text-sm text-gray-800 font-medium truncate max-w-[130px]">{w.contact_person_name}</p>
+                    <p className="text-sm text-gray-800 truncate max-w-[130px]">{w.contact_person_name}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{w.contact_person_phone}</p>
                   </TableCell>
 
@@ -937,9 +937,9 @@ export default function WarehousesPage() {
             ) : (
               <div className="flex-1"><StatusBadge status={selected?.status ?? 'Pending'} /></div>
             )}
-            <Button variant="ghost" size="sm"
+            <Button size="sm"
               onClick={() => { setShowModal(false); setTimeout(() => setSelected(null), 300); }}
-              className="h-9 text-gray-900 hover:text-gray-700 hover:bg-gray-300 bg-gray-200 font-medium text-sm px-4">
+              className="h-9 bg-[#da7948] hover:bg-[#c4693e] text-white font-medium text-sm px-4">
               Close
             </Button>
           </div>

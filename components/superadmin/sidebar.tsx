@@ -38,7 +38,7 @@ const menuItems = [
   { id: 'admin',      label: 'Admin Users',      icon: Users,     path: '/admin'      },
   { id: 'agents',     label: 'Agents',     icon: UserCheck, path: '/agents'     },
   { id: 'properties', label: 'Properties', icon: Building2, path: '/properties' },
-  { id: 'leads',      label: 'leads',      icon: Users, path: '/leads' },
+  { id: 'leads',      label: 'Leads',      icon: Users, path: '/leads' },
   { id: 'settings',   label: 'Settings',   icon: Settings,  path: '/settings'   },
 ];
 
@@ -105,7 +105,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                   )}
                 </div>
                 <div className={`overflow-hidden transition-all duration-300 ${sidebarOpen ? 'opacity-100 max-w-xs' : 'lg:opacity-0 lg:max-w-0 opacity-100 max-w-xs'}`}>
-                  <h1 className="text-xl font-bold bg-gradient-to-r from-brand-teal-dark via-brand-teal-medium to-brand-teal bg-clip-text text-transparent whitespace-nowrap">
+                  <h1 className="text-xl font-bold text-brand-teal-dark whitespace-nowrap">
                     {companyName || 'Rexon'}
                   </h1>
                   <p className="text-xs font-medium text-brand-teal-medium whitespace-nowrap">Super Admin Panel</p>
@@ -183,7 +183,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                       {logoUrl ? (
                         <AvatarImage src={logoUrl} alt={userFullName} className="object-cover" />
                       ) : (
-                        <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-sm font-bold">
+                        <AvatarFallback className="bg-brand-teal-dark text-white text-sm font-bold">
                           {userInitials}
                         </AvatarFallback>
                       )}
@@ -209,7 +209,7 @@ export default function Sidebar({ user, sidebarOpen, setSidebarOpen, onLogout }:
                       {logoUrl ? (
                         <AvatarImage src={logoUrl} alt={logoUrl} className="object-cover" />
                       ) : (
-                        <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
+                        <AvatarFallback className="bg-brand-teal-dark text-white text-xs font-bold">
                           {userInitials}
                         </AvatarFallback>
                       )}
