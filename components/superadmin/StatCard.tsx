@@ -90,7 +90,7 @@ export default function StatCard({
   return (
     <div
       onClick={onClick}
-      className="group relative overflow-hidden rounded-xl bg-white/40 backdrop-blur-xl border border-white/60 p-3 hover:bg-white/60 transition-all duration-500 hover:shadow-2xl hover:border-white/80"
+      className="group relative overflow-hidden rounded-xl bg-white/40 backdrop-blur-xl border border-white/60 p-2 sm:p-3 hover:bg-white/60 transition-all duration-500 hover:shadow-2xl hover:border-white/80"
       style={{
         animation: `slideUp 0.6s ease-out ${index * 0.1}s backwards`,
       }}
@@ -108,21 +108,17 @@ export default function StatCard({
       {/* Floating orbs */}
       <div className={`absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br ${colors.gradient} rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-all duration-700`} />
 
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-4">
-          <div className={`p-3.5 rounded-xl ${colors.bg} ring-4 ${colors.ring} transition-colors duration-300`}>
-            <Icon className={`w-6 h-6 ${colors.text}`} />
+      <div className="relative z-10 flex flex-col items-center sm:items-start text-center sm:text-left">
+        <div className="flex justify-center sm:justify-start mb-2 sm:mb-4">
+          <div className={`p-2 sm:p-3.5 rounded-lg sm:rounded-xl ${colors.bg} ring-2 sm:ring-4 ${colors.ring} transition-colors duration-300`}>
+            <Icon className={`w-4 h-4 sm:w-6 sm:h-6 ${colors.text}`} />
           </div>
-          {/* <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full ${colors.badge} font-semibold text-xs`}>
-            <TrendIcon className="w-3.5 h-3.5" />
-            <span>{change}</span>
-          </div> */}
         </div>
 
-        <h3 className="text-3xl font-bold text-gray-900 mb-2">
+        <h3 className="text-xl sm:text-3xl font-bold text-gray-900 mb-0.5 sm:mb-2">
           {value}
         </h3>
-        <p className="text-sm text-gray-600 font-semibold tracking-wide">{label}</p>
+        <p className="text-[10px] leading-tight sm:text-sm text-gray-600 font-semibold tracking-wide">{label}</p>
       </div>
     </div>
   );

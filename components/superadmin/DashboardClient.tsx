@@ -85,7 +85,7 @@ export default function DashboardClient({ initialData }: Props) {
       )}
 
       {/* ── Stat Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-2">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6">
         {statCards.map((stat, idx) => (
           <StatCard
             key={idx}
@@ -100,10 +100,10 @@ export default function DashboardClient({ initialData }: Props) {
       </div>
 
       {/* ── Main Content Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Recent Activity — 2 cols */}
-        <GlassCard className="lg:col-span-3 p-6" gradient="blue">
+        <GlassCard className="lg:col-span-3 p-4 sm:p-6" gradient="blue">
 
           {/* Card header */}
           <div className="flex flex-row items-center justify-between mb-4 bg-brand-teal rounded-xl px-3 py-2.5 sm:px-4">
@@ -134,14 +134,14 @@ export default function DashboardClient({ initialData }: Props) {
                 scrollbarColor: "#CBD5E1 transparent",
               }}
             >
-              <table className="w-full min-w-[52rem] md:min-w-full border-collapse text-left text-sm">
+              <table className="w-full min-w-[20rem] sm:min-w-[52rem] md:min-w-full border-collapse text-left text-sm">
                 <thead className="bg-brand-teal/15 sticky top-0 z-[1] shadow-[0_1px_0_0_rgb(20_184_166_/_0.2)]">
                   <tr>
                     <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Property</th>
                     <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Agent</th>
-                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">City</th>
-                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Type</th>
-                    <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Price</th>
+                    <th className="hidden sm:table-cell p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">City</th>
+                    <th className="hidden sm:table-cell p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Type</th>
+                    <th className="hidden sm:table-cell p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Price</th>
                     <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Status</th>
                     <th className="p-2 sm:p-3 text-brand-teal-dark font-semibold whitespace-nowrap">Created</th>
                   </tr>
@@ -161,13 +161,13 @@ export default function DashboardClient({ initialData }: Props) {
                         </div>
                       </td>
 
-                      <td className="p-2 sm:p-3 align-top whitespace-nowrap">{activity.city}</td>
+                      <td className="hidden sm:table-cell p-2 sm:p-3 align-top whitespace-nowrap">{activity.city}</td>
 
-                      <td className="p-2 sm:p-3 capitalize align-top whitespace-nowrap">
+                      <td className="hidden sm:table-cell p-2 sm:p-3 capitalize align-top whitespace-nowrap">
                         {activity.action.includes("warehouse") ? "Warehouse" : "-"}
                       </td>
 
-                      <td className="p-2 sm:p-3 align-top whitespace-nowrap">₹ {activity.price_per_sqft ?? "-"}</td>
+                      <td className="hidden sm:table-cell p-2 sm:p-3 align-top whitespace-nowrap">₹ {activity.price_per_sqft ?? "-"}</td>
 
                       <td className="p-2 sm:p-3 align-top">
                         <span

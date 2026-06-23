@@ -186,8 +186,8 @@ export default function UsersPage() {
       {/* ── Filters ── */}
       <div className="flex-shrink-0 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
 
-        {/* Search */}
-        <div className="relative  w-full sm:w-xl lg:w-xl">
+        {/* Search — full width on mobile */}
+        <div className="relative w-full sm:w-xl lg:w-xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
           <Input
             placeholder="Search name, username, email…"
@@ -197,10 +197,10 @@ export default function UsersPage() {
           />
         </div>
 
-        {/* Role filter + clear */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Role filter + clear + Add User — same row on mobile */}
+        <div className="flex items-center gap-2 sm:contents">
           <Select value={filterRole} onValueChange={setFilterRole}>
-            <SelectTrigger className="w-40 h-9 text-sm bg-gray-50 border-gray-200 shrink-0">
+            <SelectTrigger className="flex-1 sm:flex-none w-auto sm:w-40 h-9 text-sm bg-gray-50 border-gray-200 shrink-0">
               <Filter className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               <SelectValue placeholder="All Roles" />
             </SelectTrigger>
@@ -221,14 +221,20 @@ export default function UsersPage() {
               <X className="w-3.5 h-3.5 mr-1" /> Clear
             </Button>
           )}
+
+          <Link href="/admin/addUser" className="ml-auto sm:ml-0 sm:hidden">
+            <Button size="sm" className="h-9 px-3 bg-brand-teal-deep hover:bg-brand-teal text-sm whitespace-nowrap">
+              Add User
+            </Button>
+          </Link>
         </div>
 
-        {/* Result count */}
-        <div className="sm:ml-auto">
-          <Link href={'/admin/addUser'}>
-         <Button  size="sm"  className="h-9 px-3 bg-brand-teal-deep hover:bg-brand-teal text-sm">
-            Add User
-         </Button>
+        {/* Add User — desktop only (hidden on mobile, shown above) */}
+        <div className="hidden sm:block sm:ml-auto">
+          <Link href="/admin/addUser">
+            <Button size="sm" className="h-9 px-3 bg-brand-teal-deep hover:bg-brand-teal text-sm">
+              Add User
+            </Button>
           </Link>
         </div>
       </div>
@@ -238,17 +244,17 @@ export default function UsersPage() {
 
         {/* Scrollable table */}
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
-          <Table className="min-w-[760px] w-full">
+          <Table className="w-full">
             <TableHeader>
               <TableRow className="hover:bg-gray-50 border-b border-gray-200">
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[200px] sticky top-0 z-10">Username</TableHead>
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[250px] sticky top-0 z-10">Name</TableHead>
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[200px] sticky top-0 z-10">E-mail</TableHead>
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[110px] sticky top-0 z-10">Role</TableHead>
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[100px] sticky top-0 z-10">Status</TableHead>
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[130px] sticky top-0 z-10">Last Login</TableHead>
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[120px] sticky top-0 z-10">Joined</TableHead>
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">Actions</TableHead>
+                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">Username</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[160px] sticky top-0 z-10">Name</TableHead>
+                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">E-mail</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[90px] sticky top-0 z-10">Role</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[90px] sticky top-0 z-10">Status</TableHead>
+                <TableHead className="hidden lg:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[120px] sticky top-0 z-10">Last Login</TableHead>
+                <TableHead className="hidden lg:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[110px] sticky top-0 z-10">Joined</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-14 sticky top-0 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -261,39 +267,51 @@ export default function UsersPage() {
                     i % 2 === 1 ? 'bg-gray-50/30' : 'bg-white',
                   )}
                 >
-                    <TableCell className="px-4 py-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
-                        {user.avatar_url && (
-                          <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} className="object-cover" />
-                        )}
-                        <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
-                          {user.first_name[0]}{user.last_name[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[150px]">
+                    {/* Username — hidden on mobile, avatar+username combined */}
+                    <TableCell className="hidden sm:table-cell px-4 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
+                          {user.avatar_url && (
+                            <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} className="object-cover" />
+                          )}
+                          <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
+                            {user.first_name[0]}{user.last_name[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[140px]">
                           {user.username}
                         </p>
                       </div>
-                    </div>
-                  </TableCell>
+                    </TableCell>
 
-                   <TableCell className="px-4 py-3.5">
-                    <div className="flex items-center gap-2.5">
-                    
-                      <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[150px]">
-                          {user.first_name} {user.last_name}
-                        </p>
+                    {/* Name — on mobile shows avatar + name + username + email */}
+                    <TableCell className="px-4 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        {/* Avatar visible only on mobile */}
+                        <Avatar className="sm:hidden w-8 h-8 ring-1 ring-gray-200 shrink-0">
+                          {user.avatar_url && (
+                            <AvatarImage src={user.avatar_url} alt={`${user.first_name} ${user.last_name}`} className="object-cover" />
+                          )}
+                          <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
+                            {user.first_name[0]}{user.last_name[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[150px]">
+                            {user.first_name} {user.last_name}
+                          </p>
+                          {/* Username + email shown only on mobile */}
+                          <p className="sm:hidden text-xs text-gray-400 truncate max-w-[130px]">@{user.username}</p>
+                          <p className="sm:hidden text-xs text-gray-400 truncate max-w-[130px]">{user.email}</p>
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  {/* Contact */}
-                  <TableCell className="px-4 py-3.5">
-                    <p className="text-sm text-gray-800 truncate max-w-[190px]">{user.email}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{user.phone ?? 'No phone'}</p>
-                  </TableCell>
+                    </TableCell>
+
+                    {/* Email — hidden on mobile (shown as subtitle above) */}
+                    <TableCell className="hidden sm:table-cell px-4 py-3.5">
+                      <p className="text-sm text-gray-800 truncate max-w-[190px]">{user.email}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{user.phone ?? 'No phone'}</p>
+                    </TableCell>
 
                   {/* Role */}
                   <TableCell className="px-4 py-3.5">
@@ -321,12 +339,12 @@ export default function UsersPage() {
                   </TableCell>
 
                   {/* Last Login */}
-                  <TableCell className="px-4 py-3.5">
+                  <TableCell className="hidden lg:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800">{formatDate(user.last_login_at)}</p>
                   </TableCell>
 
                   {/* Joined */}
-                  <TableCell className="px-4 py-3.5">
+                  <TableCell className="hidden lg:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800">{formatDate(user.created_at)}</p>
                   </TableCell>
 
@@ -360,7 +378,7 @@ export default function UsersPage() {
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-24">
+                  <TableCell colSpan={5} className="text-center py-24">
                     <div className="flex flex-col items-center gap-3 text-gray-400">
                       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
                         <Users className="w-7 h-7 opacity-40" />

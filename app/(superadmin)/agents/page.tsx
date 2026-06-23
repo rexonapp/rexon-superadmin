@@ -413,7 +413,8 @@ function AgentsPageInner() {
 
       {/* ── Filters ── */}
       <div className="flex-shrink-0 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        {/* Search */}
+
+        {/* Search — full width on mobile */}
         <div className="relative w-full sm:w-xl lg:w-xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
           <Input
@@ -424,10 +425,10 @@ function AgentsPageInner() {
           />
         </div>
 
-        {/* Dropdowns */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Filters + Add Agent — same row on mobile */}
+        <div className="flex items-center gap-2 sm:contents">
           <Select value={filterStatus} onValueChange={v => { setFilterStatus(v); setCurrentPage(1); }}>
-            <SelectTrigger className="w-36 h-9 text-sm bg-gray-50 border-gray-200 shrink-0">
+            <SelectTrigger className="flex-1 sm:flex-none sm:w-36 h-9 text-sm bg-gray-50 border-gray-200 shrink-0">
               <Filter className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
@@ -441,7 +442,7 @@ function AgentsPageInner() {
           </Select>
 
           <Select value={dateFilter} onValueChange={handleDateFilterChange}>
-            <SelectTrigger className={cn('w-40 h-9 text-sm border-gray-200 shrink-0',
+            <SelectTrigger className={cn('flex-1 sm:flex-none sm:w-40 h-9 text-sm border-gray-200 shrink-0',
               dateFilter !== 'all' ? 'bg-brand-teal/8 border-brand-teal/35 text-brand-teal-dark' : 'bg-gray-50')}>
               <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               <SelectValue placeholder="Date Range" />
@@ -471,9 +472,17 @@ function AgentsPageInner() {
               <X className="w-3.5 h-3.5 mr-1" /> Clear
             </Button>
           )}
+
+          {/* Add Agent — mobile only (right-pinned) */}
+          <Link href="/agents/addAgent" className="ml-auto sm:hidden shrink-0">
+            <Button size="sm" className="h-9 bg-brand-teal-deep hover:bg-brand-teal-dark text-white text-sm font-semibold px-3 whitespace-nowrap">
+              + Add
+            </Button>
+          </Link>
         </div>
 
-        <div className="sm:ml-auto flex items-center gap-3">
+        {/* Add Agent — desktop only */}
+        <div className="hidden sm:block sm:ml-auto">
           <Link href="/agents/addAgent">
             <Button size="sm" className="h-9 bg-brand-teal-deep hover:bg-brand-teal-dark text-white text-sm font-semibold px-4 shrink-0">
               + Add Agent
@@ -486,16 +495,16 @@ function AgentsPageInner() {
       <div className="flex-1 min-h-0 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col">
 
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
-          <Table className="min-w-[860px] w-full">
+          <Table className="w-full">
             <TableHeader>
               <TableRow className="hover:bg-gray-50 border-b border-gray-200">
-                <SortableHead col="full_name"   label="Agent"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[200px] sticky top-0 z-10" />
-                <SortableHead col="city"        label="City"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[130px] sticky top-0 z-10" />
-                <SortableHead col="agency_name" label="Agency"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[150px] sticky top-0 z-10" />
-                <SortableHead col="created_at"  label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[140px] sticky top-0 z-10" />
-                <SortableHead col="domains"     label="Domain"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[160px] sticky top-0 z-10" />
-                <SortableHead col="status"      label="Status"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[100px] sticky top-0 z-10" />
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">Actions</TableHead>
+                <SortableHead col="full_name"   label="Agent"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[180px] sticky top-0 z-10" />
+                <SortableHead col="city"        label="City"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden sm:table-cell min-w-[110px] sticky top-0 z-10" />
+                <SortableHead col="agency_name" label="Agency"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden sm:table-cell min-w-[130px] sticky top-0 z-10" />
+                <SortableHead col="created_at"  label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden md:table-cell min-w-[130px] sticky top-0 z-10" />
+                <SortableHead col="domains"     label="Domain"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden md:table-cell min-w-[150px] sticky top-0 z-10" />
+                <SortableHead col="status"      label="Status"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[90px] sticky top-0 z-10" />
+                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-14 sticky top-0 z-10">Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -530,30 +539,33 @@ function AgentsPageInner() {
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[160px]">{agent.email}</p>
                         <p className="text-xs text-gray-400 truncate max-w-[160px]">{agent.mobile_number}</p>
+                        {/* City + Agency — visible only on mobile */}
+                        {agent.city && <p className="sm:hidden text-xs text-gray-400 mt-0.5 flex items-center gap-1 truncate max-w-[160px]"><MapPin className="w-3 h-3 shrink-0" />{agent.city}</p>}
+                        {agent.agency_name && <p className="sm:hidden text-xs text-gray-400 truncate max-w-[160px]">{agent.agency_name}</p>}
                       </div>
                     </div>
                   </TableCell>
 
                   {/* City */}
-                  <TableCell className="px-4 py-3.5">
+                  <TableCell className="hidden sm:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800 flex items-center gap-1">
                       <MapPin className="w-3 h-3 text-gray-400 shrink-0" />{agent.city || '—'}
                     </p>
                   </TableCell>
 
                   {/* Agency */}
-                  <TableCell className="px-4 py-3.5">
+                  <TableCell className="hidden sm:table-cell px-4 py-3.5">
                     <p className="text-sm font-medium text-gray-800 truncate max-w-[140px]">{agent.agency_name}</p>
                   </TableCell>
 
                   {/* Registered */}
-                  <TableCell className="px-4 py-3.5">
+                  <TableCell className="hidden md:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800">{fmtDate(agent.created_at)}</p>
                     {fmtTime(agent.created_at) && <p className="text-xs text-gray-400 mt-0.5">{fmtTime(agent.created_at)}</p>}
                   </TableCell>
 
                   {/* Domain */}
-                  <TableCell className="px-4 py-3.5">
+                  <TableCell className="hidden md:table-cell px-4 py-3.5">
                     {agent.domains?.length > 0 ? (
                       <div className="space-y-1">
                         <p className="text-sm text-gray-800 font-medium truncate max-w-[250px]">
@@ -682,7 +694,7 @@ function AgentsPageInner() {
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-24">
+                  <TableCell colSpan={4} className="text-center py-24">
                     <div className="flex flex-col items-center gap-3 text-gray-400">
                       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
                         <Users className="w-7 h-7 opacity-40" />

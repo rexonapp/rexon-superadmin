@@ -486,14 +486,13 @@ export default function WarehousesPage() {
   if (loading) return <Loading />;
 
   const cols: { key: SortKey; label: string; className?: string }[] = [
-    { key: 'title',               label: 'Property',    className: 'min-w-[220px]' },
-    { key: 'city',                label: 'Location',    className: 'min-w-[130px]' },
-    { key: 'property_type',       label: 'Type & Size', className: 'min-w-[130px]' },
-    { key: 'total_price',      label: 'Price',       className: 'min-w-[100px]' },
-    { key: 'contact_person_name', label: 'Contact',     className: 'min-w-[140px]' },
-    // { key: 'images_count',        label: 'Images',      className: 'min-w-[80px]'  },
-    { key: 'status',              label: 'Status',      className: 'min-w-[110px]' },
-    { key: 'created_at',          label: 'Added',       className: 'min-w-[120px]' },
+    { key: 'title',               label: 'Property',    className: 'min-w-[180px]' },
+    { key: 'city',                label: 'Location',    className: 'hidden sm:table-cell min-w-[110px]' },
+    { key: 'property_type',       label: 'Type & Size', className: 'hidden sm:table-cell min-w-[110px]' },
+    { key: 'total_price',         label: 'Price',       className: 'min-w-[90px]' },
+    { key: 'contact_person_name', label: 'Contact',     className: 'hidden md:table-cell min-w-[130px]' },
+    { key: 'status',              label: 'Status',      className: 'min-w-[90px]' },
+    { key: 'created_at',          label: 'Added',       className: 'hidden md:table-cell min-w-[110px]' },
   ];
 
   return (
@@ -510,6 +509,8 @@ export default function WarehousesPage() {
 
       {/* ── Filters ── */}
       <div className="flex-shrink-0 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+
+        {/* Search — full width on mobile */}
         <div className="relative w-full sm:w-xl lg:w-xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
           <Input
@@ -520,20 +521,14 @@ export default function WarehousesPage() {
           />
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Filters — same row on mobile */}
+        <div className="flex items-center gap-2 sm:contents">
           <Select value={filterStatus} onValueChange={v => { setFilterStatus(v); setCurrentPage(1); }}>
-            <SelectTrigger className="w-36 h-9 text-sm bg-gray-50 border-gray-200 shrink-0">
+            <SelectTrigger className="flex-1 sm:flex-none sm:w-36 h-9 text-sm bg-gray-50 border-gray-200 shrink-0">
               <Filter className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               <SelectValue placeholder="Status" />
             </SelectTrigger>
-            <SelectContent
-              side="bottom"
-              align="start"
-              sideOffset={4}
-              position="popper"
-              avoidCollisions={false}
-              className="max-h-60 overflow-y-auto"
-            >              
+            <SelectContent side="bottom" align="start" sideOffset={4} position="popper" avoidCollisions={false} className="max-h-60 overflow-y-auto">
               <SelectItem value="all">Status</SelectItem>
               <SelectItem value="Pending">Pending</SelectItem>
               <SelectItem value="Active">Active</SelectItem>
@@ -542,19 +537,12 @@ export default function WarehousesPage() {
           </Select>
 
           <Select value={dateFilter} onValueChange={handleDateFilterChange}>
-            <SelectTrigger className={cn('w-40 h-9 text-sm border-gray-200 shrink-0',
+            <SelectTrigger className={cn('flex-1 sm:flex-none sm:w-40 h-9 text-sm border-gray-200 shrink-0',
               dateFilter !== 'all' ? 'bg-brand-teal/8 border-brand-teal/35 text-brand-teal-dark' : 'bg-gray-50')}>
               <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               <SelectValue placeholder="Date Range" />
             </SelectTrigger>
-            <SelectContent
-              side="bottom"
-              align="start"
-              sideOffset={4}
-              position="popper"
-              avoidCollisions={false}
-              className="max-h-60 overflow-y-auto"
-            >              
+            <SelectContent side="bottom" align="start" sideOffset={4} position="popper" avoidCollisions={false} className="max-h-60 overflow-y-auto">
               <SelectItem value="all">All Time</SelectItem>
               <SelectItem value="today">Today</SelectItem>
               <SelectItem value="week">This Week</SelectItem>
@@ -580,12 +568,6 @@ export default function WarehousesPage() {
             </Button>
           )}
         </div>
-
-        <div className="sm:ml-auto">
-          <span className="text-xs text-gray-400 font-medium">
-           
-          </span>
-        </div>
       </div>
 
       {/* ── Table card — flex-1 + min-h-0 fills all remaining vertical space ── */}
@@ -593,7 +575,7 @@ export default function WarehousesPage() {
 
         {/* Scrollable table area */}
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
-          <Table className="min-w-[960px] w-full">
+          <Table className="w-full">
             <TableHeader>
               <TableRow className="bg-gray-50 hover:bg-gray-50 border-b border-gray-200">
                
@@ -616,6 +598,7 @@ export default function WarehousesPage() {
                   onClick={() => openDetails(w)}>
 
 
+                  {/* Property — always visible; city/type shown as subtitles on mobile */}
                   <TableCell className="px-4 py-3.5">
                     <div className="flex items-center gap-3">
                       <RowThumb warehouse={w} />
@@ -624,11 +607,15 @@ export default function WarehousesPage() {
                           {w.title}
                         </p>
                         <p className="text-xs text-gray-400 mt-0.5 truncate max-w-[175px]">{w.property_name}</p>
+                        {/* Mobile-only subtitles */}
+                        {w.city && <p className="sm:hidden text-xs text-gray-400 mt-0.5 flex items-center gap-1 truncate max-w-[160px]"><MapPin className="w-3 h-3 shrink-0" />{w.city}{w.state ? `, ${w.state}` : ''}</p>}
+                        {w.property_type && <p className="sm:hidden text-xs text-gray-400 truncate max-w-[160px]">{w.property_type} · {w.space_available} {w.space_unit}</p>}
                       </div>
                     </div>
                   </TableCell>
 
-                  <TableCell className="px-4 py-3.5">
+                  {/* Location — hidden on mobile */}
+                  <TableCell className="hidden sm:table-cell px-4 py-3.5">
                     <div className="flex items-center gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                       <span className="text-sm text-gray-800 font-medium">{w.city}</span>
@@ -636,33 +623,30 @@ export default function WarehousesPage() {
                     <p className="text-xs text-gray-400 ml-5 mt-0.5">{w.state}</p>
                   </TableCell>
 
-                  <TableCell className="px-4 py-3.5">
+                  {/* Type & Size — hidden on mobile */}
+                  <TableCell className="hidden sm:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800 font-medium">{w.property_type}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{w.space_available} {w.space_unit}</p>
                   </TableCell>
 
+                  {/* Price — always visible */}
                   <TableCell className="px-4 py-3.5">
                     <p className="text-sm font-bold text-gray-900">₹{w.total_price}</p>
-                    <p className="text-xs text-gray-400 mt-0.5"></p>
                   </TableCell>
 
-                  <TableCell className="px-4 py-3.5">
+                  {/* Contact — hidden on mobile */}
+                  <TableCell className="hidden md:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800 font-medium truncate max-w-[130px]">{w.contact_person_name}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{w.contact_person_phone}</p>
                   </TableCell>
 
-                  {/* <TableCell className="px-4 py-3.5">
-                    <div className="flex items-center gap-1.5">
-                      <ImageIcon className="w-3.5 h-3.5 text-gray-400" />
-                      <span className="text-sm text-gray-700 font-semibold">{w.images_count ?? 0}</span>
-                    </div>
-                  </TableCell> */}
-
+                  {/* Status — always visible */}
                   <TableCell className="px-1 py-3.5">
                     <StatusBadge status={w.status} />
                   </TableCell>
 
-                  <TableCell className="px-4 py-3.5">
+                  {/* Added — hidden on mobile */}
+                  <TableCell className="hidden md:table-cell px-4 py-3.5">
                     <span className="text-sm text-gray-600">{fmt(w.created_at)}</span>
                   </TableCell>
 
@@ -694,7 +678,7 @@ export default function WarehousesPage() {
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={10} className="text-center py-24">
+                  <TableCell colSpan={4} className="text-center py-24">
                     <div className="flex flex-col items-center gap-3 text-gray-400">
                       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
                         <Building2 className="w-7 h-7 opacity-40" />

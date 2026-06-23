@@ -353,22 +353,22 @@ const clearAllFilters = () => {
 
       {/* ── Filters ── */}
       <div className="flex-shrink-0 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-        {/* Search */}
+
+        {/* Search — full width on mobile */}
         <div className="relative w-full sm:w-xl lg:w-xl">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
           <Input
-            placeholder="Search name, email, agency…"
+            placeholder="Search name, email…"
             value={searchTerm}
             onChange={e => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             className="pl-9 h-9 text-sm bg-gray-50 border-gray-200 focus:bg-white"
           />
         </div>
 
-        {/* Dropdowns */}
-        <div className="flex items-center gap-2 flex-wrap">
-
+        {/* Date filter + Clear — same row on mobile */}
+        <div className="flex items-center gap-2 sm:contents">
           <Select value={dateFilter} onValueChange={handleDateFilterChange}>
-            <SelectTrigger className={cn('w-40 h-9 text-sm border-gray-200 shrink-0',
+            <SelectTrigger className={cn('flex-1 sm:flex-none sm:w-40 h-9 text-sm border-gray-200 shrink-0',
               dateFilter !== 'all' ? 'bg-brand-teal/8 border-brand-teal/35 text-brand-teal-dark' : 'bg-gray-50')}>
               <Calendar className="w-3.5 h-3.5 mr-1.5 text-gray-400" />
               <SelectValue placeholder="Date Range" />
@@ -405,17 +405,16 @@ const clearAllFilters = () => {
       <div className="flex-1 min-h-0 bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col">
 
         <div className="flex-1 min-h-0 overflow-auto" style={{ scrollbarWidth: 'thin', scrollbarColor: '#e5e7eb transparent' }}>
-          <Table className="min-w-[860px] w-full">
+          <Table className="w-full">
             <TableHeader>
               <TableRow className="hover:bg-gray-50 border-b border-gray-200">
-                <SortableHead col="full_name"   label="UserName"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[200px] sticky top-0 z-10" />
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">E-mail</TableHead>
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[180px] sticky top-0 z-10">Status</TableHead>
-                <SortableHead col="last_login"      label="Last Login"     sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[100px] sticky top-0 z-10" />
-                <SortableHead col="created_at"  label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[140px] sticky top-0 z-10" />
-
-                <TableHead className="text-l font-bold  tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-16 sticky top-0 z-10">Actions</TableHead>
-                </TableRow>
+                <SortableHead col="full_name" label="Name"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[160px] sticky top-0 z-10" />
+                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[160px] sticky top-0 z-10">E-mail</TableHead>
+                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 bg-gray-50 min-w-[90px] sticky top-0 z-10">Status</TableHead>
+                <SortableHead col="last_login" label="Last Login" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden sm:table-cell min-w-[120px] sticky top-0 z-10" />
+                <SortableHead col="created_at" label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden md:table-cell min-w-[130px] sticky top-0 z-10" />
+                <TableHead className="text-l font-bold tracking-wide text-gray-500 h-11 px-4 text-right bg-gray-50 w-14 sticky top-0 z-10">Actions</TableHead>
+              </TableRow>
             </TableHeader>
 
             <TableBody>
@@ -430,27 +429,29 @@ const clearAllFilters = () => {
                   // onClick={() => { setSelectedAgent(lead); setShowDetailsModal(true); setActiveTab('overview'); }}
                   >
 
-                  {/* lead */}
+                  {/* Name — always visible; email shown as subtitle on mobile */}
                   <TableCell className="px-4 py-3.5">
                     <div className="flex items-center gap-2.5">
-                    <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
+                      <Avatar className="w-9 h-9 ring-1 ring-gray-200 shrink-0">
                         <AvatarFallback className="bg-gradient-to-br from-brand-teal-medium to-brand-teal-dark text-white text-xs font-bold">
                           {lead.first_name[0]}{lead.last_name[0]}
                         </AvatarFallback>
                       </Avatar>
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-gray-900 group-hover:text-brand-teal-medium transition-colors truncate max-w-[150px]">
-                        {lead.first_name} {lead.last_name}
+                        <p className="text-sm font-semibold text-gray-900 transition-colors truncate max-w-[150px]">
+                          {lead.first_name} {lead.last_name}
                         </p>
+                        <p className="sm:hidden text-xs text-gray-400 mt-0.5 truncate max-w-[150px]">{lead.email}</p>
                       </div>
                     </div>
                   </TableCell>
 
-                  {/*Email*/}
-                  <TableCell className="px-4 py-3.5">
+                  {/* Email — hidden on mobile */}
+                  <TableCell className="hidden sm:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800">{lead.email}</p>
                   </TableCell>
-                  {/* Status */}
+
+                  {/* Status — always visible */}
                   <TableCell className="px-4 py-3.5">
                     {lead.is_verified ? (
                       <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -465,17 +466,14 @@ const clearAllFilters = () => {
                     )}
                   </TableCell>
 
-
-
-                  {/* Last Login */}
-                  <TableCell className="px-4 py-3.5">
+                  {/* Last Login — hidden on mobile */}
+                  <TableCell className="hidden sm:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800">{fmtDate(lead.last_login)}</p>
                     {fmtTime(lead.last_login) && <p className="text-xs text-gray-400 mt-0.5">{fmtTime(lead.last_login)}</p>}
                   </TableCell>
 
-
-                  {/* Registered */}
-                  <TableCell className="px-4 py-3.5">
+                  {/* Registered — hidden on mobile and tablet */}
+                  <TableCell className="hidden md:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800">{fmtDate(lead.created_at)}</p>
                     {fmtTime(lead.created_at) && <p className="text-xs text-gray-400 mt-0.5">{fmtTime(lead.created_at)}</p>}
                   </TableCell>
@@ -503,7 +501,7 @@ const clearAllFilters = () => {
                 </TableRow>
               )) : (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-24">
+                  <TableCell colSpan={3} className="text-center py-24">
                     <div className="flex flex-col items-center gap-3 text-gray-400">
                       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center">
                         <Users className="w-7 h-7 opacity-40" />
