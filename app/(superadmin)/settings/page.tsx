@@ -710,7 +710,7 @@ export default function SettingsPage() {
           </GlassCard>
 
           {/* Email Provider */}
-          <GlassCard className="px-5 py-4" gradient="cyan">
+          {/* <GlassCard className="px-5 py-4" gradient="cyan">
             <div className="flex items-center gap-2.5 mb-4">
               <div className={ic.cyan}><Mail className={iv.cyan} /></div>
               <div>
@@ -745,7 +745,7 @@ export default function SettingsPage() {
                 />
               </div>
             </div>
-          </GlassCard>
+          </GlassCard> */}
 
       </div>
     </>
