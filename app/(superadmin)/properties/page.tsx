@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns';
 import { useNotifications } from '@/lib/context/NotificationContext';
 import { useAgentFilter } from '@/lib/context/AgentFilterContext';
+import { useRouter } from 'next/navigation';
 
 const VALID_WAREHOUSE_STATUSES = ['Pending', 'Active', 'rejected'];
 
@@ -319,6 +320,7 @@ export default function WarehousesPage() {
 
   const isAnyFilterActive = searchTerm !== '' || filterStatus !== 'all' || dateFilter !== 'all';
   const { refetchNotifications } = useNotifications();
+  const router = useRouter();
 
   useEffect(() => { fetchWarehouses(); }, []);
 
@@ -662,6 +664,15 @@ export default function WarehousesPage() {
                         <DropdownMenuItem onClick={() => openDetails(w)} className="cursor-pointer text-sm py-2">
                           <Eye className="w-4 h-4 mr-2 text-brand-teal-medium" /> View Details
                         </DropdownMenuItem>
+                        {w.status === "Active" && (
+                          <DropdownMenuItem
+                          onClick={() => router.push(`/properties/interestedLeads/${w.id}`)}
+                          className="cursor-pointer text-sm py-2"
+                          >
+                            <UserCheck className="w-4 h-4 mr-2 text-blue-600" />
+                            Interested Leads
+                          </DropdownMenuItem>
+                        )}
                         {w.status === 'Pending' && (<>
                           <DropdownMenuItem onClick={() => updateStatus(w.id, 'Active')}
                             className="cursor-pointer text-sm py-2 text-emerald-600 focus:bg-emerald-50">

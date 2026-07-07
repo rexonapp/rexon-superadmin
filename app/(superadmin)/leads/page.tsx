@@ -50,6 +50,7 @@ interface lead {
   is_verified: boolean;
   created_at: string | null;
   last_login: string | null;
+  phone: number;
 }
 
 type DateFilterType = 'all' | 'today' | 'week' | 'month' | 'last7' | 'last30' | 'custom';
@@ -414,6 +415,7 @@ const clearAllFilters = () => {
               <TableRow className="bg-brand-teal/15 border-b border-brand-teal/20">
                 <SortableHead col="full_name" label="Name"       sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="min-w-[160px] sticky top-0 z-10" />
                 <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-brand-teal-dark bg-brand-teal/15 font-semibold h-11 px-4 min-w-[160px] sticky top-0 z-10">E-mail</TableHead>
+                <TableHead className="hidden sm:table-cell text-l font-bold tracking-wide text-brand-teal-dark bg-brand-teal/15 font-semibold h-11 px-4 min-w-[160px] sticky top-0 z-10">Phone</TableHead>
                 <TableHead className="text-l font-bold tracking-wide text-brand-teal-dark bg-brand-teal/15 font-semibold h-11 px-4 min-w-[90px] sticky top-0 z-10">Status</TableHead>
                 <SortableHead col="last_login" label="Last Login" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden sm:table-cell min-w-[120px] sticky top-0 z-10" />
                 <SortableHead col="created_at" label="Registered" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} className="hidden md:table-cell min-w-[130px] sticky top-0 z-10" />
@@ -453,6 +455,10 @@ const clearAllFilters = () => {
                   {/* Email — hidden on mobile */}
                   <TableCell className="hidden sm:table-cell px-4 py-3.5">
                     <p className="text-sm text-gray-800">{lead.email}</p>
+                  </TableCell>
+                  
+                  <TableCell className="hidden sm:table-cell px-4 py-3.5">
+                    <p className="text-sm text-gray-800">{lead.phone}</p>
                   </TableCell>
 
                   {/* Status — always visible */}
