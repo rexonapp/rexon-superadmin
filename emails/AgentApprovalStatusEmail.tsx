@@ -18,23 +18,30 @@ import {
     fullName: string;
     email: string;
     status: "approved" | "rejected";
-    dashboardUrl?: string;
+    domain?: string;
     reason?: string;
+    temporaryPassword: string;
   }
   
   export const AgentApprovalStatusEmail = ({
     fullName,
     email,
     status,
-    dashboardUrl = "http://rexon-crm.vercel.app/login",
+    domain,
+    //  "http://rexon-crm.vercel.app/login",
     reason = "",
+    temporaryPassword,
   }: AgentApprovalStatusEmailProps) => {
     const isApproved = status === "approved"; 
   
     const previewText = isApproved
       ? "Your Rexon agent account has been approved"
       : "Update regarding your Rexon agent application";
-  
+
+    const dashboardUrl = domain?.trim()
+      ? `https://${domain}/login`
+      : "https://rexon-crm.vercel.app/login";
+
     return (
       <Html>
         <Head />
@@ -96,7 +103,14 @@ import {
                   <Column style={detailLabel}>Email</Column>
                   <Column style={detailValue}>{email}</Column>
                 </Row>
-  
+
+                <Hr style={thinDivider} />
+
+                <Row style={detailRow}>
+                  <Column style={detailLabel}>temporaryPassword</Column>
+                  <Column style={detailValue}>{temporaryPassword}</Column>
+                </Row>
+
                 <Hr style={thinDivider} />
   
                 <Row style={detailRow}>

@@ -17,6 +17,8 @@ interface SendAgentStatusEmailParams {
     email: string;
     status: "approved" | "rejected";
     reason?: string;
+    domain?:string;
+    // temporaryPassword?: string;
   }
   
   // export async function sendAgentStatusEmail({
@@ -85,6 +87,8 @@ interface SendAgentStatusEmailParams {
     email,
     status,
     reason,
+    domain,
+    // temporaryPassword,
   }: SendAgentStatusEmailParams) {
     try {
       const emailHtml = await render(
@@ -92,7 +96,9 @@ interface SendAgentStatusEmailParams {
           fullName,
           email,
           status,
+          domain,
           reason,
+          temporaryPassword : 'Temp@1234',
         })
       );
   

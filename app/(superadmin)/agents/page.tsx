@@ -275,12 +275,12 @@ function AgentsPageInner() {
     })();
   }, []);
 
-  const updateAgentStatus = async (agentId: string, status: 'approved' | 'rejected' | 'invite' | 'deactivated' | 'pending') => {
+  const updateAgentStatus = async (agentId: string, status: 'approved' | 'rejected' | 'invite' | 'deactivated' | 'pending',   domain?: string) => {
     try {
       const res = await fetch(`/api/superadmin/agents/${agentId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, domain }),
       });
       const d = await res.json();
       if (d.success) {
@@ -611,7 +611,7 @@ function AgentsPageInner() {
                           <>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => updateAgentStatus(agent.id, 'approved')}
+                              onClick={() => updateAgentStatus(agent.id, 'approved', agent.domains?.[0]?.full_domain)}
                               className="cursor-pointer text-sm py-2 text-emerald-600 focus:bg-emerald-50">
                               <CheckCircle className="w-4 h-4 mr-2" /> Approve
                             </DropdownMenuItem>

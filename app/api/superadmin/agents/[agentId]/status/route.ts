@@ -17,7 +17,7 @@ export async function PATCH(
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { status } = await request.json();
+    const { status, domain } = await request.json();
     const { agentId } = await params;
 
     if (!['pending', 'approved', 'rejected','deactivated'].includes(status)) {
@@ -40,7 +40,6 @@ export async function PATCH(
     );
 
     const agent = result.rows[0];
-
     // Send email when approved or rejected
     if (status === 'approved' || status === 'rejected') {
       await sendAgentStatusEmail({
@@ -48,6 +47,7 @@ export async function PATCH(
         email: agent.email,
         status: status,
         reason: "",
+        domain: domain,
       });
     }
     await query(
